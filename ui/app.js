@@ -16,16 +16,22 @@ const icon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 const byId = (id) => document.getElementById(id);
 const { candidates, evidence } = demoRun;
 const recommended = candidates.filter((candidate) => candidate.outcome === 'recommended');
-const filtered = candidates.length - recommended.length;
 const storageKey = `fastforward:${demoRun.id}:decisions`;
 const verdicts = { approved: 'Approved', rejected: 'Rejected', pending: 'Pending' };
 const decisions = readDecisions();
+let finalBuild;
 
-const views = [
-  { id: 'results', label: 'Results', icon: 'bars' },
-  { id: 'review', label: 'Review', icon: 'review' },
-  { id: 'approve', label: 'Approve', icon: 'check' },
-];
+const stages = {
+  original: { title: 'Original Code', icon: 'file', tone: 'blue', view: 'overview' },
+  generated: { title: 'AI Generated Changes', icon: 'spark', tone: 'violet', view: 'results' },
+  correctness: { title: 'Correctness Check', icon: 'check', tone: 'green', view: 'results' },
+  performance: { title: 'Performance Evaluation', icon: 'bars', tone: 'gold', view: 'review' },
+  value: { title: 'Value Assessment', icon: 'star', tone: 'blue', view: 'results' },
+  human: { title: 'Human Review', icon: 'person', tone: 'violet', view: 'approve' },
+  final: { title: 'Final Code', icon: 'flag', tone: 'muted', view: 'final' },
+};
+const stageOrder = Object.keys(stages);
+const candidateStages = ['generated', 'correctness', 'performance', 'value'];
 
 function readDecisions() {
   const saved = new Map();
@@ -52,60 +58,78 @@ function saveDecision(candidate, decision) {
   }
 }
 
-function route(view, candidate = recommended[0]) {
-  return `#performance/${view}/${candidate.id}`;
+function route(stage, candidate = recommended[0], view = stages[stage].view) {
+  return `#${stage}/${view}/${candidate.id}`;
+}
+
+function stageCandidates(stage) {
+  return candidates.filter((candidate) =>
+    !candidate.filteredAt || stageOrder.indexOf(candidate.filteredAt) >= stageOrder.indexOf(stage),
+  );
 }
 
 function readRoute() {
-  const [stage, view, id] = location.hash.slice(1).split('/');
-  if (stage !== 'performance') return { view: 'pipeline', candidate: recommended[0] };
+  let [stage, view, id] = location.hash.slice(1).split('/');
+  // Step 1 approval links used the Performance stage.
+  if (stage === 'performance' && view === 'approve') stage = 'human';
+  if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: recommended[0] };
+  const inCandidateStage = candidateStages.includes(stage);
+  const eligible = inCandidateStage ? stageCandidates(stage) : recommended;
   return {
-    view: views.some((item) => item.id === view) ? view : 'review',
-    candidate: candidates.find((item) => item.id === id) ?? recommended[0],
+    stage,
+    view: inCandidateStage && ['results', 'review'].includes(view) ? view : stages[stage].view,
+    candidate: eligible.find((candidate) => candidate.id === id) ?? recommended[0],
   };
 }
 
-function renderNavigation({ view, candidate }) {
+function renderNavigation({ stage, view, candidate }) {
+  const candidateStage = candidateStages.includes(stage) ? stage : 'performance';
   const items = [
     { id: 'pipeline', label: 'Pipeline', icon: 'pipeline', href: '#pipeline' },
-    ...views.map((item) => ({ ...item, href: route(item.id, candidate) })),
+    { id: 'results', label: 'Results', icon: 'bars', href: route(candidateStage, candidate, 'results') },
+    { id: 'review', label: 'Review', icon: 'review', href: route(candidateStage, candidate, 'review') },
+    { id: 'approve', label: 'Approve', icon: 'check', href: route('human', candidate) },
+    { id: 'final', label: 'Final', icon: 'flag', href: route('final', candidate) },
   ];
   const link = (item) => `<a href="${item.href}" ${view === item.id ? 'aria-current="page"' : ''}>
     ${icon(item.icon)}<span>${item.label}</span></a>`;
-  byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}
-    <span class="nav-disabled" aria-disabled="true">${icon('flag')}<span>Final</span></span>`;
-  byId('workspace-views').innerHTML = views.map((item) => link({
-    ...item, href: route(item.id, candidate),
-  })).join('');
+  byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}`;
+  byId('workspace-views').innerHTML = items.slice(1).map(link).join('');
 }
 
-function renderPipeline({ view, candidate }) {
-  const reviewed = decisions.size;
-  const stages = [
-    { title: 'Original Code', icon: 'file', tone: 'blue', note: `Baseline · ${evidence.baselineMs.toFixed(2)} ms mean` },
-    { title: 'AI Generated Changes', icon: 'spark', tone: 'violet', note: `${candidates.length} changes proposed` },
-    { title: 'Correctness Check', icon: 'check', tone: 'green', note: `${candidates.length} passed · ${evidence.cases} cases each` },
-    { title: 'Performance Evaluation', icon: 'bars', tone: 'gold', note: `${filtered} filtered · ${recommended.length} remains`, href: route('review'), active: view !== 'pipeline' && view !== 'approve' },
-    { title: 'Value Assessment', icon: 'star', tone: 'blue', note: `${recommended.length} recommended for review` },
-    { title: 'Human Review', icon: 'person', tone: 'violet', note: `${reviewed} of ${recommended.length} decided`, href: route('approve', candidate), active: view === 'approve' },
-    { title: 'Final Code', icon: 'flag', tone: 'muted', note: 'Generation is outside this demo' },
-  ];
-  byId('pipeline-stages').innerHTML = stages.map((stage, index) => {
-    const content = `<span class="stage-icon">${icon(stage.icon)}</span>
-      <span class="stage-copy"><strong>${stage.title}</strong><small>${stage.note}</small></span>
-      <span class="stage-end" aria-hidden="true">${stage.href ? '→' : String(index + 1).padStart(2, '0')}</span>`;
-    const className = `stage-card tone-${stage.tone}`;
-    return `<li>${stage.href
-      ? `<a class="${className}" href="${stage.href}">${content}</a>`
-      : `<div class="${className}">${content}</div>`}</li>`;
+function stageSummary(stage) {
+  const entered = stageCandidates(stage).length;
+  const removed = candidates.filter((candidate) => candidate.filteredAt === stage).length;
+  switch (stage) {
+    case 'original': return `Baseline · ${formatMs(evidence.baseline.mean)} mean`;
+    case 'generated': return `${candidates.length} changes proposed`;
+    case 'value': return `${removed} filtered · ${recommended.length} recommended`;
+    case 'human': return `${decisions.size} of ${recommended.length} decided`;
+    case 'final': return finalBuild ? buildLabels[finalBuild.status] : 'Build from approved changes';
+    default: return `${removed} filtered · ${entered - removed} passed`;
+  }
+}
+
+function renderPipeline({ stage: activeStage, candidate }) {
+  byId('pipeline-stages').innerHTML = stageOrder.map((stage) => {
+    const { title, icon: iconName, tone } = stages[stage];
+    return `<li><a class="stage-card tone-${tone}" href="${route(stage)}">
+      <span class="stage-icon">${icon(iconName)}</span>
+      <span class="stage-copy"><strong>${title}</strong><small ${stage === 'final' ? 'id="final-stage-summary"' : ''}>${stageSummary(stage)}</small></span>
+      <span class="stage-end" aria-hidden="true">→</span>
+    </a></li>`;
   }).join('');
 
-  byId('workspace-stages').innerHTML = stages.map((stage, index) => {
-    const content = `<span class="stage-step">${index + 1}</span><span>${stage.title}</span>`;
-    return `<li>${stage.href
-      ? `<a href="${stage.href}" ${stage.active ? 'aria-current="step"' : ''}>${content}</a>`
-      : `<span class="stage-static">${content}</span>`}</li>`;
-  }).join('');
+  const strip = byId('workspace-stages');
+  strip.innerHTML = stageOrder.map((stage, index) => `
+    <li><a href="${route(stage, candidate)}" ${stage === activeStage ? 'aria-current="step"' : ''}>
+      <span class="stage-step" aria-hidden="true">${index + 1}</span><span>${stages[stage].title}</span>
+    </a></li>`).join('');
+  const activeLink = strip.querySelector('[aria-current="step"]');
+  if (activeLink && strip.scrollWidth > strip.clientWidth) {
+    const offset = activeLink.getBoundingClientRect().left - strip.getBoundingClientRect().left;
+    strip.scrollLeft += offset - (strip.clientWidth - activeLink.offsetWidth) / 2;
+  }
 
   byId('run-summary').innerHTML = `
     <p class="eyebrow">Run ${demoRun.id}</p>
@@ -114,11 +138,11 @@ function renderPipeline({ view, candidate }) {
     <dl class="run-counts">
       <div><dt>Proposed</dt><dd>${candidates.length}</dd></div>
       <div><dt>Recommended</dt><dd>${recommended.length}</dd></div>
-      <div><dt>Filtered</dt><dd>${filtered}</dd></div>
+      <div><dt>Filtered</dt><dd>${candidates.length - recommended.length}</dd></div>
     </dl>
     <div class="demo-note">${icon('file')}<div><strong>${demoRun.filename}</strong>
       <p>${demoRun.inputDomain}. Timing and correctness figures are illustrative.</p></div></div>
-    <a class="button primary" href="${route('review')}">Open Performance <span aria-hidden="true">→</span></a>`;
+    <a class="button primary" href="${route('performance')}">Open Performance <span aria-hidden="true">→</span></a>`;
 }
 
 function escapeHtml(text) {
@@ -127,109 +151,199 @@ function escapeHtml(text) {
 
 function highlightPython(line) {
   return escapeHtml(line).replace(
-    /\b(def|for|in|if|return)\b|\b(\d+)\b|\b([a-z_]\w*)(?=\()/g,
+    /\b(def|for|in|if|not|return)\b|\b(\d+)\b|\b([a-z_]\w*)(?=\()/g,
     (token, keyword, number) => `<span class="syntax-${keyword ? 'keyword' : number ? 'number' : 'call'}">${token}</span>`,
   );
 }
 
-let displayedCandidate;
+let displayedCode;
 
-function renderCode(candidate) {
-  if (displayedCandidate === candidate.id) return;
-  displayedCandidate = candidate.id;
-  const { start, remove, lines } = candidate.patch;
+function codeRow(line, before, after, kind = 'context', sign = '') {
+  return `<div class="code-line ${kind}">
+    <span class="line-number" aria-hidden="true">${before}</span>
+    <span class="line-number" aria-hidden="true">${after}</span>
+    <span class="line-sign">${sign}</span><code>${highlightPython(line)}</code>
+  </div>`;
+}
+
+function renderCode({ stage, candidate }) {
+  const isFinal = stage === 'final';
+  const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
+  const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
+  const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
+  if (displayedCode === codeId) return;
+  displayedCode = codeId;
+
+  const applied = hasFinalDiff ? finalBuild.applied : isBaseline ? [] : [candidate];
+  const title = hasFinalDiff ? 'Combined diff' : isBaseline ? 'Original source' : 'Candidate diff';
   const baseline = demoRun.baseline;
-  const offset = start - 1;
-  const row = (line, before, after, kind, sign = '') => `
-    <div class="code-line ${kind}">
-      <span class="line-number" aria-hidden="true">${before}</span>
-      <span class="line-number" aria-hidden="true">${after}</span>
-      <span class="line-sign">${sign}</span><code>${highlightPython(line)}</code>
-    </div>`;
-
+  const rows = [];
+  let before = 0;
+  let after = 0;
+  let added = 0;
+  let removed = 0;
+  for (const { patch } of applied) {
+    while (before < patch.start - 1) {
+      rows.push(codeRow(baseline[before], before + 1, after + 1));
+      before += 1;
+      after += 1;
+    }
+    for (let i = 0; i < patch.remove; i += 1) {
+      rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
+      before += 1;
+    }
+    for (const line of patch.lines) {
+      rows.push(codeRow(line, '', after + 1, 'added', '+'));
+      after += 1;
+    }
+    removed += patch.remove;
+    added += patch.lines.length;
+  }
+  while (before < baseline.length) {
+    rows.push(codeRow(baseline[before], before + 1, isBaseline ? '' : after + 1));
+    before += 1;
+    after += 1;
+  }
   byId('source-file').textContent = demoRun.filename;
-  byId('diff-toolbar').innerHTML = `<strong>Candidate diff</strong>
-    <span><span class="added-text">+${lines.length}</span> <span class="removed-text">−${remove}</span></span>`;
+  byId('diff-toolbar').innerHTML = `<strong>${title}</strong>${isBaseline ? '' :
+    `<span><span class="added-text">+${added}</span> <span class="removed-text">−${removed}</span></span>`}`;
   const diff = byId('source-diff');
-  diff.innerHTML = [
-    ...baseline.slice(0, offset).map((line, i) => row(line, i + 1, i + 1, 'context')),
-    ...baseline.slice(offset, offset + remove).map((line, i) => row(line, start + i, '', 'removed', '−')),
-    ...lines.map((line, i) => row(line, '', start + i, 'added', '+')),
-    ...baseline.slice(offset + remove).map((line, i) => row(line, start + remove + i, start + lines.length + i, 'context')),
-  ].join('');
+  diff.setAttribute('aria-label', title);
+  diff.innerHTML = rows.join('');
   diff.scrollTop = 0;
   diff.scrollLeft = 0;
-  byId('code-footer').textContent = `Original lines ${start}–${start + remove - 1} · ${candidate.title}`;
+  byId('code-footer').textContent = hasFinalDiff
+    ? `${applied.length} approved ${applied.length === 1 ? 'change' : 'changes'} used in this build`
+    : isBaseline ? demoRun.inputDomain : candidate.title;
 }
 
-function performance(candidate) {
-  const percentage = (1 - candidate.meanMs / evidence.baselineMs) * 100;
-  return `${Math.abs(percentage).toFixed(1)}% ${percentage >= 0 ? 'faster' : 'slower'}`;
+function formatMs(ms) {
+  return `${ms.toFixed(2)} ms`;
 }
 
-function outcomeBadge(candidate) {
-  return candidate.outcome === 'recommended'
-    ? '<span class="badge success">Recommended</span>'
-    : '<span class="badge warning">Filtered</span>';
+function performance(timing) {
+  const percentage = (1 - timing.mean / evidence.baseline.mean) * 100;
+  if (percentage === 0) return 'Same mean runtime';
+  return `${Math.abs(percentage).toFixed(1)}% ${percentage > 0 ? 'faster' : 'slower'}`;
 }
 
-function reviewView(candidate) {
-  const decision = decisions.get(candidate.id) ?? 'pending';
-  const maximum = Math.max(evidence.baselineMs, candidate.meanMs);
+function badge(label, tone = '') {
+  return `<span class="badge ${tone}">${label}</span>`;
+}
+
+function detailHeader(stage, title, description, status = '') {
+  return `<div class="detail-header">
+    <div class="label-row"><span class="eyebrow">${stages[stage].title}</span>${status}</div>
+    <h1 id="view-title" tabindex="-1">${title}</h1>
+    <p>${description}</p>
+  </div>`;
+}
+
+function timingPanel(timing, label) {
+  const baseline = evidence.baseline;
+  const maximum = Math.max(baseline.mean, timing.mean);
   const bar = (label, value, className) => `
     <div class="metric-row"><span>${label}</span>
       <div class="metric-track" aria-hidden="true"><span class="${className}" style="width:${value / maximum * 100}%"></span></div>
-      <strong>${value.toFixed(2)} ms</strong>
+      <strong>${formatMs(value)}</strong>
     </div>`;
-  const actions = candidate.outcome === 'recommended'
-    ? `<div class="actions">
-        <button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
-        <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>
-      </div>`
-    : `<div class="actions"><a class="button secondary" href="${route('results', candidate)}">See all results</a></div>`;
-
-  return `<div class="detail-header">
-      <div class="label-row"><span class="eyebrow">Performance evaluation</span>${outcomeBadge(candidate)}</div>
-      <h1 id="view-title" tabindex="-1">${candidate.title}</h1>
-      <p>${candidate.description}</p>
-    </div>
-    <div class="evidence-grid">
-      <section class="inset"><h2>Why it matters</h2><p>${candidate.rationale}</p></section>
-      <section class="inset"><h2>Correctness</h2><strong class="correctness">${candidate.matched} / ${evidence.cases}</strong><p>Fixture outputs matched</p></section>
-    </div>
-    <section class="inset timing">
-      <div class="label-row"><h2>${icon('bars')} Mean runtime</h2>
-        <span class="badge ${candidate.outcome === 'recommended' ? 'success' : 'warning'}">${performance(candidate)}</span></div>
-      ${bar('Baseline', evidence.baselineMs, 'baseline-bar')}
-      ${bar('Candidate', candidate.meanMs, 'candidate-bar')}
-      <p>${evidence.samples} fixture runs across ${evidence.inputTypes}</p>
-    </section>
-    <section class="inset selection"><h2>${candidate.outcome === 'recommended' ? 'Why it was recommended' : 'Why it was filtered'}</h2>
-      <p>${candidate.reason}</p></section>
-    ${actions}`;
+  return `<section class="inset timing">
+    <div class="label-row"><h2>${icon('bars')} Mean runtime</h2>
+      ${badge(performance(timing), timing.mean <= baseline.mean ? 'success' : 'warning')}</div>
+    ${bar('Baseline', baseline.mean, 'baseline-bar')}
+    ${bar(label, timing.mean, 'candidate-bar')}
+    <table class="timing-table">
+      <thead><tr><th scope="col">Runtime</th><th scope="col">Baseline</th><th scope="col">${label}</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Median</th><td>${formatMs(baseline.median)}</td><td>${formatMs(timing.median)}</td></tr>
+        <tr><th scope="row">Worst observed</th><td>${formatMs(baseline.worst)}</td><td>${formatMs(timing.worst)}</td></tr>
+      </tbody>
+    </table>
+    <p>${evidence.samples} fixture runs across ${evidence.inputTypes}</p>
+  </section>`;
 }
 
-function resultsView() {
-  return `<div class="detail-header">
-      <p class="eyebrow">Performance evaluation</p>
-      <h1 id="view-title" tabindex="-1">Candidate results</h1>
-      <p>${candidates.length} evaluated · ${recommended.length} recommended · ${filtered} filtered</p>
+function baselineView() {
+  const { mean, median, worst } = evidence.baseline;
+  return `${detailHeader('original', 'Baseline source', demoRun.inputDomain + '.')}
+    <section class="inset"><h2>Baseline runtime</h2><p>${evidence.samples} fixture runs across ${evidence.inputTypes}.</p></section>
+    <dl class="run-counts">
+      <div><dt>Mean</dt><dd>${formatMs(mean)}</dd></div>
+      <div><dt>Median</dt><dd>${formatMs(median)}</dd></div>
+      <div><dt>Worst observed</dt><dd>${formatMs(worst)}</dd></div>
+    </dl>
+    <section class="inset"><h2>Correctness reference</h2><p>Each change is compared with the original function on ${evidence.cases} fixture inputs.</p></section>
+    <div class="actions"><a class="button primary" href="${route('generated')}">See proposed changes</a></div>`;
+}
+
+function assessment(stage, candidate) {
+  if (stage === 'generated') return { label: 'Proposed', reason: candidate.description };
+  if (candidate.filteredAt === stage) return { label: 'Filtered', tone: 'warning', reason: candidate.reason };
+  if (stage === 'correctness') {
+    return { label: 'Passed', tone: 'success', reason: `All ${evidence.cases} fixture outputs matched the baseline.` };
+  }
+  if (stage === 'performance') {
+    return { label: 'Passed', tone: 'success', reason: `Mean runtime was ${performance(candidate.timing)}.` };
+  }
+  return { label: 'Recommended', tone: 'success', reason: candidate.reason };
+}
+
+function reviewView(stage, candidate) {
+  const result = assessment(stage, candidate);
+  const showCorrectness = stage !== 'generated';
+  const showTiming = stage === 'performance' || stage === 'value';
+  const failure = stage === 'correctness' ? candidate.failure : undefined;
+  const decision = decisions.get(candidate.id) ?? 'pending';
+  const canDecide = showTiming && candidate.outcome === 'recommended';
+  return `${detailHeader(stage, candidate.title, candidate.description, badge(result.label, result.tone))}
+    <div class="${showCorrectness ? 'evidence-grid' : ''}">
+      <section class="inset"><h2>Why it matters</h2><p>${candidate.rationale}</p></section>
+      ${showCorrectness ? `<section class="inset"><h2>Correctness</h2>
+        <strong class="${failure ? 'removed-text' : 'correctness'}">${candidate.matched} / ${evidence.cases}</strong><p>Fixture outputs matched</p></section>` : ''}
     </div>
-    <ul class="candidate-list">${candidates.map((candidate) => `<li>
-      <a class="candidate-row inset" href="${route('review', candidate)}">
-        <div><strong>${candidate.title}</strong><p>${candidate.reason}</p></div>
-        <div class="row-meta">${outcomeBadge(candidate)}<small>${performance(candidate)}</small></div>
-      </a>
-    </li>`).join('')}</ul>`;
+    ${failure ? `<section class="inset"><h2>Example failing input</h2>
+      <p><code>count_matches(${JSON.stringify(failure.numbers)}, ${failure.target})</code></p>
+      <p>Expected <strong>${failure.expected}</strong> · Returned <strong>${failure.actual}</strong></p>
+    </section>` : ''}
+    ${showTiming ? timingPanel(candidate.timing, 'Candidate') : ''}
+    ${showCorrectness ? `<section class="inset selection">
+      <h2>${result.label === 'Filtered' ? 'Why it was filtered' : 'Why it advanced'}</h2><p>${result.reason}</p>
+    </section>` : ''}
+    <div class="actions">
+      <a class="button secondary" href="${route(stage, candidate, 'results')}">See stage results</a>
+      ${canDecide ? `<button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
+        <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>` : ''}
+    </div>`;
+}
+
+function resultsView(stage, selected) {
+  const titles = {
+    generated: 'Proposed changes',
+    correctness: 'Correctness results',
+    performance: 'Candidate results',
+    value: 'Value assessment results',
+  };
+  const description = stage === 'value'
+    ? `${stageSummary(stage)} · ${evidence.minimumImprovement}% minimum mean improvement`
+    : stageSummary(stage);
+  return `${detailHeader(stage, titles[stage], description)}
+    <ul class="candidate-list">${stageCandidates(stage).map((candidate) => {
+      const result = assessment(stage, candidate);
+      return `<li><a class="candidate-row inset" href="${route(stage, candidate, 'review')}">
+        <div><strong>${candidate.title}</strong><p>${result.reason}</p></div>
+        <div class="row-meta">${badge(result.label, result.tone)}${candidate === selected ? '<small>Diff shown</small>' : ''}</div>
+      </a></li>`;
+    }).join('')}</ul>`;
+}
+
+function approvedCandidates() {
+  return recommended.filter((candidate) => decisions.get(candidate.id) === 'approved');
 }
 
 function queueView() {
-  const approved = [...decisions.values()].filter((decision) => decision === 'approved').length;
-  return `<div class="detail-header">
-      <p class="eyebrow">Human review</p>
-      <h1 id="view-title" tabindex="-1">Approval queue</h1>
-      <p>${decisions.size} of ${recommended.length} decided. Select a change to revisit its evidence or update your decision.</p>
-    </div>
+  const approved = approvedCandidates().length;
+  const generating = finalBuild?.status === 'pending';
+  return `${detailHeader('human', 'Approval queue', `${decisions.size} of ${recommended.length} decided. Select a change to revisit its evidence or update your decision.`)}
     <dl class="run-counts queue-counts">
       <div><dt>Approved</dt><dd>${approved}</dd></div>
       <div><dt>Rejected</dt><dd>${decisions.size - approved}</dd></div>
@@ -237,11 +351,84 @@ function queueView() {
     </dl>
     <ul class="candidate-list">${recommended.map((candidate) => {
       const decision = decisions.get(candidate.id) ?? 'pending';
-      return `<li><a class="candidate-row inset" href="${route('review', candidate)}">
+      return `<li><a class="candidate-row inset" href="${route('value', candidate, 'review')}">
         <div><strong>${candidate.title}</strong><p>View diff and evidence</p></div>
-        <span class="badge ${decision}">${verdicts[decision]}</span>
+        ${badge(verdicts[decision], decision)}
       </a></li>`;
-    }).join('')}</ul>`;
+    }).join('')}</ul>
+    <section class="inset selection"><h2>Generate optimised code</h2>
+      <p>${approved ? `The next build will use ${approved} approved ${approved === 1 ? 'change' : 'changes'}.` : 'Approve a change to enable generation.'}</p>
+    </section>
+    <div class="actions"><button class="button primary" type="button" id="generate-build" ${!approved || generating ? 'disabled' : ''}>
+      ${generating ? 'Verifying…' : 'Generate optimised code'}</button></div>`;
+}
+
+const buildLabels = { pending: 'Verification pending', verified: 'Verified', failed: 'Build failed' };
+
+function approvalKey(selected) {
+  return selected.map((candidate) => candidate.id).join('+');
+}
+
+function generateBuild() {
+  const selected = approvedCandidates();
+  if (!selected.length || finalBuild?.status === 'pending') return;
+  finalBuild = { status: 'pending', selected };
+  location.hash = route('final');
+
+  window.setTimeout(() => {
+    // Insertions at a replacement boundary can be applied before the replacement.
+    const applied = [...selected].sort((a, b) =>
+      a.patch.start - b.patch.start || a.patch.remove - b.patch.remove,
+    );
+    const overlap = applied.findIndex(({ patch }, index) => {
+      const previous = applied[index - 1]?.patch;
+      return previous && patch.start < previous.start + previous.remove;
+    });
+    finalBuild = overlap >= 0
+      ? { status: 'failed', selected, conflict: applied.slice(overlap - 1, overlap + 1) }
+      : { status: 'verified', selected, applied, timing: demoRun.finalTimings[approvalKey(selected)] };
+    renderBuildUpdate();
+  }, 900);
+}
+
+function finalView() {
+  const queueLink = `<div class="actions"><a class="button secondary" href="${route('human')}">Open approval queue</a></div>`;
+  if (!finalBuild) {
+    return `${detailHeader('final', 'Ready to generate', 'Generate a demo build from the changes you approve.')}${queueLink}`;
+  }
+
+  const { status, selected, conflict, timing } = finalBuild;
+  const statusTone = { pending: '', verified: 'success', failed: 'rejected' }[status];
+  const message = {
+    pending: 'Applying approved patches and checking the combined code.',
+    verified: 'The combined code matched the baseline on all fixture inputs.',
+    failed: 'Two approved patches change the same original lines. Choose one of them and generate again.',
+  }[status];
+  const approvalsChanged = approvalKey(selected) !== approvalKey(approvedCandidates());
+  return `${detailHeader('final', 'Final build', message, badge(buildLabels[status], statusTone))}
+    ${approvalsChanged ? '<p class="inset build-note">Your approvals changed. This build uses the selection listed below.</p>' : ''}
+    <section class="inset"><h2>${status === 'verified' ? 'Approvals used' : 'Build selection'}</h2>
+      <ul class="build-selection">${selected.map((candidate) => `<li>${candidate.title}</li>`).join('')}</ul>
+    </section>
+    ${status === 'failed' ? `<section class="inset selection"><h2>Patch conflict</h2>
+      <p>Affected changes</p>
+      <ul class="build-selection">${conflict.map((candidate) => `<li><a href="${route('value', candidate, 'review')}">${candidate.title}</a></li>`).join('')}</ul>
+    </section>` : ''}
+    ${status === 'verified' ? `<section class="inset"><h2>Combined correctness</h2>
+      <strong class="correctness">${evidence.cases} / ${evidence.cases}</strong><p>Fixture outputs matched</p></section>
+      ${timingPanel(timing, 'Final')}` : ''}
+    ${queueLink}`;
+}
+
+function renderBuildUpdate() {
+  const state = readRoute();
+  if (state.view === 'final' || state.view === 'approve') {
+    const restoreHeading = document.activeElement === byId('view-title');
+    render();
+    if (restoreHeading) byId('view-title').focus({ preventScroll: true });
+  } else {
+    byId('final-stage-summary').textContent = stageSummary('final');
+  }
 }
 
 function render(focusHeading = false) {
@@ -253,13 +440,18 @@ function render(focusHeading = false) {
   renderPipeline(state);
 
   if (!atHome) {
-    renderCode(state.candidate);
+    renderCode(state);
     const content = byId('details-content');
     switch (state.view) {
-      case 'results': content.innerHTML = resultsView(); break;
+      case 'overview': content.innerHTML = baselineView(); break;
+      case 'results': content.innerHTML = resultsView(state.stage, state.candidate); break;
       case 'approve': content.innerHTML = queueView(); break;
-      default: content.innerHTML = reviewView(state.candidate);
+      case 'final': content.innerHTML = finalView(); break;
+      default: content.innerHTML = reviewView(state.stage, state.candidate);
     }
+    const liveStatus = byId('build-status');
+    const status = state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
+    if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
   if (focusHeading) {
     window.scrollTo(0, 0);
@@ -268,12 +460,49 @@ function render(focusHeading = false) {
 }
 
 byId('details-content').addEventListener('click', (event) => {
+  if (event.target.closest('#generate-build')) {
+    generateBuild();
+    return;
+  }
   const button = event.target.closest('button[data-decision]');
   if (!button) return;
-  const { view, candidate } = readRoute();
-  if (view !== 'review' || candidate.outcome !== 'recommended') return;
+  const { stage, view, candidate } = readRoute();
+  if (view !== 'review' || !['performance', 'value'].includes(stage) || candidate.outcome !== 'recommended') return;
   saveDecision(candidate, button.dataset.decision);
-  location.hash = route('approve', candidate);
+  location.hash = route('human', candidate);
+});
+
+const split = byId('workspace-split');
+const divider = byId('split-divider');
+const minSplit = Number(divider.getAttribute('aria-valuemin'));
+const maxSplit = Number(divider.getAttribute('aria-valuemax'));
+let dragOffset = 0;
+
+function resizeSourcePane(percent) {
+  const width = Math.max(minSplit, Math.min(maxSplit, Math.round(percent)));
+  split.style.setProperty('--split-position', `${width}%`);
+  divider.setAttribute('aria-valuenow', String(width));
+}
+
+divider.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || !event.isPrimary) return;
+  const bounds = divider.getBoundingClientRect();
+  dragOffset = event.clientX - (bounds.left + bounds.width / 2);
+  divider.setPointerCapture(event.pointerId);
+  split.classList.add('resizing');
+});
+divider.addEventListener('pointermove', (event) => {
+  if (!divider.hasPointerCapture(event.pointerId)) return;
+  const { left, width } = split.getBoundingClientRect();
+  resizeSourcePane(100 * (event.clientX - left - dragOffset) / width);
+});
+divider.addEventListener('lostpointercapture', () => split.classList.remove('resizing'));
+divider.addEventListener('keydown', (event) => {
+  const current = Number(divider.getAttribute('aria-valuenow'));
+  const widths = { ArrowLeft: current - 3, ArrowRight: current + 3, Home: minSplit, End: maxSplit };
+  if (!Object.hasOwn(widths, event.key)) return;
+  event.preventDefault();
+  resizeSourcePane(widths[event.key]);
 });
 
 window.addEventListener('hashchange', () => render(true));

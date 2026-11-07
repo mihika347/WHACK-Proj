@@ -1,4 +1,3 @@
-
 from openai import OpenAI
 
 # Connect to LM Studio

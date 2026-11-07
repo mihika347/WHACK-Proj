@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c0d19">
+  <title>FastForward · Optimisation workspace</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="demo.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#pipeline" aria-label="FastForward pipeline home">FastForward</a>
+    <span class="topbar-label">Optimisation workspace</span>
+    <span class="badge demo-badge"><span class="dot"></span> Demo run</span>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" aria-label="Run views" id="navigation"></nav>
+    <main id="main">
+      <section class="home" id="pipeline-home" aria-labelledby="home-title">
+        <header class="home-heading">
+          <p class="eyebrow"><span class="dot"></span> Workflow</p>
+          <h1 id="home-title" tabindex="-1">Optimisation pipeline</h1>
+          <p>Follow proposed changes from baseline to human review.</p>
+        </header>
+        <div class="home-grid">
+          <section class="graph" aria-label="Pipeline stages">
+            <ol id="pipeline-stages"></ol>
+          </section>
+          <aside class="run-card panel" id="run-summary" aria-label="Demo run summary"></aside>
+        </div>
+      </section>
+
+      <section class="workspace" id="workspace" aria-label="Performance workspace" hidden>
+        <div class="workspace-header">
+          <a class="back-link" href="#pipeline">← Back to pipeline</a>
+          <nav aria-label="Pipeline stages">
+            <ol class="stage-strip" id="workspace-stages"></ol>
+          </nav>
+        </div>
+        <div class="split">
+          <section class="code-pane panel" aria-labelledby="source-file">
+            <header class="code-header">
+              <h2 id="source-file"></h2>
+              <span class="label">Python</span>
+            </header>
+            <div class="diff-toolbar" id="diff-toolbar"></div>
+            <div class="code-scroll" id="source-diff" tabindex="0" role="region" aria-label="Candidate code diff"></div>
+            <p class="code-footer" id="code-footer"></p>
+          </section>
+          <section class="details panel" aria-label="Candidate details">
+            <nav class="view-tabs" id="workspace-views" aria-label="Performance views"></nav>
+            <div id="details-content"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

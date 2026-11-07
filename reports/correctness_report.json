@@ -1,0 +1,68 @@
+{
+  "seed": 20261107,
+  "function": "count_matches",
+  "baseline": "original.py",
+  "candidates": [
+    {
+      "file": "stage_1.py",
+      "shared_cases": 409,
+      "targeted_cases": 489,
+      "agent_cases": 10,
+      "agent_status": "used",
+      "agent_error": null,
+      "targeting_rules": [
+        "list_count_replacement"
+      ],
+      "total": 908,
+      "failures": [],
+      "status": "pass",
+      "passed": 908
+    },
+    {
+      "file": "stage_2.py",
+      "shared_cases": 409,
+      "targeted_cases": 490,
+      "agent_cases": 10,
+      "agent_status": "used",
+      "agent_error": null,
+      "targeting_rules": [
+        "comprehension_filter_and_aggregation"
+      ],
+      "total": 909,
+      "failures": [],
+      "status": "pass",
+      "passed": 909
+    },
+    {
+      "file": "stage_3.py",
+      "shared_cases": 409,
+      "targeted_cases": 493,
+      "agent_cases": 8,
+      "agent_status": "used",
+      "agent_error": null,
+      "targeting_rules": [
+        "target_alias_binding",
+        "comparison_boundaries"
+      ],
+      "total": 910,
+      "failures": [],
+      "status": "pass",
+      "passed": 910
+    },
+    {
+      "file": "final_optimised.py",
+      "shared_cases": 409,
+      "targeted_cases": 489,
+      "agent_cases": 10,
+      "agent_status": "used",
+      "agent_error": null,
+      "targeting_rules": [
+        "list_count_replacement"
+      ],
+      "total": 908,
+      "failures": [],
+      "status": "pass",
+      "passed": 908
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Use built\u2011in list.count",
+      "explanation": "The built\u2011in count method is implemented in C and avoids the Python loop overhead.",
+      "code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))",
+      "overlaps_with": []
+    },
+    {
+      "stage": 2,
+      "name": "Use generator expression with sum",
+      "explanation": "A generator expression avoids creating an intermediate list and the sum function is a fast C implementation.",
+      "code": "def count_matches(numbers, target):\n    return sum(1 for number in numbers if number == target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))",
+      "overlaps_with": [
+        1
+      ]
+    }
+  ],
+  "final_code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))"
+}

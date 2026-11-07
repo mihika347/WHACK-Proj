@@ -1,0 +1,56 @@
+"""Benchmark identical fixed workloads after regenerating correctness checks."""
+import math
+import argparse
+import platform
+import sys
+from correctness_test import run as check_correctness
+from test_utils import ROOT, SEED, candidates, isolated, save_json, speed_cases
+
+
+def run(use_agent=True, refresh_agent=False):
+    correctness = check_correctness(use_agent=use_agent, refresh_agent=refresh_agent)
+    eligible = {c["file"] for c in correctness["candidates"] if c["status"] == "pass"}
+    suite = speed_cases()
+    suite_path = ROOT / "tests/speed_cases.json"
+    save_json(suite_path, suite)
+    baseline = ROOT / "original.py"
+    expected = isolated(baseline, suite_path, "correctness")
+    reference = isolated(baseline, suite_path, "speed")
+    if "error" in expected or "error" in reference:
+        raise RuntimeError(f"Baseline failed: {expected.get('error') or reference.get('error')}")
+    report = {"seed": SEED, "python": sys.version, "platform": platform.platform(),
+              "clock": "perf_counter_ns", "warmup_calls": 3, "samples": 7,
+              "summary": "Geometric mean of per-workload median speedups; each workload has equal weight.",
+              "baseline": reference, "candidates": []}
+    for path in candidates():
+        entry = {"file": path.name}
+        if path.name not in eligible:
+            entry.update(status="skipped", reason="Correctness suite did not pass")
+        else:
+            actual = isolated(path, suite_path, "correctness")
+            if "error" in actual or actual.get("observations") != expected["observations"]:
+                entry.update(status="skipped", reason="Benchmark-input correctness check failed", error=actual.get("error"))
+            else:
+                measured = isolated(path, suite_path, "speed")
+                if "error" in measured:
+                    entry.update(status="error", error=measured["error"])
+                else:
+                    for old, new in zip(reference["timings"], measured["timings"]):
+                        new["speedup"] = old["median_seconds"] / new["median_seconds"]
+                    entry.update(status="pass", timings=measured["timings"],
+                                 geometric_mean_speedup=math.exp(sum(math.log(t["speedup"]) for t in measured["timings"]) / len(suite)))
+        report["candidates"].append(entry)
+        print(f"{path.name}: {entry['status']}" + (f" ({entry['geometric_mean_speedup']:.2f}x)" if "geometric_mean_speedup" in entry else ""))
+    save_json(ROOT / "reports/speed_report.json", report)
+    return report
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--offline", action="store_true", help="Run deterministic correctness tests without the agent")
+    parser.add_argument("--refresh-agent", action="store_true", help="Regenerate agent correctness cases")
+    args = parser.parse_args()
+    if args.offline and args.refresh_agent:
+        parser.error("--offline and --refresh-agent cannot be combined")
+    result = run(use_agent=not args.offline, refresh_agent=args.refresh_agent)
+    raise SystemExit(0 if all(c["status"] == "pass" for c in result["candidates"]) else 1)

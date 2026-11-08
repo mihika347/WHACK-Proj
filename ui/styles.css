@@ -34,8 +34,7 @@ h1:focus { outline: none; }
   border-bottom: 1px solid #24253b;
   background: #111221;
 }
-.brand { font-size: 1.12rem; font-weight: 700; }
-.topbar-label { color: var(--muted); font-size: .83rem; }
+.brand { font-size: 1.3rem; font-weight: 800; }
 .badge {
   display: inline-flex;
   align-items: center;
@@ -351,7 +350,6 @@ main {
 
 @media (max-width: 650px) {
   .topbar { min-height: 53px; padding: 0 12px; }
-  .topbar-label { display: none; }
   .home-grid { grid-template-columns: minmax(0, 1fr); }
   .home { padding: 19px 13px; }
   .stage-strip { display: flex; overflow-x: auto; }

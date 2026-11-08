@@ -430,6 +430,25 @@ function generateBuild() {
   }, 900);
 }
 
+function finalImprovementSummary(timing) {
+  const metrics = [
+    ['mean', 'Mean runtime'],
+    ['median', 'Median runtime'],
+    ['worst', 'Worst observed runtime'],
+  ];
+  return `<h2 id="final-improvement-title">Improvement summary</h2>
+    <p>Final code compared with the original using demo timings.</p>
+    <dl class="run-counts improvement-stats">${metrics.map(([metric, label]) => {
+      const saved = evidence.baseline[metric] - timing[metric];
+      const tone = saved > 0 ? 'success' : saved < 0 ? 'warning' : '';
+      const percentage = (100 * Math.abs(saved) / evidence.baseline[metric]).toFixed(1);
+      const change = saved === 0 ? 'Same runtime' :
+        `<span aria-hidden="true">${saved > 0 ? '↑' : '↓'}</span> ${percentage}%<span class="visually-hidden"> ${saved > 0 ? 'faster' : 'slower'}</span>`;
+      const delta = saved === 0 ? 'No time difference' : `${formatMs(Math.abs(saved))} ${saved > 0 ? 'saved' : 'added'}`;
+      return `<div><dt>${label}</dt><dd>${badge(change, tone)}<small>${delta}</small></dd></div>`;
+    }).join('')}</dl>`;
+}
+
 function finalView() {
   const queueLink = `<div class="actions"><a class="button secondary" href="${route('human')}">Open approval queue</a></div>`;
   if (!finalBuild) {
@@ -470,6 +489,37 @@ function renderBuildUpdate() {
   }
 }
 
+function setSplitLayout(layout) {
+  const detailsOnly = layout === 'details-only';
+  const codeCollapsed = layout === 'code-collapsed';
+  const detailsCollapsed = layout === 'details-collapsed';
+  const codeVisible = !detailsOnly && !codeCollapsed;
+  const atTestCases = readRoute().view === 'tests';
+
+  split.dataset.layout = layout;
+  byId('code-pane').hidden = !codeVisible;
+  byId('details-pane').hidden = detailsCollapsed;
+  byId('split-rail').hidden = detailsOnly;
+  divider.hidden = layout !== 'split';
+  splitLeft.hidden = codeCollapsed;
+  splitRight.hidden = detailsCollapsed;
+  splitLeft.title = detailsCollapsed ? 'Expand details pane' : 'Collapse code pane';
+  splitRight.title = codeCollapsed ? 'Expand code pane' : 'Collapse details pane';
+  splitLeft.setAttribute('aria-label', splitLeft.title);
+  splitRight.setAttribute('aria-label', splitRight.title);
+  splitLeft.setAttribute('aria-controls', detailsCollapsed ? 'details-pane' : 'code-pane');
+  splitRight.setAttribute('aria-controls', codeCollapsed ? 'code-pane' : 'details-pane');
+  splitLeft.setAttribute('aria-expanded', String(!detailsCollapsed));
+  splitRight.setAttribute('aria-expanded', String(!codeCollapsed));
+
+  byId('test-case-code-close').hidden = !atTestCases || !codeVisible;
+  const showCode = atTestCases ? byId('test-case-show-code') : null;
+  if (showCode) {
+    showCode.setAttribute('aria-expanded', String(codeVisible));
+    showCode.textContent = codeVisible ? 'Hide code' : 'Show code';
+  }
+}
+
 function render(focusHeading = false) {
   renderFileList();
   if (renderProjectFile(focusHeading)) return;
@@ -482,9 +532,9 @@ function render(focusHeading = false) {
   const atTestCases = state.view === 'tests';
   byId('pipeline-home').hidden = !atHome;
   byId('workspace').hidden = atHome;
-  byId('code-pane').hidden = atTestCases;
-  divider.hidden = atTestCases;
-  split.classList.toggle('single-panel', atTestCases);
+  if (focusHeading || !split.dataset.layout) {
+    setSplitLayout(atTestCases ? 'details-only' : 'split');
+  }
   renderNavigation(state);
   renderPipeline(state);
 
@@ -503,6 +553,11 @@ function render(focusHeading = false) {
     const status = state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
     if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
+  const showImprovement = state.view === 'final' && finalBuild?.status === 'verified';
+  const improvement = byId('final-improvement');
+  improvement.hidden = !showImprovement;
+  improvement.innerHTML = showImprovement ? finalImprovementSummary(finalBuild.timing) : '';
+
   if (focusHeading) {
     window.scrollTo(0, 0);
     byId(atHome ? 'home-title' : 'view-title').focus({ preventScroll: true });
@@ -525,11 +580,30 @@ byId('details-content').addEventListener('click', (event) => {
 
 byId('details-content').addEventListener('change', uploadTestCases);
 
+byId('test-case-code-close').addEventListener('click', () => {
+  setSplitLayout('code-collapsed');
+  splitRight.focus();
+});
+
 const split = byId('workspace-split');
 const divider = byId('split-divider');
+const splitLeft = byId('split-left');
+const splitRight = byId('split-right');
 const minSplit = Number(divider.getAttribute('aria-valuemin'));
 const maxSplit = Number(divider.getAttribute('aria-valuemax'));
 let dragOffset = 0;
+
+function moveSplit(collapsedLayout, nextControl) {
+  const layout = split.dataset.layout === 'split' ? collapsedLayout : 'split';
+  setSplitLayout(layout);
+  const focusTarget = nextControl.getClientRects().length
+    ? nextControl
+    : byId('test-case-show-code') ?? byId('view-title');
+  focusTarget.focus();
+}
+
+splitLeft.addEventListener('click', () => moveSplit('code-collapsed', splitRight));
+splitRight.addEventListener('click', () => moveSplit('details-collapsed', splitLeft));
 
 function resizeSourcePane(percent) {
   const width = Math.max(minSplit, Math.min(maxSplit, Math.round(percent)));

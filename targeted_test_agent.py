@@ -49,12 +49,12 @@ reason tied to the changes. Do not include Markdown fences.
 """
 
 
-def request_json(method, route, body=None):
+def request_json(method, route, body=None, *, timeout=TIMEOUT):
     payload = json.dumps(body).encode("utf-8") if body is not None else None
     request = urllib.request.Request(BASE_URL + route, data=payload, method=method,
                                      headers={"Content-Type": "application/json", "Authorization": "Bearer lm-studio"})
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.load(response)
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")[:4000]

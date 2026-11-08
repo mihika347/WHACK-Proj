@@ -1,46 +1,15 @@
 
-from openai import OpenAI
+"""Generate independent optimisation proposals with LM Studio."""
+
 from pathlib import Path
 import json
 import ast
 import re
 
-# ==========================================
-# CONFIGURATION
-# ==========================================
+from targeted_test_agent import request_json
+from test_utils import save_json
 
-INPUT_FILE = Path("original.py")
-OUTPUT_DIR = Path("output")
-
-client = OpenAI(
-    base_url="http://localhost:1234/v1",
-    api_key="lm-studio",
-    timeout=600.0
-)
-
-OUTPUT_DIR.mkdir(exist_ok=True)
-
-# ==========================================
-# READ ORIGINAL CODE
-# ==========================================
-
-original_code = INPUT_FILE.read_text(encoding="utf-8")
-
-# Detect the model running in LM Studio
-models = client.models.list()
-
-if not models.data:
-    raise RuntimeError("No model available in LM Studio.")
-
-model_id = models.data[0].id
-
-print(f"Using model: {model_id}")
-
-# ==========================================
-# CREATE THE PROMPT
-# ==========================================
-
-system_prompt = """
+SYSTEM_PROMPT = """
 You are an expert Python code optimisation researcher.
 
 Your objective is to optimise Python code for execution speed
@@ -83,7 +52,7 @@ Return ONLY valid JSON with this structure:
 Do not include Markdown code fences or text outside the JSON.
 """
 
-user_prompt = f"""
+USER_PROMPT = """
 Please optimise the code in this file for speed
 whilst keeping its output and behaviour the same.
 
@@ -102,89 +71,59 @@ ORIGINAL CODE:
 ```
 """
 
-# ==========================================
-# CALL LM STUDIO API
-# ==========================================
+def generate(project_dir="."):
+    root = Path(project_dir)
+    original = (root / "original.py").read_text(encoding="utf-8")
+    models = request_json("GET", "/models").get("data", [])
+    if not models:
+        raise RuntimeError("Load a model in LM Studio and start its local server.")
+    model = models[0]["id"]
+    print(f"Asking {model} to propose optimisations...", flush=True)
+    response = request_json("POST", "/chat/completions", {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": USER_PROMPT.format(original_code=original)},
+        ],
+        "temperature": 0.2,
+    }, timeout=600)
+    result_text = response["choices"][0]["message"]["content"]
+    if not result_text:
+        raise RuntimeError("Model returned an empty response.")
+    result_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", result_text.strip())
+    try:
+        result = json.loads(result_text)
+    except json.JSONDecodeError as error:
+        (root / "raw_response.txt").write_text(result_text, encoding="utf-8")
+        raise ValueError("Model returned invalid JSON. Response saved to raw_response.txt.") from error
 
-print("Asking AI to optimise code...")
+    stages = result["stages"]
+    if not isinstance(stages, list):
+        raise ValueError("Model response must contain a list of stages.")
+    seen = set()
+    for stage in stages:
+        number = stage["stage"]
+        if type(number) is not int or number < 1 or number in seen:
+            raise ValueError("Model response must use unique positive stage numbers.")
+        if not all(isinstance(stage[field], str) for field in ("name", "explanation", "code")):
+            raise ValueError("Each stage must contain a name, explanation, and Python source.")
+        seen.add(number)
+        stage["code"] = stage["code"].replace("\r\n", "\n")
+        ast.parse(stage["code"])
+    result["final_code"] = result["final_code"].replace("\r\n", "\n")
+    ast.parse(result["final_code"])
 
-response = client.chat.completions.create(
-    model=model_id,
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt}
-    ],
-    temperature=0.2
-)
+    output = root / "output"
+    output.mkdir(exist_ok=True)
+    for stage in stages:
+        filename = output / f"stage_{stage['stage']}.py"
+        filename.write_text(stage["code"], encoding="utf-8")
+        print(f"Stage {stage['stage']}: {stage['name']}\n{stage['explanation']}\nSaved: {filename}")
+    (output / "final_optimised.py").write_text(result["final_code"], encoding="utf-8")
+    save_json(output / "report.json", result)
+    print(f"Saved {len(stages)} proposed changes to {output}.")
+    return result
 
-result_text = response.choices[0].message.content
 
-if not result_text:
-    raise RuntimeError("Model returned an empty response.")
-
-# Remove Markdown fences if model includes them
-result_text = result_text.strip()
-result_text = re.sub(r"^```(?:json)?\s*", "", result_text)
-result_text = re.sub(r"\s*```$", "", result_text)
-
-# ==========================================
-# PARSE THE AI RESPONSE
-# ==========================================
-
-try:
-    result = json.loads(result_text)
-except json.JSONDecodeError:
-    Path("raw_response.txt").write_text(
-        result_text, encoding="utf-8"
-    )
-    raise RuntimeError(
-        "Model returned invalid JSON. "
-        "Response saved to raw_response.txt."
-    )
-
-# ==========================================
-# SAVE EACH INDEPENDENT STAGE
-# ==========================================
-
-for stage in result["stages"]:
-
-    stage_number = int(stage["stage"])
-    stage_code = stage["code"]
-
-    # Basic Python syntax check
-    ast.parse(stage_code)
-
-    filename = OUTPUT_DIR / f"stage_{stage_number}.py"
-    filename.write_text(stage_code, encoding="utf-8")
-
-    print(f"\nStage {stage_number}: {stage['name']}")
-    print(stage["explanation"])
-    print(f"Saved: {filename}")
-
-# ==========================================
-# SAVE FINAL OPTIMISED CODE
-# ==========================================
-
-final_code = result["final_code"]
-
-ast.parse(final_code)
-
-final_file = OUTPUT_DIR / "final_optimised.py"
-final_file.write_text(final_code, encoding="utf-8")
-
-# Save explanations and overlap details
-report_file = OUTPUT_DIR / "report.json"
-report_file.write_text(
-    json.dumps(result, indent=2),
-    encoding="utf-8"
-)
-
-print("\n=================================")
-print("Optimisation generation complete!")
-print("=================================")
-
-print(f"Stages created: {len(result['stages'])}")
-print(f"Final code: {final_file}")
-print(f"Report: {report_file}")
-print("\nIMPORTANT: These are proposed optimisations.")
-print("Run correctness tests and benchmarks before acceptance.")
+if __name__ == "__main__":
+    generate()

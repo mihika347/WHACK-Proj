@@ -35,14 +35,13 @@ The current `original.py` defines `count_matches(numbers, target)` and prints `3
 
 ## Setup and usage
 
-Requirements: Python 3, the Python `openai` package, and LM Studio serving a loaded model through its OpenAI-compatible API.
+Requirements: Python 3 and LM Studio serving a loaded model through its OpenAI-compatible API. The generator uses Python's standard library.
 
 From the project root in PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install openai
 ```
 
 Load a model in LM Studio and start its local API server. The script uses these settings:
@@ -51,13 +50,13 @@ Load a model in LM Studio and start its local API server. The script uses these 
 | --- | --- |
 | Input file | `original.py` |
 | Output directory | `output/` |
-| API base URL | `http://localhost:1234/v1` |
+| API base URL | `http://localhost:1234/v1`, or set `LM_STUDIO_BASE_URL` |
 | Client API key | `lm-studio` |
 | Request timeout | 600 seconds |
 | Model | First entry returned by `client.models.list()` |
 | Temperature | `0.2` |
 
-Edit the configuration in `api_call1.py` if your input file or server differs. Paths are relative to the working directory. Run from the project root:
+Paths are relative to the working directory. Run from the project root:
 
 ```powershell
 python api_call1.py
@@ -275,7 +274,7 @@ A successful demo exits with code 0 when the control passes and every intentiona
 
 ## Browse saved backend runs
 
-From the repository root, start the local read-only server and open `http://127.0.0.1:8000`.
+From the repository root, start the local server and open `http://127.0.0.1:8000`.
 
 ```powershell
 python ui/serve.py
@@ -284,6 +283,10 @@ python ui/serve.py
 Choose **Saved optimisation run** or **Saved failure demo** in the file picker. Open **Original Code** for the saved baseline or **Deep Dive** for candidate diffs, test cases, correctness results, and measured performance. The failure demo shows real correctness failures from deliberately faulty candidates and has no benchmarks. The UI shows the saved run ID and checks that the reports match the source before displaying the results.
 
 Each run shows the independently evaluated changes. Uploaded cases are kept in the browser and shown as **Not run**. The bundled demo is available in the same file picker.
+
+**Value Assessment** recommends changes that pass correctness checks and reduce measured execution time by at least 5%, based on the median workload speedup. **Approve** shows each recommendation and its current decision. Decisions are saved for the browser tab's session and scoped to the run and candidate source.
+
+To start a live run, load a model and start the local API in LM Studio. Import or create a trusted Python file with a top-level `count_matches(numbers, target)` function. Select the file and click **Run optimisation** from the pipeline or Original Code. The UI opens a separate run entry and shows progress through generation, correctness, and benchmarking. Each run saves its source snapshot and reports under `.fastforward-runs/`.
 
 ## UI demo
 

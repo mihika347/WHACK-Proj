@@ -1,11 +1,14 @@
 // Browser-local source files. Demo results belong only to the bundled example.
 const projectStorageKey = 'fastforward:project-files:v1';
-let project = { files: [{ id: 'demo', name: demoRun.filename, content: demoRun.baseline.join('\n'), demo: true }], active: 'demo', collapsed: false };
+let project = { files: [{ id: 'demo', name: demoRun.filename, content: demoRun.baseline.join('\n'), demo: true }], runs: [], active: 'demo', collapsed: false };
 try {
   const saved = JSON.parse(localStorage.getItem(projectStorageKey));
   if (saved && Array.isArray(saved.files) && saved.files.every(f =>
     typeof f.id === 'string' && typeof f.name === 'string' && typeof f.content === 'string')) {
     project = saved;
+    project.runs = Array.isArray(saved.runs) ? saved.runs.filter((run) =>
+      typeof run?.name === 'string' && /^live:[0-9a-f]{32}$/.test(run.savedRun) && run.id === run.savedRun,
+    ) : [];
     if (!activeProjectFile()) project.active = project.files[0]?.id ?? savedRunFiles[0]?.id;
   }
 } catch { /* Keep files in memory when storage is unavailable. */ }
@@ -30,7 +33,7 @@ function validFileName(name, exceptId) {
 }
 
 function renderFileList() {
-  const files = [...project.files, ...savedRunFiles];
+  const files = [...project.files, ...savedRunFiles, ...project.runs];
   const dropdown = document.getElementById('header-file-select');
   dropdown.replaceChildren();
   dropdown.disabled = !files.length;
@@ -93,6 +96,18 @@ function addProjectFile(name, content) {
   saveProject(); location.hash = '#pipeline'; render();
 }
 
+function addProjectRun(job, source) {
+  const id = `live:${job.id}`;
+  project.runs.push({ id, name: `Run · ${job.filename} · ${job.id.slice(0, 8)}`, savedRun: id });
+  const stayWithRun = activeProjectFile() === source;
+  if (stayWithRun) {
+    project.active = id;
+    location.hash = '#pipeline';
+  }
+  saveProject();
+  render(stayWithRun);
+}
+
 function renderProjectFile(focusHeading) {
   const file = activeProjectFile();
   if (file?.demo) {
@@ -127,7 +142,7 @@ function renderProjectFile(focusHeading) {
   renderNavigation(state);
   renderPipeline(state);
   const name = escapeHtml(file.name);
-  document.getElementById('run-summary').innerHTML = `<p class="eyebrow">Source file</p><h2>${name}</h2><p>Ready for optimisation</p><dl class="run-counts"><div><dt>Proposed</dt><dd>0</dd></div><div><dt>Recommended</dt><dd>0</dd></div><div><dt>Filtered</dt><dd>0</dd></div></dl><div class="demo-note">${icon('file')}<div><strong>${name}</strong><p>No optimisation run yet. Results will appear after this file is processed.</p></div></div>`;
+  document.getElementById('run-summary').innerHTML = `<p class="eyebrow">Source file</p><h2>${name}</h2>${runSourceControl(file)}`;
   document.getElementById('home-title').textContent = `Optimisation pipeline · ${file.name}`;
   document.getElementById('source-file').textContent = file.name;
   document.querySelector('.code-header .label').textContent = file.name.endsWith('.py') ? 'Python' : 'Source';
@@ -149,14 +164,16 @@ function renderProjectFile(focusHeading) {
     final: ['Final code', 'No final code has been generated for this file yet.'],
   };
   const [title, message] = messages[state.stage] ?? ['Test cases', 'Upload test cases for this file.'];
-  document.getElementById('details-content').innerHTML = `${detailHeader(state.stage ?? 'original', title, message)}<section class="inset"><h3>${name}</h3><p>Optimisation has not been connected for custom files yet.</p></section>${atTests ? projectTestCasesView(file) : ''}`;
+  document.getElementById('details-content').innerHTML = `${detailHeader(state.stage ?? 'original', title, message)}
+    ${editing ? runSourceControl(file) : ''}${atTests ? projectTestCasesView(file) : ''}`;
   document.getElementById('build-status').textContent = '';
   if (focusHeading) document.getElementById(atHome ? 'home-title' : 'view-title').focus();
   return true;
 }
 
 function activeProjectFile() {
-  return project.files.find(file => file.id === project.active) ?? savedRunFiles.find(file => file.id === project.active);
+  return project.files.find(file => file.id === project.active) ??
+    savedRunFiles.find(file => file.id === project.active) ?? project.runs.find(file => file.id === project.active);
 }
 
 function selectProjectFile(id) {

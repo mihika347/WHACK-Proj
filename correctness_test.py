@@ -8,12 +8,12 @@ from targeted_test_agent import generate
 from result_stats import correctness_statistics, numeric_error
 
 
-def smallest_counterexample(baseline, path, failures, request_path):
+def smallest_counterexample(baseline, path, failures, request_path, *, project_dir=ROOT):
     if not failures:
         return None
     smallest = min(failures, key=lambda failure: len(failure["case"]["numbers"]))
     save_json(request_path, {"baseline": str(baseline.resolve()), "failure": smallest})
-    reduced = isolated(path, request_path, "shrink", timeout=15)
+    reduced = isolated(path, request_path, "shrink", timeout=15, project_dir=project_dir)
     return {"smallest_observed": smallest, "reduced": reduced if "error" not in reduced else None,
             "reduction_error": reduced.get("error")}
 
@@ -44,7 +44,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         if use_agent:
             try:
                 print(f"{path.name}: requesting independent targeted cases (or matching cache)...", flush=True)
-                agent = generate(baseline, path, refresh=refresh_agent)
+                agent = generate(baseline, path, refresh=refresh_agent, cache_dir=root / "tests/agent_cases")
                 suites["targeted"][path.name]["agent"] = agent
             except Exception as exc:
                 agent_error = f"{type(exc).__name__}: {exc}"
@@ -58,8 +58,8 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         cases += [{**test, "source": "agent", "category": "agent_targeted"} for test in agent_cases]
         suite_path = root / "tests" / f"{path.stem}_correctness_cases.json"
         save_json(suite_path, cases)
-        expected = isolated(baseline, suite_path, "correctness")
-        actual = isolated(path, suite_path, "correctness")
+        expected = isolated(baseline, suite_path, "correctness", project_dir=root)
+        actual = isolated(path, suite_path, "correctness", project_dir=root)
         entry = {"file": path.name, "source_sha256": source_hash(path),
                  "smallest_failing_input": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
@@ -83,7 +83,8 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
             entry.update(statistics=correctness_statistics(rows), case_results=rows)
             if entry["failures"]:
                 entry["smallest_failing_input"] = smallest_counterexample(
-                    baseline, path, entry["failures"], root / "tests" / f"{path.stem}_shrink_request.json")
+                    baseline, path, entry["failures"], root / "tests" / f"{path.stem}_shrink_request.json",
+                    project_dir=root)
             if agent_error and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)

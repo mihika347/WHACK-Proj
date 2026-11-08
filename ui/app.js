@@ -20,7 +20,7 @@ const { candidates, evidence } = demoRun;
 const recommended = candidates.filter((candidate) => candidate.outcome === 'recommended');
 const storageKey = `fastforward:${demoRun.id}:decisions`;
 const verdicts = { approved: 'Approved', rejected: 'Rejected', pending: 'Pending' };
-const decisions = readDecisions();
+const decisions = readDecisions(storageKey, recommended);
 let finalBuild;
 
 const stages = {
@@ -38,14 +38,15 @@ const pipelineStages = ['original', 'value', 'human', 'final'];
 const deepDiveStages = ['tests', 'generated', 'correctness', 'performance'];
 const candidateStages = ['generated', 'correctness', 'performance', 'value'];
 
-function readDecisions() {
+function readDecisions(key, eligible, candidateKey = (candidate) => candidate.id) {
   const saved = new Map();
   try {
-    const stored = JSON.parse(sessionStorage.getItem(storageKey)) ?? {};
-    for (const candidate of recommended) {
-      const decision = stored[candidate.id];
+    const stored = JSON.parse(sessionStorage.getItem(key)) ?? {};
+    for (const candidate of eligible) {
+      const id = candidateKey(candidate);
+      const decision = stored[id];
       if (decision === 'approved' || decision === 'rejected') {
-        saved.set(candidate.id, decision);
+        saved.set(id, decision);
       }
     }
   } catch {
@@ -57,8 +58,12 @@ function readDecisions() {
 function saveDecision(candidate, decision) {
   decisions.set(candidate.id, decision);
   finalBuild = undefined;
+  storeDecisions(storageKey, decisions);
+}
+
+function storeDecisions(key, values) {
   try {
-    sessionStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(decisions)));
+    sessionStorage.setItem(key, JSON.stringify(Object.fromEntries(values)));
   } catch {
     // Decisions remain available in memory for this page.
   }
@@ -218,7 +223,7 @@ function renderCode({ stage, candidate }) {
       ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
     return;
   }
-  const isBaseline = stage === 'original' || !candidate || (run && !['generated', 'correctness', 'performance'].includes(stage));
+  const isBaseline = stage === 'original' || !candidate || (run && !candidateStages.includes(stage));
   const baseline = (run ?? demoRun).baseline;
   const codeId = hasFinalDiff ? finalBuild : isBaseline ? baseline : candidate;
   if (displayedCode === codeId) return;
@@ -278,6 +283,11 @@ function performance(timing) {
 
 function badge(label, tone = '') {
   return `<span class="badge ${tone}">${label}</span>`;
+}
+
+function decisionButtons(decision) {
+  return `<button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
+    <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>`;
 }
 
 function detailHeader(stage, title, description, status = '') {
@@ -360,8 +370,7 @@ function reviewView(stage, candidate) {
     </section>` : ''}
     <div class="actions">
       <a class="button secondary" href="${route(stage, candidate, 'results')}">See stage results</a>
-      ${canDecide ? `<button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
-        <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>` : ''}
+      ${canDecide ? decisionButtons(decision) : ''}
     </div>`;
 }
 
@@ -590,8 +599,18 @@ byId('details-content').addEventListener('click', (event) => {
   const button = event.target.closest('button[data-decision]');
   if (!button) return;
   const { stage, view, candidate } = readRoute();
-  if (view !== 'review' || !['performance', 'value'].includes(stage) || candidate.outcome !== 'recommended') return;
-  saveDecision(candidate, button.dataset.decision);
+  const decision = button.dataset.decision;
+  if (view !== 'review' || !candidate || !['approved', 'rejected'].includes(decision)) return;
+  const run = activeSavedRun();
+  if (run) {
+    if (stage !== 'value' || !savedValue(candidate).recommended) return;
+    const review = savedReview(run);
+    review.decisions.set(savedCandidateKey(candidate), decision);
+    storeDecisions(review.key, review.decisions);
+  } else {
+    if (!['performance', 'value'].includes(stage) || candidate.outcome !== 'recommended') return;
+    saveDecision(candidate, decision);
+  }
   location.hash = route('human', candidate);
 });
 

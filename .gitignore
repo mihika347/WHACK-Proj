@@ -1,4 +1,5 @@
 __pycache__/
 *.py[cod]
 .venv/
+.fastforward-runs/
 tests/agent_cases/*.invalid_response.txt

@@ -1,5 +1,6 @@
 """Benchmark identical fixed workloads after regenerating correctness checks."""
 import argparse
+from pathlib import Path
 import platform
 import sys
 from correctness_test import run as check_correctness, smallest_counterexample
@@ -12,22 +13,27 @@ from stage_scoring import validate_threshold
 def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
     score_threshold = validate_threshold(score_threshold)
     correctness = check_correctness(use_agent=use_agent, refresh_agent=refresh_agent, seed=seed)
+    return benchmark(correctness, score_threshold=score_threshold)
+
+
+def benchmark(correctness, project_dir=ROOT, score_threshold=70):
+    root = Path(project_dir)
     eligible = {c["file"] for c in correctness["candidates"] if c["status"] == "pass"}
     suite = speed_cases()
-    suite_path = ROOT / "tests/speed_cases.json"
+    suite_path = root / "tests/speed_cases.json"
     save_json(suite_path, suite)
-    baseline = ROOT / "original.py"
-    expected = isolated(baseline, suite_path, "correctness")
-    reference = isolated(baseline, suite_path, "speed")
+    baseline = root / "original.py"
+    expected = isolated(baseline, suite_path, "correctness", project_dir=root)
+    reference = isolated(baseline, suite_path, "speed", project_dir=root)
     if "error" in expected or "error" in reference:
         raise RuntimeError(f"Baseline failed: {expected.get('error') or reference.get('error')}")
     report = {"schema_version": 3, "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
-              "correctness_seed": seed, "seed": SEED, "python": sys.version, "platform": platform.platform(),
+              "correctness_seed": correctness["seed"], "seed": SEED, "python": sys.version, "platform": platform.platform(),
               "baseline_sha256": correctness["baseline_sha256"],
               "clock": "perf_counter_ns", "warmup_calls": 3, "samples": 7,
               "summary": "Median percentage speed increase, population variance of percentage changes across workloads, and worst observed speed.",
               "baseline": reference, "candidates": []}
-    for path in candidates():
+    for path in candidates(root):
         correct_entry = next(c for c in correctness['candidates'] if c['file'] == path.name)
         entry = {"file": path.name, "speed_increase_percent": None,
                  "smallest_failing_input": correct_entry.get('smallest_failing_input'),
@@ -36,7 +42,7 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
         if path.name not in eligible:
             entry.update(status="skipped", reason="Correctness suite did not pass")
         else:
-            actual = isolated(path, suite_path, "correctness")
+            actual = isolated(path, suite_path, "correctness", project_dir=root)
             if "error" in actual or actual.get("observations") != expected["observations"]:
                 entry.update(status="skipped", reason="Benchmark-input correctness check failed", error=actual.get("error"))
                 if "observations" in actual:
@@ -44,9 +50,9 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
                                 for test, old, new in zip(suite, expected["observations"], actual["observations"])
                                 if old != new]
                     entry["smallest_failing_input"] = smallest_counterexample(
-                        baseline, path, failures, ROOT / "tests" / f"{path.stem}_benchmark_shrink_request.json")
+                        baseline, path, failures, root / "tests" / f"{path.stem}_benchmark_shrink_request.json", project_dir=root)
             else:
-                measured = isolated(path, suite_path, "speed")
+                measured = isolated(path, suite_path, "speed", project_dir=root)
                 if "error" in measured:
                     entry.update(status="error", error=measured["error"])
                 else:
@@ -76,10 +82,10 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
                   f"{worst['candidate_median_seconds'] * 1e6:.3f} us per call")
         else:
             print(f"{path.name}: {entry['status']}")
-    save_json(ROOT / "reports/speed_report.json", report)
-    ui = export(correctness, report, score_threshold=score_threshold)
+    save_json(root / "reports/speed_report.json", report)
+    ui = export(correctness, report, output_dir=root / "reports", score_threshold=score_threshold)
     attach_scores(report, ui)
-    save_json(ROOT / "reports/speed_report.json", report)
+    save_json(root / "reports/speed_report.json", report)
     for stage in ui["stage_ranking"]:
         print(f"  Rank {stage['rank']}: {stage['stage']} = {stage['stage_score']:.2f}/100" + (" [KEY STAGE]" if stage["is_key_stage"] else ""))
     return report

@@ -8,17 +8,17 @@ from targeted_test_agent import generate_isolated as generate, TOTAL_TIMEOUT
 from result_stats import correctness_statistics, numeric_error
 
 
-def smallest_counterexample(baseline, path, failures, request_path):
+def smallest_counterexample(baseline, path, failures, request_path, *, project_dir=ROOT):
     if not failures:
         return None
     smallest = min(failures, key=lambda failure: len(failure['case']['numbers']))
     save_json(request_path, {'baseline': str(baseline.resolve()), 'failure': smallest})
-    reduced = isolated(path, request_path, 'shrink', timeout=15)
+    reduced = isolated(path, request_path, 'shrink', timeout=15, project_dir=project_dir)
     return {'smallest_observed': smallest, 'reduced': reduced if 'error' not in reduced else None,
             'reduction_error': reduced.get('error')}
 
 
-def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
+def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None, *, uploads=(), saved_suites=None):
     if refresh_agent and not use_agent:
         raise ValueError('Refreshing agent cases requires use_agent=True')
     if not use_agent:
@@ -54,7 +54,8 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
             continue
         suites["targeted"][path.name] = targeted
         agent, agent_error = None, None
-        if use_agent:
+        saved = saved_suites.get(path.name) if saved_suites else None
+        if use_agent and saved is None:
             try:
                 print(f"{path.name}: independent targeted cases (cache or up to {TOTAL_TIMEOUT:g}s)...", flush=True)
                 agent = generate(baseline, path, refresh=refresh_agent)
@@ -68,16 +69,17 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
         cases += [{**test, "source": "exhaustive" if test["name"].startswith("exhaustive_") else "rule_targeted",
                    "category": "exhaustive_short_lists" if test["name"].startswith("exhaustive_") else "rule_targeted"}
                   for test in targeted["cases"]]
-        cases += [{**test, "source": "agent", "category": "agent_targeted"} for test in agent_cases]
+        cases += [{**test, "source": "agent", "category": "agent_targeted", "target_stage": path.name, "target_sha256": source_hash(path)} for test in agent_cases]
         suite_path = root / "tests" / f"{path.stem}_correctness_cases.json"
+        cases = [*(saved["cases"] if saved else cases), *uploads]
         save_json(suite_path, cases)
-        expected = isolated(baseline, suite_path, "correctness")
-        actual = isolated(path, suite_path, "correctness")
+        expected = isolated(baseline, suite_path, "correctness", project_dir=root)
+        actual = isolated(path, suite_path, "correctness", project_dir=root)
         entry = {"file": path.name, "source_sha256": source_hash(path),
                  "change_variance": None,
                  "smallest_failing_input": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
-                 "agent_cases": len(agent_cases), "agent_status": "error" if agent_error else "used" if agent else "disabled",
+                 "agent_cases": sum(test["source"] == "agent" for test in cases), "agent_status": saved["agent_status"] if saved else "error" if agent_error else "used" if agent else "disabled",
                  "agent_error": agent_error,
                  "targeting_rules": targeted["rules"], "total": len(cases), "failures": []}
         if "error" in expected or "error" in actual:

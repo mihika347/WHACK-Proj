@@ -1,17 +1,29 @@
-const testCaseStorageKey = `fastforward:${demoRun.id}:uploaded-test-cases`;
-const uploadedTestSuites = readUploadedTestSuites();
+const uploadedTestSuites = new Map();
+const pendingTestUploads = new WeakSet();
 const testCategories = {
   speed: { title: 'Speed', icon: 'bars', description: 'Each benchmark measurement is compared with the baseline for its workload' },
   correctness: { title: 'Correctness', icon: 'check', description: 'Shared, targeted, AI-generated, and uploaded cases' },
 };
 
-function readUploadedTestSuites() {
+function testCaseStorageKey() {
+  return `fastforward:${activeSavedRun()?.id ?? demoRun.id}:uploaded-test-cases`;
+}
+
+function readUploadedTestSuites(key) {
+  if (uploadedTestSuites.has(key)) return uploadedTestSuites.get(key);
+  let suites = [];
   try {
-    const saved = JSON.parse(sessionStorage.getItem(testCaseStorageKey));
-    return Array.isArray(saved) ? saved : [];
+    const saved = JSON.parse(sessionStorage.getItem(key));
+    if (Array.isArray(saved)) suites = saved;
   } catch {
-    return [];
+    // Uploads are still available in memory when storage is unavailable.
   }
+  uploadedTestSuites.set(key, suites);
+  return suites;
+}
+
+function currentTestCaseData() {
+  return activeSavedRun()?.tests ?? testCaseData;
 }
 
 function renderTestSuites(suites, category) {
@@ -19,7 +31,7 @@ function renderTestSuites(suites, category) {
   const showingCode = !byId('test-case-code-close').hidden;
   const codeButton = `<button class="button secondary" id="test-case-show-code" type="button" aria-controls="code-pane" aria-expanded="${showingCode}">
     ${showingCode ? 'Hide code' : 'Show code'}</button>`;
-  if (!suites.length) return `<div class="test-suite-heading"><p>No saved cases in this category.</p>${codeButton}</div>`;
+  if (!suites.length) return `<div class="test-suite-heading"><p>${isSpeed && activeSavedRun() ? 'Not measured' : 'No saved cases in this category.'}</p>${codeButton}</div>`;
   return suites.map((suite, index) => `
     <section class="test-suite">
       <div class="test-suite-heading">
@@ -32,10 +44,16 @@ function renderTestSuites(suites, category) {
       <ul class="test-case-list">${suite.cases.map((test) => `
         <li>
           <strong>${escapeHtml(test.name)}</strong>
+          ${test.aiGenerated ? badge('AI-generated · change-specific') : ''}
+          ${test.targetChange ? `<p>Targeted change: <strong>${escapeHtml(test.targetChange)}</strong></p>` : ''}
           ${test.failedIn ? badge(isSpeed ? 'Slower' : 'Failed', 'rejected') : ''}
+          ${suite.uploaded ? badge('Not run') : ''}
+          ${test.uploaded ? badge('Uploaded') : ''}
+          ${test.uploaded && !test.failedIn ? badge('Passed', 'success') : ''}
           <code class="test-case-input">${escapeHtml(test.input)}</code>
           ${test.failedIn ? `<p>${isSpeed ? 'Slower than baseline in' : 'Failed in'} ${escapeHtml(test.failedIn.join(', '))}</p>` : ''}
-          ${test.expected === undefined ? '' : `<p>Expected output <code>${escapeHtml(test.expected)}</code></p>`}
+          ${test.expected === undefined ? '' : `<p>Expected count <code>${escapeHtml(test.expected)}</code></p>`}
+          ${test.baselineValue === undefined ? '' : `<p class="removed-text">Expected count differs from the original, which returned <code>${escapeHtml(test.baselineValue)}</code>.</p>`}
           ${test.reason ? `<p>${escapeHtml(test.reason)}</p>` : ''}
         </li>`).join('')}
       </ul>
@@ -43,15 +61,18 @@ function renderTestSuites(suites, category) {
 }
 
 function testCategorySuites(category) {
-  if (category === 'speed') return testCaseData.speed;
+  const data = currentTestCaseData();
+  if (category === 'speed') return data.speed;
+  const uploads = readUploadedTestSuites(testCaseStorageKey());
   return [
-    ...uploadedTestSuites.map((suite) => ({ ...suite, sources: ['Uploaded', ...suite.sources] })),
-    ...testCaseData.correctness,
+    ...uploads.map((suite) => ({ ...suite, uploaded: true, sources: ['Uploaded', ...suite.sources] })),
+    ...data.correctness,
   ];
 }
 
 function testCategoryCount(category) {
   const count = testCategorySuites(category).reduce((total, suite) => total + suite.cases.length, 0);
+  if (!count && category === 'speed' && activeSavedRun()) return 'Not measured';
   return `${count.toLocaleString()} ${count === 1 ? 'case' : 'cases'}`;
 }
 
@@ -60,7 +81,7 @@ function testPercentage(share) {
 }
 
 function testCategoryOutcomeLabel(category) {
-  const { passed, failed } = testCaseData.outcomes[category];
+  const { passed, failed } = currentTestCaseData().outcomes[category];
   const label = category === 'speed' ? 'of measurements slower' : 'failed';
   return failed ? ` <span class="test-failure-rate">(${testPercentage(100 * failed / (passed + failed))} ${label})</span>` : '';
 }
@@ -84,7 +105,7 @@ function failuresFirst(suites, category) {
 }
 
 function testCasesView() {
-  const { passed, failed } = testCaseData.outcomes.correctness;
+  const { passed, failed } = currentTestCaseData().outcomes.correctness;
   const total = passed + failed;
   const passShare = total ? 100 * passed / total : 0;
   const failShare = total ? 100 * failed / total : 0;
@@ -111,7 +132,7 @@ function testCasesView() {
       <div class="test-outcome-bar" aria-hidden="true">
         <span class="passed-bar" style="width:${passShare}%"></span><span class="failed-bar" style="width:${failShare}%"></span>
       </div>
-      <p>${total.toLocaleString()} completed correctness checks</p>
+      <p>${total.toLocaleString()} completed correctness checks${activeSavedRun() ? ' across saved changes' : ''}</p>
     </section>
     <button class="button secondary test-category-back" id="test-category-back" type="button" hidden>← Back to categories</button>
     <div class="test-categories" id="test-categories" role="group" aria-label="Test case categories">
@@ -224,19 +245,34 @@ async function uploadTestCases(event) {
   const input = event.target;
   if (input.id !== 'test-case-file' || !input.files.length) return;
   const file = input.files[0];
+  const key = testCaseStorageKey();
+  const projectFile = activeProjectFile();
+  const run = activeSavedRun();
   input.value = '';
+  if (pendingTestUploads.has(projectFile)) return;
   let message;
   let error = false;
   try {
+    if (file.size > 1024 * 1024) throw new Error('Maximum upload size is 1 MB.');
+    if (run) {
+      pendingTestUploads.add(projectFile);
+      byId('test-case-upload-status').textContent = 'Starting a new evaluation with this upload…';
+      const job = await requestRun('/api/runs/recheck', {
+        parent: projectFile.savedRun, run_id: run.id, uploads: [await file.text()],
+      });
+      addProjectRun(job, projectFile, route('tests'));
+      return;
+    }
     const cases = parseTestCases(await file.text());
-    uploadedTestSuites.push({ sources: [file.name], cases });
+    const suites = readUploadedTestSuites(key);
+    suites.push({ sources: [file.name], cases });
     message = `Added ${cases.length} test ${cases.length === 1 ? 'case' : 'cases'}.`;
     try {
-      sessionStorage.setItem(testCaseStorageKey, JSON.stringify(uploadedTestSuites));
+      sessionStorage.setItem(key, JSON.stringify(suites));
     } catch {
       message += ' This upload is available until reload.';
     }
-    const count = byId('test-categories')?.querySelector('[data-test-category="correctness"] .badge');
+    const count = projectFile === activeProjectFile() && byId('test-categories')?.querySelector('[data-test-category="correctness"] .badge');
     if (count) {
       count.textContent = testCategoryCount('correctness');
       showTestCategory('correctness');
@@ -244,8 +280,10 @@ async function uploadTestCases(event) {
   } catch (failure) {
     message = failure.message;
     error = true;
+  } finally {
+    pendingTestUploads.delete(projectFile);
   }
-  const status = byId('test-case-upload-status');
+  const status = projectFile === activeProjectFile() && byId('test-case-upload-status');
   if (status) {
     status.textContent = message;
     status.classList.toggle('removed-text', error);

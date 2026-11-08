@@ -19,8 +19,15 @@ const byId = (id) => document.getElementById(id);
 const { candidates, evidence } = demoRun;
 const recommended = candidates.filter((candidate) => candidate.outcome === 'recommended');
 const storageKey = `fastforward:${demoRun.id}:decisions`;
-const verdicts = { approved: 'Approved', rejected: 'Rejected', pending: 'Pending' };
+const verdicts = { conflicting: 'Conflicting', approved: 'Approved', rejected: 'Rejected', pending: 'Pending' };
 const decisions = readDecisions();
+const userVerifications = new Set();
+try {
+  const stored = JSON.parse(sessionStorage.getItem(`${storageKey}:verified`) ?? '{}');
+  for (const candidate of recommended) {
+    if (stored[candidate.id] === JSON.stringify(candidate.patch)) userVerifications.add(candidate.id);
+  }
+} catch { /* Verification remains available in memory. */ }
 let finalBuild;
 
 const stages = {
@@ -38,14 +45,15 @@ const pipelineStages = ['original', 'value', 'human', 'final'];
 const deepDiveStages = ['tests', 'generated', 'correctness', 'performance'];
 const candidateStages = ['generated', 'correctness', 'performance', 'value'];
 
-function readDecisions() {
+function readDecisions(key = storageKey, eligible = recommended, candidateKey = (candidate) => candidate.id) {
   const saved = new Map();
   try {
-    const stored = JSON.parse(sessionStorage.getItem(storageKey)) ?? {};
-    for (const candidate of recommended) {
-      const decision = stored[candidate.id];
+    const stored = JSON.parse(sessionStorage.getItem(key)) ?? {};
+    for (const candidate of eligible) {
+      const id = candidateKey(candidate);
+      const decision = stored[id];
       if (decision === 'approved' || decision === 'rejected') {
-        saved.set(candidate.id, decision);
+        saved.set(id, decision);
       }
     }
   } catch {
@@ -55,21 +63,68 @@ function readDecisions() {
 }
 
 function saveDecision(candidate, decision) {
+  if (!recommended.includes(candidate) || !['approved', 'rejected'].includes(decision)) return;
+  if (decision === 'approved' && !userVerifications.has(candidate.id)) return;
+  if (decision === 'approved') {
+    for (const other of approvedCandidates()) if (other !== candidate && reviewConflicts(candidate, other)) decisions.delete(other.id);
+  }
   decisions.set(candidate.id, decision);
   finalBuild = undefined;
+  storeDecisions(storageKey, decisions);
+}
+
+function storeDecisions(key, values) {
   try {
-    sessionStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(decisions)));
+    sessionStorage.setItem(key, JSON.stringify(Object.fromEntries(values)));
   } catch {
     // Decisions remain available in memory for this page.
   }
 }
 
-function route(stage, candidate = recommended[0], view = stages[stage].view) {
+function verifyChange(candidate, verified) {
+  if (!recommended.includes(candidate)) return;
+  if (verified) userVerifications.add(candidate.id);
+  else {
+    userVerifications.delete(candidate.id);
+    decisions.delete(candidate.id);
+  }
+  finalBuild = undefined;
+  try {
+    sessionStorage.setItem(`${storageKey}:verified`, JSON.stringify(Object.fromEntries(
+      recommended.filter((item) => userVerifications.has(item.id)).map((item) => [item.id, JSON.stringify(item.patch)]),
+    )));
+    sessionStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(decisions)));
+  } catch { /* The current review remains available in memory. */ }
+}
+
+function assembleApprovedCode(baseline, applied) {
+  const lines = [...baseline];
+  // Original-coordinate edits are applied from the end to avoid shifting offsets.
+  for (const { patch } of [...applied].reverse()) {
+    lines.splice(patch.start - 1, patch.remove, ...patch.lines);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+function downloadFinalCode() {
+  if (finalBuild?.status !== 'verified' || !finalBuild.code) return;
+  const url = URL.createObjectURL(new Blob([finalBuild.code], { type: 'text/x-python;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = demoRun.filename.replace(/\.py$/i, '') + '_optimised.py';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function route(stage, candidate, view = stages[stage].view) {
   const section = deepDiveStages.includes(stage) ? 'deep-dive/' : '';
-  return `#${section}${stage}/${view}/${candidate.id}`;
+  const fallback = activeProjectFile()?.savedRun ? activeSavedRun()?.candidates[0] : recommended[0];
+  const id = (candidate ?? fallback)?.id;
+  return `#${section}${stage}/${view}${id ? `/${id}` : ''}`;
 }
 
 function stageCandidates(stage) {
+  if (activeProjectFile()?.savedRun) return activeSavedRun()?.candidates ?? [];
   return candidates.filter((candidate) =>
     !candidate.filteredAt || stageOrder.indexOf(candidate.filteredAt) >= stageOrder.indexOf(stage),
   );
@@ -84,34 +139,33 @@ function readRoute() {
   if (isDeepDive && !deepDiveStages.includes(stage)) stage = 'tests';
   // Step 1 approval links used the Performance stage.
   if (stage === 'performance' && view === 'approve') stage = 'human';
-  if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: recommended[0] };
+  const saved = activeProjectFile()?.savedRun;
+  const fallback = saved ? activeSavedRun()?.candidates[0] : recommended[0];
+  if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: fallback };
   const inCandidateStage = candidateStages.includes(stage);
-  const eligible = inCandidateStage ? stageCandidates(stage) : recommended;
+  const eligible = saved || inCandidateStage ? stageCandidates(stage) : recommended;
   return {
     stage,
     view: inCandidateStage && ['results', 'review'].includes(view) ? view : stages[stage].view,
-    candidate: eligible.find((candidate) => candidate.id === id) ?? recommended[0],
+    candidate: eligible.find((candidate) => candidate.id === id) ?? fallback,
   };
 }
 
-function renderNavigation({ stage, view, candidate }) {
-  const candidateStage = candidateStages.includes(stage) ? stage : 'performance';
-  const items = [
-    { id: 'pipeline', label: 'Pipeline', icon: 'pipeline', href: '#pipeline' },
-    { id: 'measured', label: 'Test results', icon: 'bars', href: '#tests' },
-    { id: 'tests', label: 'Test cases', icon: 'tests', href: route('tests', candidate) },
-    { id: 'results', label: 'Results', icon: 'bars', href: route(candidateStage, candidate, 'results') },
-    { id: 'review', label: 'Review', icon: 'review', href: route(candidateStage, candidate, 'review') },
-    { id: 'approve', label: 'Approve', icon: 'check', href: route('human', candidate) },
-    { id: 'final', label: 'Final', icon: 'flag', href: route('final', candidate) },
-  ];
-  const link = (item) => `<a href="${item.href}" ${view === item.id ? 'aria-current="page"' : ''}>
-    ${icon(item.icon)}<span>${item.label}</span></a>`;
-  byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}`;
+function renderNavigation({ stage, candidate }) {
+  const link = (id, label = stages[id].title) => {
+    const active = stage === id;
+    return `<a href="${route(id, candidate)}" ${active ? 'aria-current="page"' : ''}>
+      ${icon(stages[id].icon)}<span>${label}</span></a>`;
+  };
+  byId('navigation').innerHTML = `<p class="nav-label">Optimisation pipeline</p>
+    ${pipelineStages.map(id => link(id)).join('')}
+    <p class="nav-label">Deep Dive</p>
+    ${link('tests')}${link('generated')}${link('correctness')}${link('performance', 'Evaluation')}`;
 }
 
 function stageSummary(stage) {
   const file = activeProjectFile();
+  if (file?.savedRun) return savedStageSummary(stage, activeSavedRun());
   if (file && !file.demo) {
     return stage === 'original' ? file.name : stage === 'tests' ? 'Upload tests for this file' : 'Awaiting optimisation';
   }
@@ -161,6 +215,11 @@ function renderPipeline({ stage: activeStage, candidate }) {
     strip.scrollLeft += offset - (strip.clientWidth - activeLink.offsetWidth) / 2;
   }
 
+  const file = activeProjectFile();
+  if (file?.savedRun) {
+    byId('run-summary').innerHTML = savedRunSummary(file, activeSavedRun());
+    return;
+  }
   byId('run-summary').innerHTML = `
     <p class="eyebrow">Run ${demoRun.id}</p>
     <h2>Ready for review</h2>
@@ -198,39 +257,45 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 }
 
 function renderCode({ stage, candidate }) {
+  const run = activeSavedRun();
   const isFinal = stage === 'final';
-  const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
+  const savedBuild = run && isFinal ? savedBuildState(run) : undefined;
+  const savedFinal = savedBuild?.result?.verified ? savedBuild.result : undefined;
+  const hasFinalDiff = isFinal && (run ? Boolean(savedFinal) : finalBuild?.status === 'verified');
   if (isFinal && !hasFinalDiff) {
     displayedCode = undefined;
-    byId('source-file').textContent = demoRun.filename;
-    byId('diff-toolbar').textContent = finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
+    byId('source-file').textContent = (run ?? demoRun).filename;
+    const pending = run ? buildProgress[savedBuild?.status] : finalBuild?.status === 'pending';
+    byId('diff-toolbar').textContent = pending ? 'Building final code…' : 'No final code available';
     byId('source-diff').replaceChildren();
     byId('source-diff').setAttribute('aria-label', 'Final code');
-    byId('code-footer').textContent = finalBuild?.status === 'failed'
+    byId('code-footer').textContent = run ? '' : finalBuild?.status === 'failed'
       ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
     return;
   }
-  const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
-  const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
+  const isBaseline = !hasFinalDiff && (stage === 'original' || !candidate || (run && !candidateStages.includes(stage)));
+  const baseline = (run ?? demoRun).baseline;
+  const codeId = hasFinalDiff ? savedFinal ?? finalBuild : isBaseline ? baseline : candidate;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
 
-  const applied = hasFinalDiff ? finalBuild.applied : isBaseline ? [] : [candidate];
-  const title = hasFinalDiff ? 'Final code · all approved changes' : isBaseline ? 'Original source' : 'Candidate diff';
-  const baseline = demoRun.baseline;
+  const patches = hasFinalDiff ? savedFinal?.patches ?? finalBuild.applied.map(({ patch }) => patch)
+    : isBaseline ? [] : candidate.patches ?? [candidate.patch];
+  const title = savedFinal ? 'Verified final code diff' : hasFinalDiff ? 'Final code · all approved changes'
+    : isBaseline ? 'Original source' : 'Candidate diff';
   const rows = [];
   let before = 0;
   let after = 0;
   let added = 0;
   let removed = 0;
-  for (const { patch } of applied) {
+  for (const patch of patches) {
     while (before < patch.start - 1) {
       rows.push(codeRow(baseline[before], before + 1, after + 1));
       before += 1;
       after += 1;
     }
     for (let i = 0; i < patch.remove; i += 1) {
-      if (!hasFinalDiff) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
+      if (!hasFinalDiff || savedFinal) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
       before += 1;
     }
     for (const line of patch.lines) {
@@ -245,7 +310,7 @@ function renderCode({ stage, candidate }) {
     before += 1;
     after += 1;
   }
-  byId('source-file').textContent = demoRun.filename;
+  byId('source-file').textContent = (run ?? demoRun).filename;
   byId('diff-toolbar').innerHTML = `<strong>${title}</strong>${isBaseline ? '' :
     `<span><span class="added-text">+${added}</span> <span class="removed-text">−${removed}</span></span>`}`;
   const diff = byId('source-diff');
@@ -253,9 +318,10 @@ function renderCode({ stage, candidate }) {
   diff.innerHTML = rows.join('');
   diff.scrollTop = 0;
   diff.scrollLeft = 0;
+  const approvedCount = savedFinal ? savedApproved(run).length : patches.length;
   byId('code-footer').textContent = hasFinalDiff
-    ? `${applied.length} approved ${applied.length === 1 ? 'change' : 'changes'} used in this build`
-    : isBaseline ? demoRun.inputDomain : candidate.title;
+    ? `${approvedCount} approved ${approvedCount === 1 ? 'change' : 'changes'} used in this build`
+    : isBaseline ? (run ? 'Saved baseline' : demoRun.inputDomain) : candidate.title;
 }
 
 function formatMs(ms) {
@@ -270,6 +336,11 @@ function performance(timing) {
 
 function badge(label, tone = '') {
   return `<span class="badge ${tone}">${label}</span>`;
+}
+
+function decisionButtons(decision) {
+  return `<button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
+    <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>`;
 }
 
 function detailHeader(stage, title, description, status = '') {
@@ -351,10 +422,11 @@ function reviewView(stage, candidate) {
     ${showCorrectness ? `<section class="inset selection">
       <h2>${result.label === 'Filtered' ? 'Why it was filtered' : 'Why it advanced'}</h2><p>${result.reason}</p>
     </section>` : ''}
+    ${canDecide ? `<section class="inset"><label><input type="checkbox" data-verify-change="${candidate.id}" ${userVerifications.has(candidate.id) ? 'checked' : ''}> I have reviewed and verified this change</label><p>Review the diff, correctness results and performance evidence before approving.</p></section>` : ''}
     <div class="actions">
       <a class="button secondary" href="${route(stage, candidate, 'results')}">See stage results</a>
       ${canDecide ? `<button class="button secondary" type="button" data-decision="rejected" aria-pressed="${decision === 'rejected'}">Reject change</button>
-        <button class="button primary" type="button" data-decision="approved" aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>` : ''}
+        <button class="button primary" type="button" data-decision="approved" ${userVerifications.has(candidate.id) ? '' : 'disabled'} aria-pressed="${decision === 'approved'}">Approve change ${icon('check')}</button>` : ''}
     </div>`;
 }
 
@@ -384,29 +456,26 @@ function resultsView(stage, selected) {
 }
 
 function approvedCandidates() {
-  return recommended.filter((candidate) => decisions.get(candidate.id) === 'approved');
+  return recommended.filter((candidate) => userVerifications.has(candidate.id) && decisions.get(candidate.id) === 'approved');
 }
 
 function queueView() {
   const approved = approvedCandidates().length;
   const generating = finalBuild?.status === 'pending';
-  return `${detailHeader('human', 'Approval queue', `${decisions.size} of ${recommended.length} decided. Select a change to revisit its evidence or update your decision.`)}
-    <dl class="run-counts queue-counts">
-      <div><dt>Approved</dt><dd>${approved}</dd></div>
-      <div><dt>Rejected</dt><dd>${decisions.size - approved}</dd></div>
-      <div><dt>Pending</dt><dd>${recommended.length - decisions.size}</dd></div>
-    </dl>
+  return `${detailHeader('human', 'Approval queue', 'Review and approve your preferred changes.')}
+    ${reviewPlanningPanel(recommended, approvedCandidates(), new Set(recommended.filter(candidate => decisions.get(candidate.id) === 'rejected').map(candidate => candidate.id)))}
     <ul class="candidate-list">${recommended.map((candidate) => {
-      const decision = decisions.get(candidate.id) ?? 'pending';
+      const storedDecision = decisions.get(candidate.id);
+      const decision = reviewStatus(candidate, approvedCandidates(), storedDecision === 'approved' && !userVerifications.has(candidate.id) ? 'pending' : storedDecision ?? 'pending');
       return `<li><a class="candidate-row inset" href="${route('value', candidate, 'review')}">
         <div><strong>${candidate.title}</strong><p>View diff and evidence</p></div>
-        ${badge(verdicts[decision], decision)}
+        ${badge(verdicts[decision], decision === 'conflicting' ? 'warning' : decision)}
       </a></li>`;
     }).join('')}</ul>
     <section class="inset selection"><h2>Generate optimised code</h2>
       <p>${approved ? `The next build will use ${approved} approved ${approved === 1 ? 'change' : 'changes'}.` : 'Approve a change to enable generation.'}</p>
     </section>
-    <div class="actions"><button class="button primary" type="button" id="generate-build" ${!approved || generating ? 'disabled' : ''}>
+    <div class="actions"><button class="button primary" type="button" id="generate-build" ${!approved || generating || approvedEditsConflict(approvedCandidates()) ? 'disabled' : ''}>
       ${generating ? 'Verifying…' : 'Generate optimised code'}</button></div>`;
 }
 
@@ -417,11 +486,13 @@ function approvalKey(selected) {
 }
 
 function generateBuild() {
+  if (!activeProjectFile()?.demo) return;
   const selected = approvedCandidates();
   if (!selected.length || finalBuild?.status === 'pending') return;
   finalBuild = { status: 'pending', selected };
   const pendingBuild = finalBuild;
   location.hash = route('final');
+  render();
 
   window.setTimeout(() => {
     if (finalBuild !== pendingBuild) return;
@@ -435,7 +506,7 @@ function generateBuild() {
     });
     finalBuild = overlap >= 0
       ? { status: 'failed', selected, conflict: applied.slice(overlap - 1, overlap + 1) }
-      : { status: 'verified', selected, applied, timing: demoRun.finalTimings[approvalKey(selected)] };
+      : { status: 'verified', selected, applied, code: assembleApprovedCode(demoRun.baseline, applied), timing: demoRun.finalTimings[approvalKey(selected)] };
     renderBuildUpdate();
   }, 900);
 }
@@ -465,7 +536,8 @@ function finalImprovementSummary(timing) {
 function finalView() {
   const queueLink = `<div class="actions"><a class="button secondary" href="${route('human')}">Open approval queue</a></div>`;
   if (!finalBuild) {
-    return `${detailHeader('final', 'Ready to generate', 'Generate a demo build from the changes you approve.')}${queueLink}`;
+    return `${detailHeader('final', 'Ready to generate', 'Generate a demo build using only changes you have verified and approved.')}
+      <div class="actions"><button class="button primary" id="generate-build" type="button" ${approvedCandidates().length ? '' : 'disabled'}>Generate optimised code</button></div>${queueLink}`;
   }
 
   const { status, selected, conflict, timing } = finalBuild;
@@ -487,11 +559,13 @@ function finalView() {
     </section>` : ''}
     ${status === 'verified' ? `<section class="inset"><h2>Combined correctness</h2>
       <strong class="correctness">${evidence.cases} / ${evidence.cases}</strong><p>Fixture outputs matched</p></section>
-      ${timingPanel(timing, 'Final')}` : ''}
+      ${timing ? timingPanel(timing, 'Final') : '<p>No timing measurements are available for this selection.</p>'}
+      <div class="actions"><button id="download-final-code" class="button primary" type="button">Download Python file</button></div>` : ''}
     ${queueLink}`;
 }
 
 function renderBuildUpdate() {
+  if (!activeProjectFile()?.demo) return;
   const state = readRoute();
   if (state.view === 'final' || state.view === 'approve') {
     const restoreHeading = document.activeElement === byId('view-title');
@@ -555,20 +629,25 @@ function render(focusHeading = false) {
   byId('source-diff').hidden = false;
   document.querySelector('.code-header .label').textContent = 'Python';
   const state = readRoute();
-  if (state.stage === 'final' && !finalBuild && approvedCandidates().length) generateBuild();
+  const file = activeProjectFile();
+  const saved = file.savedRun;
+  const run = activeSavedRun();
   const atHome = state.view === 'pipeline';
   const atTestCases = state.view === 'tests';
   document.querySelector('.demo-badge').innerHTML = '<span class="dot"></span> Demo run';
   byId('pipeline-home').hidden = !atHome;
   byId('workspace').hidden = atHome;
-  if (focusHeading || !split.dataset.layout) setSplitLayout(atTestCases ? 'details-only' : 'split');
+  if (focusHeading || !split.dataset.layout) {
+    setSplitLayout(atTestCases || (saved && !run) ? 'details-only' : 'split');
+  }
   renderNavigation(state);
   renderPipeline(state);
 
   if (!atHome) {
-    if (!atTestCases) renderCode(state);
+    if (!atTestCases && (!saved || run)) renderCode(state);
     const content = byId('details-content');
-    switch (state.view) {
+    if (saved) content.innerHTML = savedRunView(file, run, state);
+    else switch (state.view) {
       case 'overview': content.innerHTML = baselineView(); break;
       case 'tests': content.innerHTML = testCasesView(); break;
       case 'results': content.innerHTML = resultsView(state.stage, state.candidate); break;
@@ -577,13 +656,16 @@ function render(focusHeading = false) {
       default: content.innerHTML = reviewView(state.stage, state.candidate);
     }
     const liveStatus = byId('build-status');
-    const status = state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
+    const status = state.view === 'final'
+      ? (saved ? savedBuildLabel(savedBuildState(run)) : buildLabels[finalBuild?.status]) ?? '' : '';
     if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
-  const showImprovement = state.view === 'final' && finalBuild?.status === 'verified';
+  const savedFinal = state.view === 'final' ? savedBuildState(run)?.result : undefined;
+  const demoVerified = !saved && state.view === 'final' && finalBuild?.status === 'verified' && Boolean(finalBuild.timing);
+  const summary = savedFinal?.verified ? savedImprovementSummary(savedFinal) : demoVerified ? finalImprovementSummary(finalBuild.timing) : '';
   const improvement = byId('final-improvement');
-  improvement.hidden = !showImprovement;
-  improvement.innerHTML = showImprovement ? finalImprovementSummary(finalBuild.timing) : '';
+  improvement.hidden = !summary;
+  improvement.innerHTML = summary;
 
   if (focusHeading) {
     window.scrollTo(0, 0);
@@ -592,20 +674,57 @@ function render(focusHeading = false) {
 }
 
 byId('details-content').addEventListener('click', (event) => {
+  const recheck = event.target.closest('[data-recheck-without-ai]');
+  if (recheck) {
+    recheckSavedWithAI(recheck);
+    return;
+  }
+  if (event.target.closest('#download-final-code')) {
+    if (activeSavedRun()) downloadSavedBuild(activeSavedRun());
+    else downloadFinalCode();
+    return;
+  }
   if (handleTestCaseClick(event)) return;
+  const run = activeSavedRun();
   if (event.target.closest('#generate-build')) {
-    generateBuild();
+    if (run) startSavedBuild(run);
+    else generateBuild();
     return;
   }
   const button = event.target.closest('button[data-decision]');
   if (!button) return;
   const { stage, view, candidate } = readRoute();
-  if (view !== 'review' || !['performance', 'value'].includes(stage) || candidate.outcome !== 'recommended') return;
-  saveDecision(candidate, button.dataset.decision);
+  const decision = button.dataset.decision;
+  if (view !== 'review' || !candidate || !['approved', 'rejected'].includes(decision)) return;
+  if (run) {
+    if (stage !== 'value' || !savedValue(candidate).recommended) return;
+    const review = savedReview(run);
+    if (decision === 'approved' && !review.verified.has(savedCandidateKey(candidate))) return;
+    if (decision === 'approved') {
+      for (const other of savedApproved(run)) if (other !== candidate && reviewConflicts(candidate, other)) review.decisions.delete(savedCandidateKey(other));
+    }
+    review.decisions.set(savedCandidateKey(candidate), decision);
+    storeDecisions(review.key, review.decisions);
+  } else {
+    if (!['performance', 'value'].includes(stage) || candidate.outcome !== 'recommended') return;
+    saveDecision(candidate, decision);
+  }
   location.hash = route('human', candidate);
 });
 
-byId('details-content').addEventListener('change', uploadTestCases);
+byId('details-content').addEventListener('change', (event) => {
+  if (event.target.matches('[data-verify-change]')) {
+    const run = activeSavedRun();
+    if (run) verifySavedChange(run, event.target.dataset.verifyChange, event.target.checked);
+    else {
+      const candidate = recommended.find((item) => item.id === event.target.dataset.verifyChange);
+      verifyChange(candidate, event.target.checked);
+    }
+    render();
+    return;
+  }
+  uploadTestCases(event);
+});
 
 byId('test-case-code-close').addEventListener('click', () => {
   setSplitLayout('code-collapsed');

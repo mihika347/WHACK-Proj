@@ -161,10 +161,10 @@ def observe(function, test):
             "numbers_after": numbers, "stdout": out.getvalue(), "stderr": err.getvalue()}
 
 
-def isolated(path, suite_path, mode, timeout=60):
+def isolated(path, suite_path, mode, timeout=60, *, project_dir=ROOT):
     try:
         process = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--worker", str(path),
-                                  str(suite_path), mode], capture_output=True, text=True, timeout=timeout, cwd=ROOT)
+                                  str(suite_path), mode], capture_output=True, text=True, timeout=timeout, cwd=project_dir)
         if process.returncode:
             return {"error": process.stderr[-4000:] or f"Exit code {process.returncode}"}
         return json.loads(process.stdout)

@@ -365,3 +365,39 @@ python speed_test.py --score-threshold 80
 ```
 
 The non-key independent stages are exported to `reports/review_stages.json` and `reports/review_stages.csv`, with scores, statuses, reasons, and source-file references in the JSON. No source files are moved or deleted. The full report still retains every result. In the UI, edit **Key-stage score threshold** to update the key list and the separate **Review stages** section immediately; filter that list using **Search review stages** and download it separately. Browser changes affect the view and downloads, not files on disk; use the export command to persist the same threshold. Selection is a recommendation only; it does not combine changes, guarantee compatibility, or modify final code. Test with `python -m unittest test_stage_scoring -v`.
+# Live UI optimisation and approved builds
+
+The approval queue shows conflicts by original source line and highlights a
+compatible combination ranked by the sum of existing individual stage scores.
+Rejected stages are excluded. For up to 22 eligible proposals, the planner finds
+the highest-scoring compatible set; larger runs use a labelled greedy approximation.
+This score is a review aid, not a predicted combined speedup. Identical edits are
+counted once, but shared work and runtime interactions can still affect the result.
+Build and benchmark the selected combination to establish its actual performance.
+Generation is disabled while the approved selection contains overlapping edits.
+
+Start LM Studio's local server on port 1234 with a chat model loaded, then run:
+
+```powershell
+python ui/serve.py --port 8000
+```
+
+Open http://127.0.0.1:8000 (the root URL). A generic static HTTP server cannot
+provide the optimisation API. Create or import a `.py` file containing
+`count_matches(numbers, target)`, open Original Code and select Run optimisation.
+Each run uses its own `.fastforward-runs` directory; it does not overwrite the
+project's original source or saved benchmark reports.
+
+After correctness checks and benchmarking finish, review each recommended diff,
+tick the verification checkbox and approve the changes you want. Generate
+optimised code combines only that selection with the run's original source.
+Overlapping edits are reported as conflicts. The combined program is checked and
+benchmarked again before a verified Python download becomes available. The final
+summary uses these combined-program measurements. Removing verification removes
+that change's approval. Only run Python source you trust locally.
+
+The live generator uses the existing compact-stage generator and the configured
+LM Studio model (preferring the loaded `whack-nvidia` identifier). It does not
+reload the GPU model. Live UI runs enable AI-generated change-specific tests alongside
+deterministic cases. The Test Cases page labels each AI case and its targeted change.
+Final builds reuse the approved changes’ test suites. CLI tests remain opt-in with --with-agent.

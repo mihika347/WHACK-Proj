@@ -12,6 +12,22 @@
   --gold: #ffce7a;
 }
 
+.review-planner h3 { margin: 18px 0 10px; }
+.score-explanation { margin-top: 12px; }
+.score-explanation summary { cursor: pointer; color: var(--violet); }
+.score-explanation summary span { font-size: .85rem; }
+.score-stage { border-top: 1px solid var(--border); margin-top: 14px; }
+.score-stage p, .score-stage td { font-size: .85rem; }
+.combination-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.combination-chips li { padding: 8px 12px; border: 1px solid var(--green); border-radius: 18px; background: var(--inset); }
+.review-planner p { margin-top: 10px; }
+.review-conflict { padding: 12px; border: 1px solid var(--gold); border-radius: 8px; color: var(--gold); }
+.review-conflict ul { margin-top: 8px; }
+.review-planner a { text-decoration: underline; text-underline-offset: 3px; }
+.review-compatibility-table { overflow-x: auto; margin-top: 18px; }
+.review-compatibility-table caption { text-align: left; font-weight: 700; padding-bottom: 10px; }
+.review-compatibility-table small { display: block; color: var(--muted); margin-top: 6px; }
+
 .statistics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 18px; }
 .statistics-grid h3, .summary-correctness h3 { margin: 0 0 10px; }
 .statistics-grid .run-counts { margin: 14px 0; }
@@ -344,6 +360,8 @@ main {
 .timing-table th, .timing-table td { padding: 5px 0; border-top: 1px solid #36354f; text-align: right; }
 .timing-table th:first-child { text-align: left; color: var(--muted); }
 .timing-table thead { color: var(--muted); }
+.saved-evidence-table, .saved-run-id { overflow-wrap: anywhere; }
+.saved-performance-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 8px 0; }
 .selection { border-color: #514575; background: #211c39; }
 .actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
 .candidate-list { display: grid; gap: 8px; }

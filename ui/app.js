@@ -456,7 +456,10 @@ function finalImprovementSummary(timing) {
         `<span aria-hidden="true">${saved > 0 ? '↑' : '↓'}</span> ${percentage}%<span class="visually-hidden"> ${saved > 0 ? 'faster' : 'slower'}</span>`;
       const delta = saved === 0 ? 'No time difference' : `${formatMs(Math.abs(saved))} ${saved > 0 ? 'saved' : 'added'}`;
       return `<div><dt>${label}</dt><dd>${badge(change, tone)}<small>${delta}</small></dd></div>`;
-    }).join('')}</dl>`;
+    }).join('')}</dl>
+    <section class="inset"><h3>Runtime comparison · illustrative demo</h3>
+      ${runtimeBars(metrics.map(([metric, label]) => ({ label, original: evidence.baseline[metric], final: timing[metric] })), 'ms')}
+    </section>`;
 }
 
 function finalView() {

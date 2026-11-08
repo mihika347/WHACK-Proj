@@ -26,7 +26,7 @@ function appHarness() {
     window: {addEventListener() {}, scrollTo() {}, setTimeout, testResults: {show() {shown++;}}},
     sessionStorage: storage, localStorage: storage, crypto: {randomUUID: () => 'new-file-id'},
     FileReader: class {}, setTimeout, clearTimeout});
-  for (const file of ['demo.js', 'test-case-data.js', 'test-cases.js', 'files.js', 'app.js']) {
+  for (const file of ['demo.js', 'statistics-charts.js', 'test-case-data.js', 'test-cases.js', 'files.js', 'app.js']) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, file), 'utf8'), context, {filename: file});
   }
   const navigate = hash => {context.location.hash = hash; vm.runInContext('render(true)', context);};

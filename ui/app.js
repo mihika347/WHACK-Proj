@@ -1,6 +1,7 @@
 const icons = {
   pipeline: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v7a2 2 0 0 0 2 2h7"/>',
   file: '<path d="M7 3h7l5 5v13H5V3zm7 0v6h5M8 13h8m-8 4h8"/>',
+  tests: '<path d="M9 3h6m-5 0v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3M8 14h8"/>',
   spark: '<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7z"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
   bars: '<path d="M5 20v-5m7 5V9m7 11V4" stroke-width="3"/>',
@@ -23,14 +24,17 @@ let finalBuild;
 
 const stages = {
   original: { title: 'Original Code', icon: 'file', tone: 'blue', view: 'overview' },
+  tests: { title: 'Test Cases', icon: 'tests', tone: 'violet', view: 'tests' },
   generated: { title: 'AI Generated Changes', icon: 'spark', tone: 'violet', view: 'results' },
-  correctness: { title: 'Correctness Check', icon: 'check', tone: 'green', view: 'results' },
+  correctness: { title: 'Correctness Check', icon: 'check', tone: 'muted', view: 'results' },
   performance: { title: 'Performance Evaluation', icon: 'bars', tone: 'gold', view: 'review' },
   value: { title: 'Value Assessment', icon: 'star', tone: 'blue', view: 'results' },
   human: { title: 'Human Review', icon: 'person', tone: 'violet', view: 'approve' },
   final: { title: 'Final Code', icon: 'flag', tone: 'muted', view: 'final' },
 };
 const stageOrder = Object.keys(stages);
+const pipelineStages = ['original', 'value', 'human', 'final'];
+const deepDiveStages = ['tests', 'generated', 'correctness', 'performance'];
 const candidateStages = ['generated', 'correctness', 'performance', 'value'];
 
 function readDecisions() {
@@ -59,7 +63,8 @@ function saveDecision(candidate, decision) {
 }
 
 function route(stage, candidate = recommended[0], view = stages[stage].view) {
-  return `#${stage}/${view}/${candidate.id}`;
+  const section = deepDiveStages.includes(stage) ? 'deep-dive/' : '';
+  return `#${section}${stage}/${view}/${candidate.id}`;
 }
 
 function stageCandidates(stage) {
@@ -69,7 +74,11 @@ function stageCandidates(stage) {
 }
 
 function readRoute() {
-  let [stage, view, id] = location.hash.slice(1).split('/');
+  const parts = location.hash.slice(1).split('/');
+  const isDeepDive = parts[0] === 'deep-dive';
+  if (isDeepDive) parts.shift();
+  let [stage, view, id] = parts;
+  if (isDeepDive && !deepDiveStages.includes(stage)) stage = 'tests';
   // Step 1 approval links used the Performance stage.
   if (stage === 'performance' && view === 'approve') stage = 'human';
   if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: recommended[0] };
@@ -94,7 +103,6 @@ function renderNavigation({ stage, view, candidate }) {
   const link = (item) => `<a href="${item.href}" ${view === item.id ? 'aria-current="page"' : ''}>
     ${icon(item.icon)}<span>${item.label}</span></a>`;
   byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}`;
-  byId('workspace-views').innerHTML = items.slice(1).map(link).join('');
 }
 
 function stageSummary(stage) {
@@ -110,18 +118,31 @@ function stageSummary(stage) {
   }
 }
 
-function renderPipeline({ stage: activeStage, candidate }) {
-  byId('pipeline-stages').innerHTML = stageOrder.map((stage) => {
-    const { title, icon: iconName, tone } = stages[stage];
-    return `<li><a class="stage-card tone-${tone}" href="${route(stage)}">
-      <span class="stage-icon">${icon(iconName)}</span>
-      <span class="stage-copy"><strong>${title}</strong><small ${stage === 'final' ? 'id="final-stage-summary"' : ''}>${stageSummary(stage)}</small></span>
-      <span class="stage-end" aria-hidden="true">→</span>
-    </a></li>`;
-  }).join('');
+function stageCard(stage, title, summary) {
+  const { icon: iconName, tone } = stages[stage];
+  return `<li><a class="stage-card tone-${tone}" href="${route(stage)}">
+    <span class="stage-icon">${icon(iconName)}</span>
+    <span class="stage-copy"><strong>${title}</strong><small id="${stage}-stage-summary">${summary}</small></span>
+    <span class="stage-end" aria-hidden="true">→</span>
+  </a></li>`;
+}
 
+function renderPipeline({ stage: activeStage, candidate }) {
+  byId('pipeline-stages').innerHTML = pipelineStages.map((stage) =>
+    stageCard(stage, stages[stage].title, stageSummary(stage)),
+  ).join('');
+  byId('deep-dive-cards').innerHTML = [
+    stageCard('tests', stages.tests.title, 'AI-generated cases and your uploads'),
+    stageCard('generated', stages.generated.title, stageSummary('generated')),
+    stageCard('correctness', 'Evaluation', 'Correctness and performance results'),
+  ].join('');
+
+  const isDeepDive = deepDiveStages.includes(activeStage);
+  const menuStages = isDeepDive ? deepDiveStages : pipelineStages;
+  byId('deep-dive-label').hidden = !isDeepDive;
+  byId('workspace-stage-menu').setAttribute('aria-label', isDeepDive ? 'Deep Dive' : 'Pipeline stages');
   const strip = byId('workspace-stages');
-  strip.innerHTML = stageOrder.map((stage, index) => `
+  strip.innerHTML = menuStages.map((stage, index) => `
     <li><a href="${route(stage, candidate)}" ${stage === activeStage ? 'aria-current="step"' : ''}>
       <span class="stage-step" aria-hidden="true">${index + 1}</span><span>${stages[stage].title}</span>
     </a></li>`).join('');
@@ -142,7 +163,7 @@ function renderPipeline({ stage: activeStage, candidate }) {
     </dl>
     <div class="demo-note">${icon('file')}<div><strong>${demoRun.filename}</strong>
       <p>${demoRun.inputDomain}. Timing and correctness figures are illustrative.</p></div></div>
-    <a class="button primary" href="${route('performance')}">Open Performance <span aria-hidden="true">→</span></a>`;
+  `;
 }
 
 function escapeHtml(text) {
@@ -169,7 +190,7 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 function renderCode({ stage, candidate }) {
   const isFinal = stage === 'final';
   const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
-  const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
+  const isBaseline = stage === 'original' || stage === 'tests' || (isFinal && !hasFinalDiff);
   const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
@@ -273,7 +294,7 @@ function baselineView() {
       <div><dt>Worst observed</dt><dd>${formatMs(worst)}</dd></div>
     </dl>
     <section class="inset"><h2>Correctness reference</h2><p>Each change is compared with the original function on ${evidence.cases} fixture inputs.</p></section>
-    <div class="actions"><a class="button primary" href="${route('generated')}">See proposed changes</a></div>`;
+    <div class="actions"><a class="button primary" href="${route('value')}">See value assessment</a></div>`;
 }
 
 function assessment(stage, candidate) {
@@ -444,6 +465,7 @@ function render(focusHeading = false) {
     const content = byId('details-content');
     switch (state.view) {
       case 'overview': content.innerHTML = baselineView(); break;
+      case 'tests': content.innerHTML = testCasesView(); break;
       case 'results': content.innerHTML = resultsView(state.stage, state.candidate); break;
       case 'approve': content.innerHTML = queueView(); break;
       case 'final': content.innerHTML = finalView(); break;
@@ -471,6 +493,8 @@ byId('details-content').addEventListener('click', (event) => {
   saveDecision(candidate, button.dataset.decision);
   location.hash = route('human', candidate);
 });
+
+byId('details-content').addEventListener('change', uploadTestCases);
 
 const split = byId('workspace-split');
 const divider = byId('split-divider');

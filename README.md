@@ -65,9 +65,9 @@ Edit the configuration in `api_call1.py` if your input file or server differs. P
 python api_call1.py
 ```
 
-The generator reads the original, requests optimisation proposals, parses the JSON response, checks generated Python syntax using `ast.parse`, and saves each stage, the final version, and the report. Stage names and explanations are also printed.
+The generator preserves the original full-program output format. For inputs up to 3,000 characters it first uses the original single-response JSON request. Larger inputs use a short stage catalogue followed by one complete independent program per request, then a complete final program. This avoids repeating every full program in one oversized response. Smaller requests also fall back to this approach if the bulk response is invalid or truncated. Each stage still starts from the exact original, and the public output/report schema remains `stages` plus `final_code`.
 
-Invalid JSON is saved to `raw_response.txt` before an error is raised. Empty model lists and empty responses also raise errors. For connection failures, check that LM Studio is serving a loaded model at the configured address.
+Model responses and finish reasons are saved in `output/generation_*.json`. Every request has at most two attempts, prints its stage progress, and detects output-limit truncation explicitly. The entire result is syntax/schema-validated before the entry point replaces any stage files. Failed generation leaves previous stage/report files untouched; it does not publish a partial manifest. Existing `raw_response.txt` files are diagnostics from the previous implementation. For connection failures, check that LM Studio is serving a loaded model at the configured address.
 
 Repeated runs overwrite matching output filenames. Old stage files can remain if a later response contains fewer stages. Test runners now select only stages listed in the latest `output/report.json`, verify their contents match the report, and ignore older files. When no manifest exists, they discover standalone `stage_*.py` files instead.
 
@@ -98,7 +98,7 @@ Syntax checks do not establish correctness, speed, independence, or compatibilit
 
 ## Testing design discussed so far
 
-The repository includes `test_utils.py`, `speed_test.py`, `correctness_test.py`, and an independent LM Studio test-generation agent in `targeted_test_agent.py`. Testing uses the Python standard library; the default correctness workflow makes model calls when a matching case cache is unavailable.
+The repository includes `test_utils.py`, `speed_test.py`, `correctness_test.py`, and an independent LM Studio test-generation agent in `targeted_test_agent.py`. **Agent-generated targeted cases are disabled by default during development.** Normal test commands make no model calls and use the varied boundary, seeded random, exhaustive, and deterministic rule-targeted cases immediately. Reports record `agent_status: disabled` rather than claiming agent coverage. The agent implementation and caches remain available for opt-in development.
 
 ```powershell
 python correctness_test.py
@@ -118,25 +118,34 @@ Targeted coverage now has two layers. The independent agent reads the actual ori
 
 Each candidate gets a fresh chat-completion request containing just a test-designer system instruction and a user message with the original and candidate source code. The agent receives no optimiser conversation, optimiser prompt, `output/report.json`, stage explanations, other stages, or previous agent messages. It can use the same loaded model with a fresh context, or a different model selected through `TEST_AGENT_MODEL`.
 
-The agent is asked for 8–60 distinct concrete cases, each with an integer list, an integer target, and a reason tied to the actual code change. It first requests schema-constrained JSON; if the local runtime rejects that mode, it falls back to plain JSON. There are at most three generation requests per candidate, including retries with validation feedback. Each retry has a fresh two-message context without previous model responses. Invalid responses are saved for diagnosis. Python validates the JSON, rejects executable expressions, floats, booleans, missing reasons, and oversized lists, and removes duplicate inputs. It never executes model-generated test code. Expected outputs are computed by running the original, not supplied by the agent.
+The agent now requests eight short distinct concrete cases and a concise analysis (8–60 cases are accepted). Each case needs an integer list, an integer target, and a change-specific reason. Plain JSON is the default because the local GPT-OSS runtime rejects schema-constrained generation; set `TEST_AGENT_STRUCTURED_OUTPUT=1` only if your server supports it. There are at most three generation requests per candidate, including fresh-context retries with validation feedback.
+
+If the model writes numeric shorthand instead of literal JSON, a bounded data decoder can expand integer arithmetic, short list repetition/concatenation, `range`, `list(range(...))`, and simple single-range list comprehensions. It uses an explicit AST interpreter, never `eval`, `exec`, imports, attributes, arbitrary calls, or generated test programs. Arrays are limited to 2,000 items, arithmetic to 4,096-bit integers, powers to exponent 1,000 with a size bound, and response size/node counts are capped. Unsupported expressions, floats, booleans, missing reasons, and duplicate-only suites are rejected. Expanded cases are saved as ordinary JSON integer lists. This handles responses such as `[i for i in range(70)]` without executing model code. Expected outputs still come from running the original program.
 
 Validated cases, reasons, the source hashes, model ID, and exact request messages are saved under `tests/agent_cases/`. A source-and-prompt fingerprint prevents reusing cases after either program or the instructions change. Identical source pairs can share cached cases even when filenames differ, such as a stage and an identical final version. The configured endpoint and requested model are also part of the cache key. With automatic model selection, a matching cache is deliberately reused even if the server's loaded model changes; use `--refresh-agent` to request fresh cases.
 
 ```powershell
 # Regenerate independent cases, ignoring matching caches:
-python correctness_test.py --refresh-agent
+python correctness_test.py --with-agent --refresh-agent
 
-# Explicitly run only deterministic tests, without contacting LM Studio:
-python correctness_test.py --offline
-python speed_test.py --offline
+# Normal fast development runs (no LM Studio calls):
+python correctness_test.py
+python speed_test.py --score-threshold 70
+
+# Opt in to independent agent-generated cases later:
+python correctness_test.py --with-agent
+python speed_test.py --with-agent --score-threshold 70
 
 # Optional agent settings (PowerShell):
 $env:LM_STUDIO_BASE_URL = "http://localhost:1234/v1"
 $env:TEST_AGENT_MODEL = "openai/gpt-oss-20b"
 $env:TEST_AGENT_TIMEOUT = "120"
+$env:TEST_AGENT_TOTAL_TIMEOUT = "150"
 ```
 
-The default endpoint is the same local LM Studio server used by the optimiser, with its first listed model selected unless overridden. The request timeout defaults to 120 seconds. If generation or validation fails, deterministic tests still run, but the report marks agent generation as an error and the runner exits unsuccessfully. It never silently reports full success without the requested agent coverage. `--offline` explicitly disables agent generation and records that choice.
+The default endpoint is the same local LM Studio server used by the optimiser, with its first non-embedding model selected unless overridden. Individual HTTP requests time out after 120 seconds. Agent generation runs in a separate worker with a hard 150-second total limit per candidate, including all retries; configure this using `TEST_AGENT_TOTAL_TIMEOUT`. If generation or validation fails, deterministic tests still run and their `observed_status` is recorded, but the overall entry remains an error because requested agent coverage is missing. Failure diagnostics are concise, with full invalid responses saved to disk. `--offline` explicitly disables model calls and records deterministic-only coverage; it does not claim agent validation.
+
+Correctness results and UI exports are checkpointed after every completed stage. Interrupted runs have `complete: false` and list `pending_candidates`; the UI identifies them as partial. Ctrl+C cancels cleanly without a traceback and keeps completed results. Agent-enabled reruns reuse validated cached cases. `--offline` remains a compatible explicit alias for the default deterministic-only mode. `--refresh-agent` requires `--with-agent`; `--offline` cannot be combined with `--with-agent`.
 
 The current agent contract is specifically `count_matches(numbers, target)`. Adapt its prompt as well as the execution adapter when changing the function contract.
 

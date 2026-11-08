@@ -1,1 +1,12 @@
 stage,stage_score,rank,correctness_status,speed_status,selection_reason
+stage_1.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_2.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_3.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_4.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_5.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_6.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_7.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_8.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_9.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_10.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.
+stage_11.py,,,pass,not_run,Blocked: correctness failed or evidence is incomplete.

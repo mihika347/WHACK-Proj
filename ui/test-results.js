@@ -141,6 +141,7 @@
     const date = new Date(report.generated_at);
     el('report-content').innerHTML = `
       <div class="report-provenance inset"><div><strong>${isDemo ? 'Intentional failure demonstration' : 'Saved test run'}</strong><p>${escape(sourceLabel)} · ${Number.isNaN(date.getTime()) ? 'Date unavailable' : escape(date.toLocaleString())}</p><p>Run ${escape(report.run_id)} · ${escape(report.summary.length)} candidates</p></div><a id="download-report" class="button secondary" download="test-results.json">Download JSON</a></div>
+      ${report.complete === false ? `<p class="inset report-warning">Partial run: ${escape((report.pending_candidates ?? []).length)} candidates still pending. These are checkpointed results, not a completed run.</p>` : ''}
       ${panel('Stage ranking & key changes', table('Explainable stage scores', ['Rank', 'Stage', 'Score / 100', 'Mean gain', 'Worst slowdown', 'Selection'], [...report.summary].filter(row => row.is_key_stage || row.stage === 'final_optimised.py').sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity)).map(item => row([
         finite(item.rank) ? number(item.rank, 0) : '—', escape(stageLabel(item.stage)), number(item.stage_score, 2),
         percent(item.mean_speed_increase_percent), finite(item.score_breakdown?.worst_slowdown_percent) ? `${number(item.score_breakdown.worst_slowdown_percent)}%` : 'Not measured',

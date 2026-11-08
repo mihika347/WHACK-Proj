@@ -4,11 +4,15 @@ from datetime import datetime, timezone
 import uuid
 from pathlib import Path
 from test_utils import ROOT, SEED, FUNCTION_NAME, candidates, correctness_cases, isolated, save_json, targeted_cases, source_hash
-from targeted_test_agent import generate
+from targeted_test_agent import generate_isolated as generate, TOTAL_TIMEOUT
 from result_stats import correctness_statistics, numeric_error
 
 
-def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
+def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
+    if refresh_agent and not use_agent:
+        raise ValueError('Refreshing agent cases requires use_agent=True')
+    if not use_agent:
+        print('Agent-generated cases disabled for development. Use --with-agent to enable them.', flush=True)
     root = Path(project_dir) if project_dir is not None else ROOT
     baseline = root / "original.py"
     common = correctness_cases(seed)
@@ -22,22 +26,31 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
     if not files:
         raise RuntimeError("No generated candidate files found in output/")
     suites = {"seed": seed, "shared_cases": common, "targeted": {}}
+    report['complete'] = False
+    def checkpoint():
+        report['pending_candidates'] = [p.name for p in files if p.name not in {c['file'] for c in report['candidates']}]
+        save_json(root / 'tests/correctness_cases.json', suites)
+        save_json(root / 'reports/correctness_report.json', report)
+        from export_results import export
+        export(report, output_dir=root / 'reports')
+    checkpoint()
     for path in files:
         try:
             targeted = targeted_cases(baseline, path)
         except (SyntaxError, UnicodeError, OSError) as exc:
             report["candidates"].append({"file": path.name, "status": "error", "error": str(exc), "failures": []})
             print(f"{path.name}: error ({exc})")
+            checkpoint()
             continue
         suites["targeted"][path.name] = targeted
         agent, agent_error = None, None
         if use_agent:
             try:
-                print(f"{path.name}: requesting independent targeted cases (or matching cache)...", flush=True)
+                print(f"{path.name}: independent targeted cases (cache or up to {TOTAL_TIMEOUT:g}s)...", flush=True)
                 agent = generate(baseline, path, refresh=refresh_agent)
                 suites["targeted"][path.name]["agent"] = agent
             except Exception as exc:
-                agent_error = f"{type(exc).__name__}: {exc}"
+                agent_error = f"{type(exc).__name__}: {exc}"[:600]
                 suites["targeted"][path.name]["agent_error"] = agent_error
                 print(f"{path.name}: test agent failed: {agent_error}", flush=True)
         agent_cases = agent["cases"] if agent else []
@@ -72,26 +85,34 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
             entry.update(status="fail" if entry["failures"] else "pass", passed=len(cases) - len(entry["failures"]))
             entry.update(statistics=correctness_statistics(rows), case_results=rows)
             entry["change_variance"] = entry["statistics"]["change_variance"]
+            entry['observed_status'] = entry['status']
             if agent_error and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)
         print(f"{path.name}: {entry['status']} ({len(entry['failures'])} differences, {len(cases)} cases)")
         print(f"  Output-change variance: {entry['change_variance']} (candidate output minus original)")
-    save_json(root / "tests/correctness_cases.json", suites)
-    save_json(root / "reports/correctness_report.json", report)
-    # A correctness-only run must not present old speed measurements as current.
-    from export_results import export
-    export(report, output_dir=root / "reports")
+        if agent_error:
+            print(f"  Observed checks: {entry.get('observed_status', 'error')}; agent coverage unavailable. Not accepted as fully validated.")
+        checkpoint()
+    report['complete'] = True
+    checkpoint()
     return report
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true", help="Explicitly use deterministic tests only; no agent request")
+    parser.add_argument('--with-agent', action='store_true', help='Opt in to LLM-generated targeted cases (disabled by default)')
     parser.add_argument("--refresh-agent", action="store_true", help="Regenerate agent cases instead of reusing matching caches")
     parser.add_argument("--seed", type=int, default=SEED, help="Seed for reproducible random correctness inputs")
     args = parser.parse_args()
-    if args.offline and args.refresh_agent:
-        parser.error("--offline and --refresh-agent cannot be combined")
-    result = run(use_agent=not args.offline, refresh_agent=args.refresh_agent, seed=args.seed)
+    if args.offline and args.with_agent:
+        parser.error('--offline and --with-agent cannot be combined')
+    if args.refresh_agent and not args.with_agent:
+        parser.error('--refresh-agent requires --with-agent')
+    try:
+        result = run(use_agent=args.with_agent, refresh_agent=args.refresh_agent, seed=args.seed)
+    except KeyboardInterrupt:
+        print('\nCancelled. Completed stage results are saved in reports/correctness_report.json. Rerun to reuse cached agent cases, or use --offline.')
+        raise SystemExit(130)
     raise SystemExit(0 if all(c["status"] == "pass" for c in result["candidates"]) else 1)

@@ -81,11 +81,27 @@ class AgentTests(unittest.TestCase):
             original.write_text(code, encoding="utf-8")
             candidate.write_text(code, encoding="utf-8")
             with patch.object(correctness_test, "ROOT", root), patch.object(correctness_test, "candidates", return_value=[candidate]), patch.object(correctness_test, "generate", side_effect=ValueError("invalid JSON")):
-                report = correctness_test.run()
+                report = correctness_test.run(use_agent=True)
             entry = report["candidates"][0]
             self.assertEqual(entry["status"], "error")
             self.assertEqual(entry["agent_status"], "error")
             self.assertEqual(entry["agent_cases"], 0)
+
+    def test_interrupt_preserves_completed_stage_checkpoint(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as folder:
+            root = Path(folder)
+            original = root / 'original.py'
+            first, second = root / 'stage_1.py', root / 'stage_2.py'
+            code = 'def count_matches(numbers, target):\n    return numbers.count(target)\n'
+            for path in [original, first, second]:
+                path.write_text(code, encoding='utf-8')
+            with patch.object(correctness_test, 'ROOT', root), patch.object(correctness_test, 'candidates', return_value=[first, second]), patch.object(correctness_test, 'generate', side_effect=[response_cases(), KeyboardInterrupt()]):
+                with self.assertRaises(KeyboardInterrupt):
+                    correctness_test.run(use_agent=True)
+            saved = json.loads((root / 'reports/correctness_report.json').read_text())
+            self.assertFalse(saved['complete'])
+            self.assertEqual(saved['pending_candidates'], ['stage_2.py'])
+            self.assertEqual(saved['candidates'][0]['status'], 'pass')
 
     def test_unsupported_schema_and_invalid_json_retry_with_fresh_context(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as folder:
@@ -105,12 +121,25 @@ class AgentTests(unittest.TestCase):
                     return {"choices": [{"message": {"content": "invalid response marker"}}]}
                 self.assertNotIn("invalid response marker", str(body["messages"]))
                 return {"choices": [{"message": {"content": json.dumps(response_cases())}}]}
-            result = generate(original, candidate, request_fn=fake, cache_dir=root / "cache")
+            with patch('targeted_test_agent.STRUCTURED_OUTPUT', True):
+                result = generate(original, candidate, request_fn=fake, cache_dir=root / "cache")
             self.assertEqual(len(requests), 3)
             self.assertIn("response_format", requests[0])
             self.assertNotIn("response_format", requests[1])
             self.assertFalse(result["structured_output"])
             self.assertEqual(len(result["generation_errors"]), 2)
+
+    def test_default_run_never_calls_agent(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as folder:
+            root = Path(folder)
+            original, candidate = root / 'original.py', root / 'stage_1.py'
+            for path in [original, candidate]:
+                path.write_text('def count_matches(numbers, target):\n    return numbers.count(target)\n', encoding='utf-8')
+            with patch.object(correctness_test, 'ROOT', root), patch.object(correctness_test, 'candidates', return_value=[candidate]), patch.object(correctness_test, 'generate', side_effect=AssertionError('Agent should not run')) as agent:
+                report = correctness_test.run()
+                agent.assert_not_called()
+            self.assertEqual(report['candidates'][0]['status'], 'pass')
+            self.assertEqual(report['candidates'][0]['agent_status'], 'disabled')
 
 
 if __name__ == "__main__":

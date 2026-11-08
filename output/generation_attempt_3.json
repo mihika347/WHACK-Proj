@@ -1,0 +1,4 @@
+{
+  "finish_reason": "stop",
+  "response": "{\"stages\":[{\"stage\":1,\"name\":\"_positive_total\",\"explanation\":\"Use list comprehension for faster filtering and sum.\",\"function\":\"_positive_total\",\"replacement\":\"def _positive_total(sample):\\n    return sum(n for n in sample if n > 0)\\n\",\"imports\":[]}]}\n"
+}

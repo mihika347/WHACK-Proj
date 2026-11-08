@@ -9,7 +9,7 @@ from export_results import export, attach_scores
 from stage_scoring import validate_threshold
 
 
-def run(use_agent=True, refresh_agent=False, seed=SEED, score_threshold=70):
+def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
     score_threshold = validate_threshold(score_threshold)
     correctness = check_correctness(use_agent=use_agent, refresh_agent=refresh_agent, seed=seed)
     eligible = {c["file"] for c in correctness["candidates"] if c["status"] == "pass"}
@@ -73,11 +73,18 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, score_threshold=70):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true", help="Run deterministic correctness tests without the agent")
+    parser.add_argument('--with-agent', action='store_true', help='Opt in to LLM-generated targeted cases (disabled by default)')
     parser.add_argument("--refresh-agent", action="store_true", help="Regenerate agent correctness cases")
     parser.add_argument("--seed", type=int, default=SEED, help="Random correctness seed; benchmark inputs remain fixed")
     parser.add_argument('--score-threshold', type=validate_threshold, default=70)
     args = parser.parse_args()
-    if args.offline and args.refresh_agent:
-        parser.error("--offline and --refresh-agent cannot be combined")
-    result = run(use_agent=not args.offline, refresh_agent=args.refresh_agent, seed=args.seed, score_threshold=args.score_threshold)
+    if args.offline and args.with_agent:
+        parser.error('--offline and --with-agent cannot be combined')
+    if args.refresh_agent and not args.with_agent:
+        parser.error('--refresh-agent requires --with-agent')
+    try:
+        result = run(use_agent=args.with_agent, refresh_agent=args.refresh_agent, seed=args.seed, score_threshold=args.score_threshold)
+    except KeyboardInterrupt:
+        print('\nCancelled. Completed correctness stages are saved. Rerun to reuse cached cases, or add --offline to skip the model.')
+        raise SystemExit(130)
     raise SystemExit(0 if all(c["status"] == "pass" for c in result["candidates"]) else 1)

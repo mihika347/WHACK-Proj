@@ -89,6 +89,7 @@ def export(correctness, speed=None, output_dir=None, score_threshold=70):
             "stage_ranking": sorted([row for row in summary if row["rank"] is not None], key=lambda row: row["rank"]),
             "key_stages": [row["stage"] for row in sorted(summary, key=lambda r: r["rank"] or float("inf")) if row["is_key_stage"]],
             "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
+            "complete": correctness.get('complete', True), "pending_candidates": correctness.get('pending_candidates', []),
             "has_speed_results": speed is not None, "seed": correctness["seed"],
             "baseline_sha256": correctness["baseline_sha256"],
             "environment": {"python": speed.get("python"), "platform": speed.get("platform")} if speed else None,

@@ -108,39 +108,15 @@ ORIGINAL CODE:
 
 print("Asking AI to optimise code...")
 
-response = client.chat.completions.create(
-    model=model_id,
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt}
-    ],
-    temperature=0.2
-)
-
-result_text = response.choices[0].message.content
-
-if not result_text:
-    raise RuntimeError("Model returned an empty response.")
-
-# Remove Markdown fences if model includes them
-result_text = result_text.strip()
-result_text = re.sub(r"^```(?:json)?\s*", "", result_text)
-result_text = re.sub(r"\s*```$", "", result_text)
-
-# ==========================================
-# PARSE THE AI RESPONSE
-# ==========================================
+from full_stage_generation import generate_result
 
 try:
-    result = json.loads(result_text)
-except json.JSONDecodeError:
-    Path("raw_response.txt").write_text(
-        result_text, encoding="utf-8"
+    result = generate_result(
+        client, model_id, original_code, system_prompt, user_prompt, OUTPUT_DIR
     )
-    raise RuntimeError(
-        "Model returned invalid JSON. "
-        "Response saved to raw_response.txt."
-    )
+except KeyboardInterrupt:
+    print("\nGeneration cancelled. Existing output files were not changed.")
+    raise SystemExit(130)
 
 # ==========================================
 # SAVE EACH INDEPENDENT STAGE

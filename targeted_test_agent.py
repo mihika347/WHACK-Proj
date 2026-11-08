@@ -5,14 +5,19 @@ import os
 from pathlib import Path
 import urllib.request
 import urllib.error
+import subprocess
+import sys
 
 from test_utils import FUNCTION_NAME, ROOT, save_json
+from agent_case_data import decode_cases
 
 BASE_URL = os.environ.get("LM_STUDIO_BASE_URL", "http://localhost:1234/v1").rstrip("/")
 MODEL = os.environ.get("TEST_AGENT_MODEL", "")
 TIMEOUT = float(os.environ.get("TEST_AGENT_TIMEOUT", "120"))
 MAX_CASES = 60
 MAX_LIST_LENGTH = 2000
+STRUCTURED_OUTPUT = os.environ.get('TEST_AGENT_STRUCTURED_OUTPUT', '0') == '1'
+TOTAL_TIMEOUT = float(os.environ.get('TEST_AGENT_TOTAL_TIMEOUT', '150'))
 RESPONSE_SCHEMA = {
     "type": "object", "additionalProperties": False, "required": ["analysis", "cases"],
     "properties": {
@@ -47,6 +52,7 @@ short lists and a concise analysis. JSON must contain no comments or trailing co
 integers (write out huge values; do not use 10**20). Each case needs a specific
 reason tied to the changes. Do not include Markdown fences.
 """
+PROMPT += '\nKeep analysis under 80 words and return exactly 8 short distinct cases. Focus on the actual code diff. Never infer the output just from the historical function name.\n'
 
 
 def request_json(method, route, body=None):
@@ -115,7 +121,7 @@ def generate(original_path, candidate_path, refresh=False, request_fn=None, cach
     request = request_fn or request_json
     model = MODEL
     if not model:
-        models = request("GET", "/models").get("data", [])
+        models = [item for item in request("GET", "/models").get("data", []) if 'embedding' not in item['id'].lower()]
         if not models:
             raise RuntimeError("No model available for the independent test agent")
         model = models[0]["id"]
@@ -123,7 +129,7 @@ def generate(original_path, candidate_path, refresh=False, request_fn=None, cach
     # expected values, or other stages are included in this context.
     messages = [{"role": "system", "content": PROMPT},
                 {"role": "user", "content": json.dumps({"original_code": original, "candidate_code": candidate})}]
-    structured = True
+    structured = STRUCTURED_OUTPUT
     errors = []
     for attempt in range(3):
         # Retry feedback belongs only to this test-generation task. No failed
@@ -132,6 +138,7 @@ def generate(original_path, candidate_path, refresh=False, request_fn=None, cach
                            "\nCorrect this in a fresh valid JSON response." if errors else "")
         messages = [{"role": "system", "content": system}, messages[1]]
         body = {"model": model, "messages": messages, "temperature": 0.2}
+        print(f'  Test agent request {attempt + 1}/3 (timeout {TIMEOUT:g}s)...', flush=True)
         if structured:
             body["response_format"] = {"type": "json_schema", "json_schema": {
                 "name": "targeted_correctness_cases", "strict": True, "schema": RESPONSE_SCHEMA}}
@@ -147,19 +154,52 @@ def generate(original_path, candidate_path, refresh=False, request_fn=None, cach
         try:
             if not isinstance(content, str) or not content.strip():
                 raise ValueError("Test agent returned an empty response")
-            result = validate_response(json.loads(content))
+            if response['choices'][0].get('finish_reason') == 'length':
+                raise ValueError('Model response was truncated; return shorter cases')
+            decoded, decoding = decode_cases(content)
+            result = validate_response(decoded)
             break
-        except ValueError as exc:
+        except (ValueError, SyntaxError, RecursionError) as exc:
             errors.append(str(exc) + " Use literal JSON arrays and integers only: write [1,1,1], not [1]*3; "
                           "write 1000000, not 10**6. No arithmetic, comments, floats, or booleans. "
                           "Use short lists instead of trying to abbreviate long ones.")
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.with_suffix(f".attempt_{attempt + 1}.invalid_response.txt").write_text(str(content), encoding="utf-8")
     else:
-        raise ValueError("Test agent did not produce valid cases after 3 requests: " + "; ".join(errors))
+        raise ValueError('Test agent could not produce valid cases after 3 requests. See tests/agent_cases/*.invalid_response.txt; use --offline for deterministic-only testing.')
     saved = {**result, "fingerprint": fingerprint, "model": model,
              "original_sha256": hashlib.sha256(original.encode("utf-8")).hexdigest(),
              "candidate_sha256": hashlib.sha256(candidate.encode("utf-8")).hexdigest(),
-             "messages": messages, "structured_output": structured, "generation_errors": errors, "cached": False}
+             "messages": messages, "structured_output": structured, "decoding": decoding, "generation_errors": errors, "cached": False}
     save_json(cache_path, saved)
     return saved
+
+
+def generate_isolated(original_path, candidate_path, refresh=False):
+    """Hard wall-clock limit, including models that keep responses open."""
+    args = [sys.executable, str(Path(__file__).resolve()), '--worker', str(Path(original_path).resolve()), str(Path(candidate_path).resolve())]
+    if refresh:
+        args.append('--refresh')
+    try:
+        response = subprocess.run(args, capture_output=True, text=True, timeout=TOTAL_TIMEOUT)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f'Test-agent generation exceeded {TOTAL_TIMEOUT:g}s. Deterministic results will still be recorded; use --offline to skip model calls.') from exc
+    if response.returncode:
+        raise RuntimeError(response.stderr.strip().splitlines()[-1][:500] if response.stderr.strip() else 'Test-agent worker failed')
+    return json.loads(response.stdout)
+
+
+if __name__ == '__main__':
+    import argparse
+    import contextlib
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--worker', nargs=2, required=True)
+    parser.add_argument('--refresh', action='store_true')
+    args = parser.parse_args()
+    try:
+        with contextlib.redirect_stdout(sys.stderr):
+            result = generate(*args.worker, refresh=args.refresh)
+        print(json.dumps(result))
+    except Exception as exc:
+        print(f'{type(exc).__name__}: {str(exc)[:500]}', file=sys.stderr)
+        raise SystemExit(1)

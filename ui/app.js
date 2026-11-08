@@ -69,6 +69,7 @@ function stageCandidates(stage) {
 }
 
 function readRoute() {
+  if (location.hash === '#tests') return { view: 'tests', candidate: recommended[0] };
   let [stage, view, id] = location.hash.slice(1).split('/');
   // Step 1 approval links used the Performance stage.
   if (stage === 'performance' && view === 'approve') stage = 'human';
@@ -86,6 +87,7 @@ function renderNavigation({ stage, view, candidate }) {
   const candidateStage = candidateStages.includes(stage) ? stage : 'performance';
   const items = [
     { id: 'pipeline', label: 'Pipeline', icon: 'pipeline', href: '#pipeline' },
+    { id: 'tests', label: 'Test results', icon: 'bars', href: '#tests' },
     { id: 'results', label: 'Results', icon: 'bars', href: route(candidateStage, candidate, 'results') },
     { id: 'review', label: 'Review', icon: 'review', href: route(candidateStage, candidate, 'review') },
     { id: 'approve', label: 'Approve', icon: 'check', href: route('human', candidate) },
@@ -94,7 +96,7 @@ function renderNavigation({ stage, view, candidate }) {
   const link = (item) => `<a href="${item.href}" ${view === item.id ? 'aria-current="page"' : ''}>
     ${icon(item.icon)}<span>${item.label}</span></a>`;
   byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}`;
-  byId('workspace-views').innerHTML = items.slice(1).map(link).join('');
+  byId('workspace-views').innerHTML = items.filter(item => !['pipeline', 'tests'].includes(item.id)).map(link).join('');
 }
 
 function stageSummary(stage) {
@@ -142,7 +144,8 @@ function renderPipeline({ stage: activeStage, candidate }) {
     </dl>
     <div class="demo-note">${icon('file')}<div><strong>${demoRun.filename}</strong>
       <p>${demoRun.inputDomain}. Timing and correctness figures are illustrative.</p></div></div>
-    <a class="button primary" href="${route('performance')}">Open Performance <span aria-hidden="true">→</span></a>`;
+    <a class="button primary" href="#tests">View measured test results <span aria-hidden="true">→</span></a>
+    <a class="button secondary" href="${route('performance')}">Explore demo workflow</a>`;
 }
 
 function escapeHtml(text) {
@@ -296,6 +299,7 @@ function reviewView(stage, candidate) {
   const decision = decisions.get(candidate.id) ?? 'pending';
   const canDecide = showTiming && candidate.outcome === 'recommended';
   return `${detailHeader(stage, candidate.title, candidate.description, badge(result.label, result.tone))}
+    ${['correctness', 'performance'].includes(stage) ? measuredLink() : ''}
     <div class="${showCorrectness ? 'evidence-grid' : ''}">
       <section class="inset"><h2>Why it matters</h2><p>${candidate.rationale}</p></section>
       ${showCorrectness ? `<section class="inset"><h2>Correctness</h2>
@@ -316,6 +320,10 @@ function reviewView(stage, candidate) {
     </div>`;
 }
 
+function measuredLink() {
+  return '<aside class="inset measured-link"><strong>This view uses illustrative workflow data.</strong><p><a href="#tests">Open measured correctness and speed reports →</a></p></aside>';
+}
+
 function resultsView(stage, selected) {
   const titles = {
     generated: 'Proposed changes',
@@ -327,6 +335,7 @@ function resultsView(stage, selected) {
     ? `${stageSummary(stage)} · ${evidence.minimumImprovement}% minimum mean improvement`
     : stageSummary(stage);
   return `${detailHeader(stage, titles[stage], description)}
+    ${['correctness', 'performance'].includes(stage) ? measuredLink() : ''}
     <ul class="candidate-list">${stageCandidates(stage).map((candidate) => {
       const result = assessment(stage, candidate);
       return `<li><a class="candidate-row inset" href="${route(stage, candidate, 'review')}">
@@ -434,12 +443,16 @@ function renderBuildUpdate() {
 function render(focusHeading = false) {
   const state = readRoute();
   const atHome = state.view === 'pipeline';
+  const atTests = state.view === 'tests';
+  document.querySelector('.demo-badge').innerHTML = `<span class="dot"></span> ${atTests ? 'Saved reports' : 'Demo run'}`;
   byId('pipeline-home').hidden = !atHome;
-  byId('workspace').hidden = atHome;
+  byId('workspace').hidden = atHome || atTests;
+  byId('measured-results').hidden = !atTests;
+  if (atTests) window.testResults.show();
   renderNavigation(state);
   renderPipeline(state);
 
-  if (!atHome) {
+  if (!atHome && !atTests) {
     renderCode(state);
     const content = byId('details-content');
     switch (state.view) {
@@ -455,7 +468,7 @@ function render(focusHeading = false) {
   }
   if (focusHeading) {
     window.scrollTo(0, 0);
-    byId(atHome ? 'home-title' : 'view-title').focus({ preventScroll: true });
+    byId(atTests ? 'measured-title' : atHome ? 'home-title' : 'view-title').focus({ preventScroll: true });
   }
 }
 

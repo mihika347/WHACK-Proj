@@ -276,3 +276,21 @@ Open [`ui/index.html`](ui/index.html) in a browser. The page uses plain HTML, CS
 4. To try a failed build, approve both **Use the built-in list count** and **Count a list of matches**, then generate again. Final identifies the overlapping patches. Reject either change and rebuild to recover.
 
 Timing and correctness figures are illustrative. Decisions persist for the browser tab's session. Final build results last until reload.
+
+### Measured test results
+
+The sidebar's **Test results** view and the home page's **View measured test results** button open the actual saved reports. Correctness and Performance demo pages also link to this view. The demo approvals and source diffs remain illustrative; measured reports have their own run ID, timestamp, candidate selector, and source label.
+
+Serve the repository root so the UI can retrieve the report files:
+
+```powershell
+python -m http.server 8000 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:8000/ui/#tests`. Use **Latest test run** for `reports/ui_results.json` or **Intentional failure demo** for `examples/failure_demo/reports/ui_results.json`. **Reload reports** reads updated exports after running the Python tests. **Open results JSON** also supports opening a local export when the page is opened directly from disk.
+
+The view includes candidate pass-rate and percentage-speed graphs, speed by input size, status/agent/variance tables, category/source correctness breakdowns, failing inputs, worst observed performance, and expandable per-workload median timings and variability. Missing speed results are shown as unmeasured, and byte-identical candidates are flagged. When available, deletion-reduced failures are displayed; older exports use the shortest observed failure from a matching detailed correctness report. The UI does not run tests or perform minimisation itself.
+
+Both older and newer report schemas are supported. Displayed speed summaries and size groups use the median of the exported workload speedup ratios; no mean metrics are displayed in the measured results view. UI graphs have labelled table equivalents, and wide tables scroll independently on narrow screens.
+
+Check the report adapter and rendering with `node --test ui/test-results.test.cjs`.

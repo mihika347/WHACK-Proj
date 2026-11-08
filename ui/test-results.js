@@ -6,6 +6,11 @@
     const mid = Math.floor(sorted.length / 2);
     return !sorted.length ? null : sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
   };
+  const variance = values => {
+    if (!values.length) return null;
+    const centre = values.reduce((total, value) => total + value, 0) / values.length;
+    return values.reduce((total, value) => total + (value - centre) ** 2, 0) / values.length;
+  };
   const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   const number = (value, digits = 1) => finite(value) ? value.toLocaleString(undefined, { maximumFractionDigits: digits }) : 'Not measured';
@@ -20,7 +25,9 @@
     const summary = data.summary.map(row => {
       const measured = workloads.filter(test => test.stage === row.stage && finite(test.speedup) && test.speedup > 0);
       const ratio = measured.length ? median(measured.map(test => test.speedup)) : finite(row.median_speedup) ? row.median_speedup : null;
-      return { ...row, median_speedup: ratio, speed_increase_percent: ratioPercent(ratio), execution_time_reduction_percent: timeSaved(ratio) };
+      return { ...row, median_speedup: ratio, speed_increase_percent: ratioPercent(ratio), execution_time_reduction_percent: timeSaved(ratio),
+        speed_change_variance_pp_squared: measured.length ? variance(measured.map(test => ratioPercent(test.speedup))) : null,
+        correctness_change_variance: row.correctness_change_variance ?? row.numeric_error_population_variance ?? null };
     });
     return { ...data, summary, charts: { ...data.charts, speed_by_workload: workloads } };
   };
@@ -35,8 +42,25 @@
     const worst = tests.reduce((a, b) => a.speedup < b.speedup ? a : b);
     return { ...worst, slowdown_percent: Math.max(0, (1 / worst.speedup - 1) * 100) };
   };
+  const selectByThreshold = (data, threshold) => {
+    if (!finite(threshold) || threshold < 0 || threshold > 100) throw new Error('Threshold must be between 0 and 100.');
+    const summary = data.summary.map(row => {
+      const stage = /^stage_\d+\.py$/.test(row.stage);
+      const eligible = row.correctness_status === 'pass' && row.speed_status === 'pass' && finite(row.stage_score)
+        && row.total_cases > 0 && row.passed_cases === row.total_cases && row.failed_cases === 0
+        && ['used', 'disabled'].includes(row.agent_status);
+      const above = finite(row.stage_score) && row.stage_score > threshold;
+      return { ...row, selection_eligible: eligible, meets_score_threshold: above, is_key_stage: stage && eligible && above,
+        selection_reason: !stage ? 'Comparison only.' : !eligible ? 'Blocked: correctness failed or evidence is incomplete.'
+          : !above ? `Score ${row.stage_score.toFixed(2)} is not strictly above ${threshold}.` : `Score above ${threshold}; checks passed.` };
+    });
+    return { ...data, summary, score_threshold: threshold, scoring_policy: { ...data.scoring_policy, score_threshold: threshold },
+      key_stages: summary.filter(row => row.is_key_stage).map(row => row.stage),
+      review_stages: summary.filter(row => /^stage_\d+\.py$/.test(row.stage) && !row.is_key_stage),
+      stage_ranking: summary.filter(row => finite(row.rank)).sort((a, b) => a.rank - b.rank) };
+  };
   // These helpers also run in Node for data-contract tests without a browser.
-  if (typeof module !== 'undefined' && module.exports) module.exports = { median, normalise, sizeSeries, worstWorkload, escape };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { median, normalise, sizeSeries, worstWorkload, escape, selectByThreshold };
   if (typeof document === 'undefined') return;
 
   const el = id => document.getElementById(id);
@@ -46,6 +70,8 @@
   let requestId = 0;
   let sourceLabel = '';
   let downloadUrl;
+  let reviewUrl;
+  let customThreshold = false;
   const sources = { latest: '../reports/', failure: '../examples/failure_demo/reports/' };
   const status = (value, tone = '') => `<span class="badge ${tone}">${escape(value ?? 'Not measured')}</span>`;
   const tone = value => value === 'pass' ? 'success' : ['fail', 'error'].includes(value) ? 'rejected' : '';
@@ -100,6 +126,11 @@
 
   function renderReport() {
     if (!report) return;
+    const thresholdText = el('score-threshold').value.trim();
+    if (!thresholdText || !finite(Number(thresholdText)) || Number(thresholdText) < 0 || Number(thresholdText) > 100) return;
+    report = selectByThreshold(report, Number(el('score-threshold').value));
+    const query = el('review-search').value.trim().toLowerCase();
+    const review = report.review_stages.filter(row => `${row.stage} ${row.correctness_status} ${row.selection_reason}`.toLowerCase().includes(query));
     const candidate = report.summary.find(item => item.stage === el('report-candidate').value) ?? report.summary[0];
     const tests = report.charts.speed_by_workload.filter(item => item.stage === candidate.stage);
     const series = sizeSeries(report, candidate.stage);
@@ -110,30 +141,46 @@
     const date = new Date(report.generated_at);
     el('report-content').innerHTML = `
       <div class="report-provenance inset"><div><strong>${isDemo ? 'Intentional failure demonstration' : 'Saved test run'}</strong><p>${escape(sourceLabel)} · ${Number.isNaN(date.getTime()) ? 'Date unavailable' : escape(date.toLocaleString())}</p><p>Run ${escape(report.run_id)} · ${escape(report.summary.length)} candidates</p></div><a id="download-report" class="button secondary" download="test-results.json">Download JSON</a></div>
+      ${panel('Stage ranking & key changes', table('Explainable stage scores', ['Rank', 'Stage', 'Score / 100', 'Mean gain', 'Worst slowdown', 'Selection'], [...report.summary].filter(row => row.is_key_stage || row.stage === 'final_optimised.py').sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity)).map(item => row([
+        finite(item.rank) ? number(item.rank, 0) : '—', escape(stageLabel(item.stage)), number(item.stage_score, 2),
+        percent(item.mean_speed_increase_percent), finite(item.score_breakdown?.worst_slowdown_percent) ? `${number(item.score_breakdown.worst_slowdown_percent)}%` : 'Not measured',
+        item.is_key_stage ? status('Key stage', 'success') : item.stage === 'final_optimised.py' ? 'Comparison only' : item.selection_eligible ? 'Eligible' : finite(item.stage_score) ? 'Review / blocked' : 'Needs evidence']))),
+        `Key stages must score strictly above ${report.score_threshold}/100 and pass checks. No top-three limit. Final code is comparison only; no code is automatically applied.`)}
+      ${panel(`Review stages (${review.length} of ${report.review_stages.length})`, `<p><a id="download-review" class="button secondary" download="review_stages.json">Download review list</a></p>` + table('Stages below the threshold or blocked from selection', ['Stage', 'Score', 'Reason'], review.map(item => row([
+        `<button type="button" class="report-select-link" data-report-candidate="${escape(item.stage)}">${escape(stageLabel(item.stage))}</button>`, number(item.stage_score, 2), escape(item.selection_reason)]))),
+        'Use “Search review stages” above to filter this separate list. Browser threshold changes update this view and downloads; use --score-threshold when exporting to save the split on disk.')}
       ${isDemo ? '<p class="inset report-warning">These candidates deliberately contain mistakes. This dataset demonstrates the validator and is separate from your real optimisation run.</p>' : ''}
       ${candidate.identical_to ? `<p class="inset">${escape(stageLabel(candidate.stage))} has identical source to ${escape(stageLabel(candidate.identical_to))}. Differences in measured speed are timing variation.</p>` : ''}
       <dl class="report-metrics">${metric('Correctness', finite(candidate.pass_rate_percent) ? `${number(candidate.pass_rate_percent)}%` : 'Not measured', `${number(candidate.passed_cases, 0)} / ${number(candidate.total_cases, 0)} cases passed`)}
         ${metric('Speed increase', percent(candidate.speed_increase_percent), 'Median of per-workload speedup ratios')}
-        ${metric('Execution time saved', percent(candidate.execution_time_reduction_percent), 'Relative to the original code')}
-        ${metric('Worst observed slowdown', worst ? `${number(worst.slowdown_percent)}%` : 'Not measured', worst ? worst.slowdown_percent > 0 ? worst.workload : 'No measured workload was slower' : 'No benchmark results')}</dl>
+        ${metric('Variance of speed change', finite(candidate.speed_change_variance_pp_squared) ? `${number(candidate.speed_change_variance_pp_squared, 2)} pp²` : 'Not measured', 'Variation across workload percentage changes')}
+        ${metric('Worst observed speed change', worst ? percent(ratioPercent(worst.speedup)) : 'Not measured', worst ? worst.workload : 'No benchmark results')}</dl>
       <div class="report-graph-grid">${panel('Correctness across candidates', barChart(report.summary, 'pass_rate_percent', 'Pass percentage by candidate', true), 'Cases that match all observed behaviour. Read alongside the status and agent coverage below.')}
         ${panel('Speed across candidates', barChart(report.summary, 'speed_increase_percent', 'Percentage speed increase by candidate'), 'Positive is faster; negative is slower. Missing measurements are never plotted as zero.')}</div>
-      ${panel('Candidate results', table('Measured correctness and performance', ['Candidate', 'Correctness', 'Passed / total', 'Agent', 'Speed status', 'Speed increase', 'Time saved', 'Outcome variance'], report.summary.map(item => row([
-        `<button type="button" class="report-select-link" data-report-candidate="${escape(item.stage)}">${escape(stageLabel(item.stage))}</button>`, status(item.correctness_status, tone(item.correctness_status)), `${number(item.passed_cases, 0)} / ${number(item.total_cases, 0)}`, escape(item.agent_status ?? 'Unknown'), status(item.speed_status, tone(item.speed_status)), percent(item.speed_increase_percent), percent(item.execution_time_reduction_percent), number(item.pass_population_variance, 4)]))))}
+      ${panel('Candidate results', table('Measured correctness and performance', ['Candidate', 'Correctness', 'Passed / total', 'Agent', 'Speed status', 'Speed increase', 'Speed-change variance (pp²)', 'Output-change variance'], report.summary.map(item => row([
+        `<button type="button" class="report-select-link" data-report-candidate="${escape(item.stage)}">${escape(stageLabel(item.stage))}</button>`, status(item.correctness_status, tone(item.correctness_status)), `${number(item.passed_cases, 0)} / ${number(item.total_cases, 0)}`, escape(item.agent_status ?? 'Unknown'), status(item.speed_status, tone(item.speed_status)), percent(item.speed_increase_percent), number(item.speed_change_variance_pp_squared, 2), number(item.correctness_change_variance, 4)]))))}
       <h2 class="candidate-heading">${escape(stageLabel(candidate.stage))} <span>${escape(candidate.stage)}</span></h2>
+      ${panel('Why this score?', `<p><strong>${number(candidate.stage_score, 2)} / 100</strong></p><p>${escape((candidate.score_reasons ?? ['Generate fresh reports to calculate stage scores.']).join(' '))}</p>
+        ${table('Score components', ['Component', 'Points'], Object.entries(candidate.score_breakdown ?? {}).filter(([key]) => ['correctness', 'speed_benefit', 'worst_case', 'consistency'].includes(key)).map(([key, value]) => row([escape(key.replaceAll('_', ' ')), number(value, 2)])))}`,
+        '20 correctness points + up to 50 speed-benefit points + 20 worst-case points + 10 consistency points. Incorrect stages receive only 0–19 points and cannot be selected.')}
       <div class="report-graph-grid">${panel('Speed by input size', sizeChart(series) + table('Median percentage speed increase by list size', ['List size', 'Speed increase'], series.map(item => row([number(item.input_size, 0), percent(item.speed_increase_percent)]))), 'Each point gives equal weight to workloads of that size. Horizontal spacing is categorical.')}
         ${panel('Correctness by test source', table('Coverage and correctness by source', ['Source', 'Passed', 'Failed', 'Pass rate'], groups.map(group => row([escape(group.name.replaceAll('_', ' ')), number(group.passed, 0), number(group.failed, 0), finite(group.pass_rate_percent) ? `${number(group.pass_rate_percent)}%` : 'Not measured']))), 'Compare the shared suite for like-for-like candidate coverage. Targeted suites can differ.')}</div>
       <div class="report-graph-grid">${failurePanel(candidate)}${panel('Worst observed performance', worst ? `<p><strong>${escape(worst.workload)}</strong> · ${number(worst.input_size, 0)} items</p><dl class="failure-values"><div><dt>Baseline median</dt><dd>${number(worst.baseline_median_us, 3)} µs</dd></div><div><dt>Candidate median</dt><dd>${number(worst.median_us, 3)} µs</dd></div></dl><p>${worst.slowdown_percent > 0 ? `${number(worst.slowdown_percent)}% longer execution time.` : 'All workloads were at least as fast as the baseline. This is the least-improved workload.'}</p>` : '<p>Not measured. Incorrect candidates are excluded from benchmarks.</p>', 'Worst observed in this finite suite, not a universal worst-case bound.')}</div>
       ${panel('Input-category coverage', table('Correctness by category', ['Category', 'Passed', 'Failed', 'Pass rate'], categories.map(group => row([escape(group.name.replaceAll('_', ' ')), number(group.passed, 0), number(group.failed, 0), finite(group.pass_rate_percent) ? `${number(group.pass_rate_percent)}%` : 'Not measured']))))}
       ${panel('Workload timing details', `<details><summary>Show ${tests.length} workloads and timing variability</summary>${table('Per-workload timing measurements', ['Workload', 'Size', 'Baseline µs', 'Candidate µs', 'Std dev µs', 'Variance µs²', 'Speed increase'], tests.map(test => row([escape(test.workload), number(test.input_size, 0), number(test.baseline_median_us, 3), number(test.median_us, 3), number(test.standard_deviation_us, 3), number(test.population_variance_us_squared, 4), percent(ratioPercent(test.speedup))])))}</details>`, 'Median execution time per call. Variability is across batch timing samples; it is not a confidence interval.')}
-      <p class="chart-note">Passing finite tests is evidence, not proof of correctness. Zero outcome variance can mean all passed or all failed. This report does not change demo approvals or choose a final implementation.</p>`;
+      ${candidate.slowest_observed_workload ? panel('Slowest observed runtime', `<p>${escape(candidate.slowest_observed_workload.workload)} · ${number(candidate.slowest_observed_workload.input_size, 0)} items</p><p><strong>${number(candidate.slowest_observed_workload.candidate_median_seconds * 1e6, 3)} µs</strong> median per call; maximum sampled batch-average time ${number(candidate.slowest_observed_workload.maximum_sample_seconds * 1e6, 3)} µs.</p>`) : ''}
+      <p class="chart-note">Output-change variance measures candidate minus original numeric outputs. Zero variance can also mean a constant wrong answer; read it alongside pass/fail status. Speed-change variance measures workload sensitivity in percentage-points squared, not timing noise. Worst means worst observed in this finite suite.</p>`;
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     downloadUrl = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }));
     el('download-report').href = downloadUrl;
+    if (reviewUrl) URL.revokeObjectURL(reviewUrl);
+    reviewUrl = URL.createObjectURL(new Blob([JSON.stringify({run_id: report.run_id, score_threshold: report.score_threshold, stages: report.review_stages}, null, 2)], {type: 'application/json'}));
+    el('download-review').href = reviewUrl;
   }
 
   function accept(data, label, details = null) {
     report = normalise(data);
+    if (!customThreshold) el('score-threshold').value = String(report.score_threshold ?? 70);
     detail = details;
     sourceLabel = label;
     const selected = el('report-candidate').value;
@@ -175,6 +222,18 @@
   el('report-set').addEventListener('change', load);
   el('reload-report').addEventListener('click', load);
   el('report-candidate').addEventListener('change', renderReport);
+  el('score-threshold').addEventListener('input', () => {
+    const text = el('score-threshold').value.trim();
+    const value = Number(text);
+    if (!text || !finite(value) || value < 0 || value > 100) {
+      el('report-status').textContent = 'Enter a score threshold between 0 and 100.';
+      return;
+    }
+    customThreshold = true;
+    el('report-status').textContent = `Key stages must score strictly above ${value}.`;
+    renderReport();
+  });
+  el('review-search').addEventListener('input', renderReport);
   el('report-content').addEventListener('click', event => {
     const button = event.target.closest('[data-report-candidate]');
     if (button) { el('report-candidate').value = button.dataset.reportCandidate; renderReport(); }

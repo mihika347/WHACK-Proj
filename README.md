@@ -1,5 +1,7 @@
 # WHACK: AI Code Optimisation
 
+For a larger end-to-end demonstration, see [the large integer-list demo](examples/large_demo/README.md). It keeps the current input/function/output types, contains 14 distinct optimisation opportunities, and includes an independently checked reference implementation.
+
 A Python prototype that uses a locally hosted LM Studio model to propose speed optimisations while preserving the original program's output and behaviour. Each change is saved as an independent stage for review and comparison against the original.
 
 ## Goals and current status
@@ -138,7 +140,7 @@ The default endpoint is the same local LM Studio server used by the optimiser, w
 
 The current agent contract is specifically `count_matches(numbers, target)`. Adapt its prompt as well as the execution adapter when changing the function contract.
 
-Timing uses three warmup calls and seven samples per workload, with repeated calls per sample and fresh input copies prepared outside the measured interval. Reports include sample timings, medians, per-workload speedups, and their geometric mean. A speedup below 1 means a slowdown. Small timing differences can be noise; results depend on the machine and current load.
+Timing uses three warmup calls and seven samples per workload, with repeated calls per sample and fresh input copies prepared outside the measured interval. Reports include sample timings, medians, percentage speed increases, variance of those changes, and worst observed speed. A speedup below 1 means a slowdown. Small timing differences can be noise; results depend on the machine and current load.
 
 ### Shared speed-test batch
 
@@ -197,11 +199,11 @@ reports/speed_workloads.csv      # Timing statistics and percentages for each wo
 reports/correctness_cases.csv    # Individual outcomes, numeric errors, and mismatch fields
 ```
 
-Correctness statistics include pass/fail counts, pass percentage, mean, median, population variance, standard deviation, and category/source breakdowns. Outcomes are encoded as pass=1 and fail=0. The mean is the pass fraction, and population variance is `p * (1 - p)`. Both all-passing and all-failing suites have zero variance: always interpret variance alongside the pass rate. These are descriptive statistics over the executed cases, not a proof of correctness or an estimate that a future input will pass. Counts can include repeated inputs across coverage sources.
+Correctness statistics include pass/fail counts, pass percentage, population variance, and category/source breakdowns. The primary `change_variance` measures the population variance of candidate minus original numeric outputs. The separate pass/fail outcome variance uses `p * (1 - p)`. These are descriptive statistics over the executed cases, not a proof of correctness or an estimate that a future input will pass. Counts can include repeated inputs across coverage sources.
 
-For finite numeric return values, the numeric error is `candidate - original`. Reports include its mean, variance, mean absolute error (MAE), mean squared error (MSE), and root mean squared error (RMSE). Signed errors can cancel, so inspect MAE/MSE too. Non-numeric values, exceptions, and errors too large for finite statistics are excluded from numeric-error statistics and counted separately. Full behaviour comparison still covers those cases. Correct numeric output with unexpected input mutation or printed output still fails correctness.
+For finite numeric return values, the numeric error is `candidate - original`. Reports include its variance, median, and maximum absolute error. A constant wrong difference also has zero variance, so pass/fail status must always accompany it. Non-numeric values, exceptions, and errors too large for finite statistics are excluded from numeric-error statistics and counted separately. Full behaviour comparison still covers those cases. Correct numeric output with unexpected input mutation or printed output still fails correctness.
 
-Speed reports include per-workload sample mean, median, population variance, standard deviation, min/max, interquartile range, and empirical 5th/95th percentiles. These describe seven per-call batch-average timing samples, not the distribution of individual calls; percentiles are not confidence intervals. Raw report times use seconds, and variances use seconds squared. UI chart times use microseconds (`us`) and variances use microseconds squared. Variance uses denominator N throughout.
+Speed reports focus on `speed_increase_percent`, `speed_change_variance_pp_squared`, and `worst_observed_speed`. Speed-change variance is the population variance of the workload percentage speed increases, measured in percentage-points squared. It measures how the benefit varies across workloads, not timing noise. Per-workload timing variance and percentiles remain available as supporting detail: they describe seven per-call batch-average timing samples and are not confidence intervals. Raw timing units are seconds and seconds squared; UI timing units are microseconds and microseconds squared.
 
 Two separate percentage metrics avoid ambiguity:
 
@@ -210,7 +212,7 @@ Two separate percentage metrics avoid ambiguity:
 | Speed increase | `100 * (baseline_time / candidate_time - 1)` | 100% faster |
 | Execution time reduction | `100 * (1 - candidate_time / baseline_time)` | 50% less time |
 
-Negative values mean a slowdown or longer execution, respectively. Aggregate percentages are derived from the equal-workload geometric mean of median speedup ratios. They are not total runtime reductions for an application. The mean of workload medians is also available but mixes input sizes and should not replace workload-specific comparisons. Near-zero differences can be timing noise, especially with sequential benchmarking. Identical code files are marked with `identical_to` in the UI summary.
+Negative values mean a slowdown or longer execution, respectively. Aggregate percentages are derived from the median of workload speedup ratios. They are not total runtime reductions for an application. Mean metrics are no longer exported. `worst_observed_speed` records the lowest speed increase, the workload and exact input, and baseline/candidate median runtimes. It remains positive if every workload improved. `slowest_observed_workload` separately records the largest candidate median runtime and its maximum sampled per-call batch-average time; this can be a different workload. Both are worst observed in this finite suite, not theoretical worst-case guarantees. Incorrect candidates have null speed results. Identical code files are marked with `identical_to` in the UI summary.
 
 `ui_results.json` includes these chart-ready arrays:
 
@@ -218,7 +220,7 @@ Negative values mean a slowdown or longer execution, respectively. Aggregate per
 | --- | --- |
 | `summary` | Candidate cards or summary table |
 | `charts.speed_comparison` | Percentage speed increase / time reduction bars |
-| `charts.correctness_comparison` | Pass-rate bars, outcome variance, MAE |
+| `charts.correctness_comparison` | Pass-rate bars, output-change variance, maximum absolute error |
 | `charts.correctness_by_source` | Shared, rule-targeted, exhaustive, and agent coverage |
 | `charts.correctness_by_category` | Pass/fail breakdown by input category |
 | `charts.speed_by_input_size` | Percentage speed improvement by list size |
@@ -294,3 +296,32 @@ The view includes candidate pass-rate and percentage-speed graphs, speed by inpu
 Both older and newer report schemas are supported. Displayed speed summaries and size groups use the median of the exported workload speedup ratios; no mean metrics are displayed in the measured results view. UI graphs have labelled table equivalents, and wide tables scroll independently on narrow screens.
 
 Check the report adapter and rendering with `node --test ui/test-results.test.cjs`.
+
+### Stage scores and key stages
+
+`python speed_test.py` now scores stages after validation and measurement. `python export_results.py` also scores existing matching reports without re-running benchmarks. The UI shows a ranked stage table, the top key stages, and the selected candidate's score components and reasons. Scores and rankings are exported in `ui_results.json`, `summary.csv`, and `speed_report.json`. The final combined version is scored as a comparison but not ranked as another independent stage.
+
+The policy is a configurable, versioned heuristic in `stage_scoring.py`, not a probability or a guarantee of correctness. It reintroduces **mean percentage improvement specifically for scoring**: every benchmark workload has equal weight. Existing median summaries remain available.
+
+For stages passing all observed correctness and benchmark checks, the 0–100 score is:
+
+| Component | Points | Calculation |
+| --- | --- | --- |
+| Correctness | 20 | All observed cases passed |
+| Mean speed benefit | Up to 50 | `50 * max(mean_gain, 0) / (max(mean_gain, 0) + 100)` |
+| Worst observed slowdown | Up to 20 | `20 / (1 + worst_runtime_slowdown_percent / 20)` |
+| Consistency | Up to 10 | `10 / (1 + sqrt(variance_pp_squared) / max(abs(mean_gain), 25))` |
+
+Using standard deviation relative to the typical benefit avoids directly subtracting variance with squared units. It still penalises sensitivity across workloads; it is not a measure of timing confidence. Incorrect stages receive only `19 * pass_fraction` points and cannot be selected, so speed never compensates for incorrect outputs. Performance is not fabricated for those stages. Incomplete checks or absent timings give a null score rather than zero. Explicit offline runs can be scored but are labelled as having deterministic coverage only.
+
+Key stages now use a **user-entered score threshold**, replacing the top-three rule. Every verified stage scoring **strictly above** the threshold is marked `is_key_stage`; equality goes to review. The default threshold is 70, the valid range is 0–100, and there is no stage-count limit. Incorrect or incomplete stages remain blocked at every threshold. Worst-case and variance penalties remain in the score rather than imposing a second performance cutoff. The final version remains comparison-only. Stage files with identical source can both meet the threshold; check duplicate-source notices and compatibility before combining them.
+
+```powershell
+# Apply a cutoff to existing results without rerunning tests:
+python export_results.py --score-threshold 80
+
+# Run fresh tests and apply the cutoff:
+python speed_test.py --score-threshold 80
+```
+
+The non-key independent stages are exported to `reports/review_stages.json` and `reports/review_stages.csv`, with scores, statuses, reasons, and source-file references in the JSON. No source files are moved or deleted. The full report still retains every result. In the UI, edit **Key-stage score threshold** to update the key list and the separate **Review stages** section immediately; filter that list using **Search review stages** and download it separately. Browser changes affect the view and downloads, not files on disk; use the export command to persist the same threshold. Selection is a recommendation only; it does not combine changes, guarantee compatibility, or modify final code. Test with `python -m unittest test_stage_scoring -v`.

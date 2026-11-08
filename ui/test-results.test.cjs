@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { median, normalise, sizeSeries, worstWorkload, escape } = require('./test-results.js');
+const { median, normalise, sizeSeries, worstWorkload, escape, selectByThreshold } = require('./test-results.js');
 const root = path.resolve(__dirname, '..');
 const readReport = folder => JSON.parse(fs.readFileSync(path.join(root, folder, 'ui_results.json'), 'utf8'));
 
@@ -14,6 +14,17 @@ test('uses medians and leaves missing measurements missing', () => {
   assert.equal(data.summary[0].speed_increase_percent, null);
   assert.equal(worstWorkload(data, 'wrong.py'), null);
   assert.throws(() => normalise({ summary: [], charts: {} }));
+});
+
+test('threshold splits strictly, has no top-three limit, and blocks incorrect code', () => {
+  const good = {correctness_status: 'pass', speed_status: 'pass', total_cases: 10,
+    passed_cases: 10, failed_cases: 0, agent_status: 'used', stage_score: 75};
+  const data = {summary: [1,2,3,4].map(i => ({...good, stage: `stage_${i}.py`}))};
+  data.summary.push({...good, stage: 'stage_5.py', correctness_status: 'fail', failed_cases: 1});
+  assert.equal(selectByThreshold(data, 75).key_stages.length, 0);
+  assert.equal(selectByThreshold(data, 74).key_stages.length, 4);
+  assert.equal(selectByThreshold(data, 0).review_stages[0].stage, 'stage_5.py');
+  assert.throws(() => selectByThreshold(data, NaN));
 });
 
 test('derives size groups and worst relative slowdown from actual workloads', () => {
@@ -68,7 +79,9 @@ test('renders latest report, switches to failures, and selects a failing candida
   h.context.window.testResults.show();
   await h.flush();
   assert.match(h.element('report-content').innerHTML, /Speed by input size/);
-  assert.match(h.element('report-content').innerHTML, /Outcome variance/);
+  assert.match(h.element('report-content').innerHTML, /Output-change variance/);
+  assert.match(h.element('report-content').innerHTML, /Stage ranking &amp; key changes/);
+  assert.match(h.element('report-content').innerHTML, /Why this score/);
   h.element('report-set').value = 'failure';
   await h.element('report-set').handlers.change();
   h.element('report-candidate').value = 'stage_2.py';

@@ -44,6 +44,8 @@
         <div class="report-controls panel">
           <label>Report set<select id="report-set"><option value="latest">Latest test run</option><option value="failure">Intentional failure demo</option></select></label>
           <label>Candidate<select id="report-candidate" disabled><option>Loading candidates…</option></select></label>
+          <label>Key-stage score threshold<input id="score-threshold" type="number" min="0" max="100" step="any" value="70"></label>
+          <label>Search review stages<input id="review-search" type="search" placeholder="Stage, status or reason"></label>
           <button class="button secondary" type="button" id="reload-report">Reload reports</button>
           <label class="button secondary report-upload">Open results JSON<input id="report-file" type="file" accept=".json,application/json"></label>
         </div>

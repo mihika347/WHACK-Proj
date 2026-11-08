@@ -1,15 +1,16 @@
 {
-  "schema_version": 2,
-  "run_id": "d38e472d-8f7a-45de-a063-1318dab8470e",
-  "generated_at": "2026-11-08T00:09:33.583525+00:00",
+  "schema_version": 3,
+  "run_id": "0b9211cd-0ff8-4faf-84fe-ea315fbb8c51",
+  "generated_at": "2026-11-08T03:28:50.385724+00:00",
   "seed": 20261107,
   "function": "count_matches",
   "baseline": "original.py",
-  "baseline_sha256": "46c61dd2173936d21a3e9e1924ac04452b936b9ad557d713393145d850b5050b",
+  "baseline_sha256": "60c08a1bbf6e78dae6a5eea5465486d2f0486f9714244eaeed02389db7bedbed",
   "candidates": [
     {
       "file": "stage_1.py",
-      "source_sha256": "ccca6198106fcc9042a5c81a83a3442e07ca8e3d1757a97b94ab1292f539671b",
+      "source_sha256": "de542170324bed6d82d7a288e561c5558c9ae1fbd61ce21f1332bba626e57857",
+      "change_variance": 0.0,
       "shared_cases": 409,
       "targeted_cases": 489,
       "agent_cases": 0,
@@ -29,7 +30,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 898,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -41,7 +41,6 @@
         },
         "numeric_error_statistics": {
           "count": 898,
-          "mean": 0.0,
           "median": 0.0,
           "population_variance": 0.0,
           "standard_deviation": 0.0,
@@ -51,10 +50,9 @@
           "p95": 0.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 0.0,
-          "mean_squared_error": 0.0,
-          "root_mean_squared_error": 0.0
+          "max_absolute_error": 0.0
         },
+        "change_variance": 0.0,
         "by_source": [
           {
             "name": "exhaustive",
@@ -64,7 +62,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 484,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -83,7 +80,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -102,7 +98,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 409,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -123,7 +118,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -142,7 +136,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -161,7 +154,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -180,7 +172,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -199,7 +190,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -218,7 +208,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237,7 +226,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -256,7 +244,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 484,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -275,7 +262,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -294,7 +280,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -313,7 +298,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -332,7 +316,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -351,7 +334,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -370,7 +352,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -389,7 +370,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -408,7 +388,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 300,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -427,7 +406,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -446,7 +424,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -465,7 +442,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -9463,7 +9439,8 @@
     },
     {
       "file": "stage_2.py",
-      "source_sha256": "fe1b6f3c3ded912a693fe4c949f6c80b25d596d4b3d2aa443619172c4eeb6099",
+      "source_sha256": "2364ee172b913ce506a871d1f7abe815f56180c9ed6563665b649d597d5f73b8",
+      "change_variance": 133.15577654320987,
       "shared_cases": 409,
       "targeted_cases": 491,
       "agent_cases": 0,
@@ -40002,7 +39979,6 @@
         "pass_rate_percent": 75.88888888888889,
         "outcome_statistics": {
           "count": 900,
-          "mean": 0.7588888888888888,
           "median": 1.0,
           "population_variance": 0.18297654320987655,
           "standard_deviation": 0.427757575280528,
@@ -40014,7 +39990,6 @@
         },
         "numeric_error_statistics": {
           "count": 900,
-          "mean": -2.401111111111111,
           "median": 0.0,
           "population_variance": 133.15577654320987,
           "standard_deviation": 11.539314387917935,
@@ -40024,10 +39999,9 @@
           "p95": 0.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 2.401111111111111,
-          "mean_squared_error": 138.92111111111112,
-          "root_mean_squared_error": 11.786480013605042
+          "max_absolute_error": 199.0
         },
+        "change_variance": 133.15577654320987,
         "by_source": [
           {
             "name": "exhaustive",
@@ -40037,7 +40011,6 @@
             "pass_rate_percent": 74.58677685950413,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.7458677685950413,
               "median": 1.0,
               "population_variance": 0.1895490403660952,
               "standard_deviation": 0.4353723008714441,
@@ -40056,7 +40029,6 @@
             "pass_rate_percent": 28.57142857142857,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.2857142857142857,
               "median": 0,
               "population_variance": 0.20408163265306123,
               "standard_deviation": 0.45175395145262565,
@@ -40075,7 +40047,6 @@
             "pass_rate_percent": 78.239608801956,
             "outcome_statistics": {
               "count": 409,
-              "mean": 0.78239608801956,
               "median": 1,
               "population_variance": 0.17025244947124898,
               "standard_deviation": 0.4126165889433543,
@@ -40096,7 +40067,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -40115,7 +40085,6 @@
             "pass_rate_percent": 71.42857142857143,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.7142857142857143,
               "median": 1,
               "population_variance": 0.20408163265306123,
               "standard_deviation": 0.45175395145262565,
@@ -40134,7 +40103,6 @@
             "pass_rate_percent": 42.857142857142854,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.42857142857142855,
               "median": 0,
               "population_variance": 0.24489795918367346,
               "standard_deviation": 0.4948716593053935,
@@ -40153,7 +40121,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40172,7 +40139,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40191,7 +40157,6 @@
             "pass_rate_percent": 71.42857142857143,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.7142857142857143,
               "median": 1,
               "population_variance": 0.20408163265306123,
               "standard_deviation": 0.45175395145262565,
@@ -40210,7 +40175,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40229,7 +40193,6 @@
             "pass_rate_percent": 74.58677685950413,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.7458677685950413,
               "median": 1.0,
               "population_variance": 0.1895490403660952,
               "standard_deviation": 0.4353723008714441,
@@ -40248,7 +40211,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -40267,7 +40229,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -40286,7 +40247,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40305,7 +40265,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40324,7 +40283,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40343,7 +40301,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40362,7 +40319,6 @@
             "pass_rate_percent": 28.57142857142857,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.2857142857142857,
               "median": 0,
               "population_variance": 0.20408163265306123,
               "standard_deviation": 0.45175395145262565,
@@ -40381,7 +40337,6 @@
             "pass_rate_percent": 74.0,
             "outcome_statistics": {
               "count": 300,
-              "mean": 0.74,
               "median": 1.0,
               "population_variance": 0.1924,
               "standard_deviation": 0.4386342439892262,
@@ -40400,7 +40355,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40419,7 +40373,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -40438,7 +40391,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -49890,7 +49842,8 @@
     },
     {
       "file": "stage_3.py",
-      "source_sha256": "cc8b25c6ddba6dd6b9c94f299d51a9b2dbf3140bc2a6546a8b070fffc4cc683b",
+      "source_sha256": "a9cbba640d57596988bc7b2dde0098ab8f5f8f79ed7c2eca431d86a4922c7be7",
+      "change_variance": 55.407766137384144,
       "shared_cases": 409,
       "targeted_cases": 490,
       "agent_cases": 0,
@@ -63401,7 +63354,6 @@
         "pass_rate_percent": 85.76195773081201,
         "outcome_statistics": {
           "count": 899,
-          "mean": 0.8576195773081201,
           "median": 1,
           "population_variance": 0.12210823792596148,
           "standard_deviation": 0.3494398917209675,
@@ -63413,7 +63365,6 @@
         },
         "numeric_error_statistics": {
           "count": 899,
-          "mean": -1.174638487208009,
           "median": 0.0,
           "population_variance": 55.407766137384144,
           "standard_deviation": 7.443639307313603,
@@ -63423,10 +63374,9 @@
           "p95": 0.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 1.174638487208009,
-          "mean_squared_error": 56.78754171301446,
-          "root_mean_squared_error": 7.535750905716992
+          "max_absolute_error": 100.0
         },
+        "change_variance": 55.407766137384144,
         "by_source": [
           {
             "name": "exhaustive",
@@ -63436,7 +63386,6 @@
             "pass_rate_percent": 81.40495867768594,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.8140495867768595,
               "median": 1.0,
               "population_variance": 0.1513728570452838,
               "standard_deviation": 0.3890666485902946,
@@ -63455,7 +63404,6 @@
             "pass_rate_percent": 83.33333333333334,
             "outcome_statistics": {
               "count": 6,
-              "mean": 0.8333333333333334,
               "median": 1.0,
               "population_variance": 0.1388888888888889,
               "standard_deviation": 0.37267799624996495,
@@ -63474,7 +63422,6 @@
             "pass_rate_percent": 90.95354523227384,
             "outcome_statistics": {
               "count": 409,
-              "mean": 0.9095354523227384,
               "median": 1,
               "population_variance": 0.08228071329081008,
               "standard_deviation": 0.286846149165036,
@@ -63495,7 +63442,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -63514,7 +63460,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63533,7 +63478,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63552,7 +63496,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -63571,7 +63514,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -63590,7 +63532,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63609,7 +63550,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63628,7 +63568,6 @@
             "pass_rate_percent": 81.40495867768594,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.8140495867768595,
               "median": 1.0,
               "population_variance": 0.1513728570452838,
               "standard_deviation": 0.3890666485902946,
@@ -63647,7 +63586,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63666,7 +63604,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -63685,7 +63622,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -63704,7 +63640,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63723,7 +63658,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63742,7 +63676,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63761,7 +63694,6 @@
             "pass_rate_percent": 83.33333333333334,
             "outcome_statistics": {
               "count": 6,
-              "mean": 0.8333333333333334,
               "median": 1.0,
               "population_variance": 0.1388888888888889,
               "standard_deviation": 0.37267799624996495,
@@ -63780,7 +63712,6 @@
             "pass_rate_percent": 89.66666666666666,
             "outcome_statistics": {
               "count": 300,
-              "mean": 0.8966666666666666,
               "median": 1.0,
               "population_variance": 0.09265555555555556,
               "standard_deviation": 0.3043937508483963,
@@ -63799,7 +63730,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63818,7 +63748,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -63837,7 +63766,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -73101,7 +73029,8 @@
     },
     {
       "file": "stage_4.py",
-      "source_sha256": "d1b4c8c619b55284708607d25ac076a578e15befc25f3e501e4c06678c6454cf",
+      "source_sha256": "fc48f7e6b2f1f2b70d0412676caaeee4d1766531b3ab5f9e2de0bb613bc73de9",
+      "change_variance": 0.16357185728245396,
       "shared_cases": 409,
       "targeted_cases": 489,
       "agent_cases": 0,
@@ -85097,7 +85026,6 @@
         "pass_rate_percent": 79.39866369710468,
         "outcome_statistics": {
           "count": 898,
-          "mean": 0.7939866369710468,
           "median": 1.0,
           "population_variance": 0.16357185728245396,
           "standard_deviation": 0.40444017763132034,
@@ -85109,7 +85037,6 @@
         },
         "numeric_error_statistics": {
           "count": 898,
-          "mean": -0.20601336302895323,
           "median": 0.0,
           "population_variance": 0.16357185728245396,
           "standard_deviation": 0.40444017763132034,
@@ -85119,10 +85046,9 @@
           "p95": 0.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 0.20601336302895323,
-          "mean_squared_error": 0.20601336302895323,
-          "root_mean_squared_error": 0.4538869496129551
+          "max_absolute_error": 1.0
         },
+        "change_variance": 0.16357185728245396,
         "by_source": [
           {
             "name": "exhaustive",
@@ -85132,7 +85058,6 @@
             "pass_rate_percent": 75.20661157024794,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.7520661157024794,
               "median": 1.0,
               "population_variance": 0.1864626733146643,
               "standard_deviation": 0.4318132389293597,
@@ -85151,7 +85076,6 @@
             "pass_rate_percent": 60.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.6,
               "median": 1,
               "population_variance": 0.24,
               "standard_deviation": 0.4898979485566356,
@@ -85170,7 +85094,6 @@
             "pass_rate_percent": 84.59657701711491,
             "outcome_statistics": {
               "count": 409,
-              "mean": 0.8459657701711492,
               "median": 1,
               "population_variance": 0.13030768586988362,
               "standard_deviation": 0.36098155890555356,
@@ -85191,7 +85114,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -85210,7 +85132,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -85229,7 +85150,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -85248,7 +85168,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -85267,7 +85186,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -85286,7 +85204,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -85305,7 +85222,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -85324,7 +85240,6 @@
             "pass_rate_percent": 75.20661157024794,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.7520661157024794,
               "median": 1.0,
               "population_variance": 0.1864626733146643,
               "standard_deviation": 0.4318132389293597,
@@ -85343,7 +85258,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -85362,7 +85276,6 @@
             "pass_rate_percent": 85.71428571428571,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.8571428571428571,
               "median": 1,
               "population_variance": 0.12244897959183673,
               "standard_deviation": 0.3499271061118826,
@@ -85381,7 +85294,6 @@
             "pass_rate_percent": 88.88888888888889,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0.8888888888888888,
               "median": 1,
               "population_variance": 0.09876543209876543,
               "standard_deviation": 0.31426968052735443,
@@ -85400,7 +85312,6 @@
             "pass_rate_percent": 87.5,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0.875,
               "median": 1.0,
               "population_variance": 0.109375,
               "standard_deviation": 0.33071891388307384,
@@ -85419,7 +85330,6 @@
             "pass_rate_percent": 87.5,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0.875,
               "median": 1.0,
               "population_variance": 0.109375,
               "standard_deviation": 0.33071891388307384,
@@ -85438,7 +85348,6 @@
             "pass_rate_percent": 87.5,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0.875,
               "median": 1.0,
               "population_variance": 0.109375,
               "standard_deviation": 0.33071891388307384,
@@ -85457,7 +85366,6 @@
             "pass_rate_percent": 60.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.6,
               "median": 1,
               "population_variance": 0.24,
               "standard_deviation": 0.4898979485566356,
@@ -85476,7 +85384,6 @@
             "pass_rate_percent": 84.0,
             "outcome_statistics": {
               "count": 300,
-              "mean": 0.84,
               "median": 1.0,
               "population_variance": 0.1344,
               "standard_deviation": 0.3666060555964672,
@@ -85495,7 +85402,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -85514,7 +85420,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -85533,7 +85438,6 @@
             "pass_rate_percent": 80.0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0.8,
               "median": 1,
               "population_variance": 0.16,
               "standard_deviation": 0.4,
@@ -94901,7 +94805,8 @@
     },
     {
       "file": "stage_5.py",
-      "source_sha256": "1fb31d71778f0b46be720ca65966905de222d56044a66f8b0f8ef3adf6a6c82c",
+      "source_sha256": "9bf24ac9afc5116ae5e841aaffc09b0fab3aa5c50497d387af31619387ff893b",
+      "change_variance": 0.0,
       "shared_cases": 409,
       "targeted_cases": 491,
       "agent_cases": 0,
@@ -151115,7 +151020,6 @@
         "pass_rate_percent": 37.44444444444445,
         "outcome_statistics": {
           "count": 900,
-          "mean": 0.37444444444444447,
           "median": 0.0,
           "population_variance": 0.2342358024691358,
           "standard_deviation": 0.4839791343323964,
@@ -151127,7 +151031,6 @@
         },
         "numeric_error_statistics": {
           "count": 900,
-          "mean": 0.0,
           "median": 0.0,
           "population_variance": 0.0,
           "standard_deviation": 0.0,
@@ -151137,10 +151040,9 @@
           "p95": 0.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 0.0,
-          "mean_squared_error": 0.0,
-          "root_mean_squared_error": 0.0
+          "max_absolute_error": 0.0
         },
+        "change_variance": 0.0,
         "by_source": [
           {
             "name": "exhaustive",
@@ -151150,7 +151052,6 @@
             "pass_rate_percent": 28.92561983471074,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.2892561983471074,
               "median": 0.0,
               "population_variance": 0.20558705006488628,
               "standard_deviation": 0.4534170817965356,
@@ -151169,7 +151070,6 @@
             "pass_rate_percent": 42.857142857142854,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.42857142857142855,
               "median": 0,
               "population_variance": 0.24489795918367346,
               "standard_deviation": 0.4948716593053935,
@@ -151188,7 +151088,6 @@
             "pass_rate_percent": 47.43276283618582,
             "outcome_statistics": {
               "count": 409,
-              "mean": 0.4743276283618582,
               "median": 0,
               "population_variance": 0.24934092933447313,
               "standard_deviation": 0.4993404943868193,
@@ -151209,7 +151108,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151228,7 +151126,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151247,7 +151144,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151266,7 +151162,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 9,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151285,7 +151180,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151304,7 +151198,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 7,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151323,7 +151216,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151342,7 +151234,6 @@
             "pass_rate_percent": 28.92561983471074,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0.2892561983471074,
               "median": 0.0,
               "population_variance": 0.20558705006488628,
               "standard_deviation": 0.4534170817965356,
@@ -151361,7 +151252,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151380,7 +151270,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151399,7 +151288,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151418,7 +151306,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151437,7 +151324,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151456,7 +151342,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 8,
-              "mean": 1,
               "median": 1.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151475,7 +151360,6 @@
             "pass_rate_percent": 42.857142857142854,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0.42857142857142855,
               "median": 0,
               "population_variance": 0.24489795918367346,
               "standard_deviation": 0.4948716593053935,
@@ -151494,7 +151378,6 @@
             "pass_rate_percent": 44.0,
             "outcome_statistics": {
               "count": 300,
-              "mean": 0.44,
               "median": 0.0,
               "population_variance": 0.2464,
               "standard_deviation": 0.4963869458396343,
@@ -151513,7 +151396,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151532,7 +151414,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -151551,7 +151432,6 @@
             "pass_rate_percent": 100,
             "outcome_statistics": {
               "count": 5,
-              "mean": 1,
               "median": 1,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -161695,7 +161575,8 @@
     },
     {
       "file": "stage_6.py",
-      "source_sha256": "239aeea554c999e457f7d471ae876910a54588fc84ba8cf9b031f475f7493bc8",
+      "source_sha256": "b64006813015cd9caf37cb8643141945e2e2986b1d69d6caf8ddae81550f527c",
+      "change_variance": 0.0,
       "shared_cases": 409,
       "targeted_cases": 489,
       "agent_cases": 0,
@@ -237647,7 +237528,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 898,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -237659,7 +237539,6 @@
         },
         "numeric_error_statistics": {
           "count": 898,
-          "mean": 1.0,
           "median": 1.0,
           "population_variance": 0.0,
           "standard_deviation": 0.0,
@@ -237669,10 +237548,9 @@
           "p95": 1.0,
           "iqr": 0.0,
           "excluded_cases": 0,
-          "mean_absolute_error": 1.0,
-          "mean_squared_error": 1.0,
-          "root_mean_squared_error": 1.0
+          "max_absolute_error": 1.0
         },
+        "change_variance": 0.0,
         "by_source": [
           {
             "name": "exhaustive",
@@ -237682,7 +237560,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237701,7 +237578,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237720,7 +237596,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 409,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237741,7 +237616,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237760,7 +237634,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237779,7 +237652,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237798,7 +237670,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237817,7 +237688,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237836,7 +237706,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237855,7 +237724,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237874,7 +237742,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 484,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237893,7 +237760,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237912,7 +237778,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 7,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237931,7 +237796,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 9,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237950,7 +237814,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237969,7 +237832,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -237988,7 +237850,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 8,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -238007,7 +237868,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -238026,7 +237886,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 300,
-              "mean": 0,
               "median": 0.0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -238045,7 +237904,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -238064,7 +237922,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,
@@ -238083,7 +237940,6 @@
             "pass_rate_percent": 0,
             "outcome_statistics": {
               "count": 5,
-              "mean": 0,
               "median": 0,
               "population_variance": 0,
               "standard_deviation": 0.0,

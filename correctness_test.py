@@ -12,7 +12,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
     root = Path(project_dir) if project_dir is not None else ROOT
     baseline = root / "original.py"
     common = correctness_cases(seed)
-    report = {"schema_version": 2, "run_id": str(uuid.uuid4()),
+    report = {"schema_version": 3, "run_id": str(uuid.uuid4()),
               "generated_at": datetime.now(timezone.utc).isoformat(),
               "seed": seed, "function": FUNCTION_NAME, "baseline": baseline.name,
               "baseline_sha256": source_hash(baseline), "candidates": [],
@@ -51,6 +51,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         expected = isolated(baseline, suite_path, "correctness")
         actual = isolated(path, suite_path, "correctness")
         entry = {"file": path.name, "source_sha256": source_hash(path),
+                 "change_variance": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
                  "agent_cases": len(agent_cases), "agent_status": "error" if agent_error else "used" if agent else "disabled",
                  "agent_error": agent_error,
@@ -70,10 +71,12 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
                     entry["failures"].append({"case": test, "expected": old, "actual": new})
             entry.update(status="fail" if entry["failures"] else "pass", passed=len(cases) - len(entry["failures"]))
             entry.update(statistics=correctness_statistics(rows), case_results=rows)
+            entry["change_variance"] = entry["statistics"]["change_variance"]
             if agent_error and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)
         print(f"{path.name}: {entry['status']} ({len(entry['failures'])} differences, {len(cases)} cases)")
+        print(f"  Output-change variance: {entry['change_variance']} (candidate output minus original)")
     save_json(root / "tests/correctness_cases.json", suites)
     save_json(root / "reports/correctness_report.json", report)
     # A correctness-only run must not present old speed measurements as current.

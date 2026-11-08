@@ -18,22 +18,21 @@ def rows(outcomes, errors):
 class StatisticsTests(unittest.TestCase):
     def test_known_distribution_and_empty_values(self):
         summary = describe([1, 2, 3, 4])
-        self.assertEqual(summary["mean"], 2.5)
+        self.assertNotIn("mean", summary)
         self.assertEqual(summary["median"], 2.5)
         self.assertEqual(summary["population_variance"], 1.25)
         self.assertEqual(summary["standard_deviation"], math.sqrt(1.25))
-        self.assertEqual(describe([])["mean"], None)
+        self.assertEqual(describe([])["median"], None)
 
     def test_mixed_correctness_and_numeric_errors(self):
         result = correctness_statistics(rows([True, False, True, False], [0, -2, 0, 2]))
         self.assertEqual(result["pass_rate_percent"], 50)
-        self.assertEqual(result["outcome_statistics"]["mean"], .5)
+        self.assertNotIn("mean", result["outcome_statistics"])
         self.assertEqual(result["outcome_statistics"]["population_variance"], .25)
         numeric = result["numeric_error_statistics"]
-        self.assertEqual(numeric["mean"], 0)  # Signed errors can cancel.
+        self.assertEqual(result["change_variance"], 2)
         self.assertEqual(numeric["population_variance"], 2)
-        self.assertEqual(numeric["mean_absolute_error"], 1)
-        self.assertEqual(numeric["mean_squared_error"], 2)
+        self.assertEqual(numeric["max_absolute_error"], 2)
         self.assertEqual(result["by_source"][0]["failed"], 2)
 
     def test_all_pass_and_all_fail_both_have_zero_outcome_variance(self):
@@ -41,19 +40,40 @@ class StatisticsTests(unittest.TestCase):
             result = correctness_statistics(rows([outcome] * 3, [None] * 3))
             self.assertEqual(result["outcome_statistics"]["population_variance"], 0)
             self.assertEqual(result["pass_rate_percent"], rate)
-            self.assertIsNone(result["numeric_error_statistics"]["mean_absolute_error"])
+            self.assertIsNone(result["numeric_error_statistics"]["max_absolute_error"])
 
     def test_percentage_speed_and_time_are_different(self):
         self.assertEqual(speed_percentages(2), {"speed_increase_percent": 100, "execution_time_reduction_percent": 50})
         self.assertEqual(speed_percentages(.5), {"speed_increase_percent": -50, "execution_time_reduction_percent": -100})
         timings = [{"speedup": n, "median_seconds": 1 / n, **speed_percentages(n)} for n in [2, .5]]
-        self.assertEqual(speed_statistics(timings)["geometric_mean_speedup"], 1)
+        result = speed_statistics(timings)
+        self.assertEqual(result["median_speedup"], 1.25)
+        self.assertEqual(result["speed_change_variance_pp_squared"], 5625)
+        self.assertEqual(result["worst_observed_speed"]["speed_increase_percent"], -50)
+        self.assertEqual(result["worst_observed_speed"]["slowdown_percent"], 100)
 
     def test_numeric_errors_exclude_exceptions_booleans_and_nonfinite_values(self):
         observation = {"exception": None, "value": 4}
         for value in [True, "4", float("inf")]:
             self.assertIsNone(numeric_error(observation, {"exception": None, "value": value}))
         self.assertIsNone(numeric_error(observation, {"exception": "ValueError", "value": 4}))
+
+    def test_relative_worst_and_slowest_runtime_are_distinct(self):
+        timings = [{"name": "least_improved", "size": 100, "median_seconds": 1, "speedup": 2,
+                    "speed_increase_percent": 100},
+                   {"name": "slowest_absolute", "size": 10000, "median_seconds": 10, "speedup": 4,
+                    "speed_increase_percent": 300}]
+        result = speed_statistics(timings)
+        self.assertEqual(result["worst_observed_speed"]["workload"], "least_improved")
+        self.assertEqual(result["worst_observed_speed"]["speed_increase_percent"], 100)
+        self.assertEqual(result["worst_observed_speed"]["slowdown_percent"], 0)
+        self.assertEqual(result["slowest_observed_workload"]["workload"], "slowest_absolute")
+        self.assertEqual(result["speed_change_variance_pp_squared"], 10000)
+
+    def test_constant_wrong_output_change_still_has_zero_variance(self):
+        result = correctness_statistics(rows([False, False], [1, 1]))
+        self.assertEqual(result["change_variance"], 0)
+        self.assertEqual(result["pass_rate_percent"], 0)
 
     def test_export_missing_speed_is_null_and_reports_must_match(self):
         report = {"run_id": "one", "generated_at": "2026-11-08T00:00:00+00:00", "seed": 1,
@@ -78,6 +98,7 @@ class StatisticsTests(unittest.TestCase):
                  "candidates": []}
         for name in ["stage_1.py", "final.py"]:
             correctness["candidates"].append({"file": name, "source_sha256": "same-code", "status": "pass",
+                                               "total": 1, "agent_status": "used",
                                                "statistics": correctness_statistics(rows([True], [0]))})
             speed["candidates"].append({"file": name, "status": "pass", "statistics": speed_statistics([timing]),
                                         "timings": [timing]})
@@ -89,6 +110,11 @@ class StatisticsTests(unittest.TestCase):
             self.assertEqual(sample["speed_increase_percent"], 100)
             self.assertEqual(sample["execution_time_reduction_percent"], 50)
             self.assertEqual(data["summary"][1]["identical_to"], "stage_1.py")
+            rejected = export(correctness, speed, output_dir=folder, score_threshold=100)
+            self.assertEqual(rejected['key_stages'], [])
+            self.assertEqual([r['stage'] for r in rejected['review_stages']], ['stage_1.py'])
+            self.assertTrue((Path(folder) / 'review_stages.json').exists())
+            self.assertTrue((Path(folder) / 'review_stages.csv').exists())
 
     def test_manifest_excludes_old_stages_and_rejects_mismatched_code(self):
         with tempfile.TemporaryDirectory(dir=test_utils.ROOT) as folder:

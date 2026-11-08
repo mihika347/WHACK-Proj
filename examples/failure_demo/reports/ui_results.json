@@ -1,15 +1,440 @@
 {
-  "schema_version": 1,
-  "run_id": "d38e472d-8f7a-45de-a063-1318dab8470e",
-  "generated_at": "2026-11-08T00:09:33.583525+00:00",
+  "schema_version": 4,
+  "scoring_policy": {
+    "version": 2,
+    "default_score_threshold": 70,
+    "description": "Correct measured stages: 20 correctness + up to 50 benefit + 20 worst-case + 10 consistency points. Incorrect stages: 0\u201319 points. Missing evidence: unscored.",
+    "benefit": "50 * max(mean_gain, 0) / (max(mean_gain, 0) + 100)",
+    "worst_case": "20 / (1 + worst_runtime_slowdown_percent / 20)",
+    "consistency": "10 / (1 + sqrt(speed_change_variance) / max(abs(mean_gain), 25))",
+    "incorrect": "19 * passed_cases / total_cases; never selectable",
+    "key_stages": "Every verified stage scoring strictly above the user threshold; no top-N limit. Failed or incomplete stages go to review. Final code is comparison only.",
+    "score_threshold": 70.0
+  },
+  "score_threshold": 70.0,
+  "review_stages": [
+    {
+      "stage": "stage_1.py",
+      "source_sha256": "de542170324bed6d82d7a288e561c5558c9ae1fbd61ce21f1332bba626e57857",
+      "identical_to": null,
+      "correctness_status": "pass",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 898,
+      "passed_cases": 898,
+      "failed_cases": 0,
+      "pass_rate_percent": 100,
+      "pass_population_variance": 0,
+      "numeric_error_population_variance": 0.0,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 0.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": null,
+      "rank": null,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {},
+      "score_reasons": [
+        "No verified benchmark evidence; unscored."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_2.py",
+      "source_sha256": "2364ee172b913ce506a871d1f7abe815f56180c9ed6563665b649d597d5f73b8",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 900,
+      "passed_cases": 683,
+      "failed_cases": 217,
+      "pass_rate_percent": 75.88888888888889,
+      "pass_population_variance": 0.18297654320987655,
+      "numeric_error_population_variance": 133.15577654320987,
+      "correctness_change_variance": 133.15577654320987,
+      "max_absolute_error": 199.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 14.42,
+      "rank": 3,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 14.42,
+        "performance": null
+      },
+      "score_reasons": [
+        "217 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_3.py",
+      "source_sha256": "a9cbba640d57596988bc7b2dde0098ab8f5f8f79ed7c2eca431d86a4922c7be7",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 899,
+      "passed_cases": 771,
+      "failed_cases": 128,
+      "pass_rate_percent": 85.76195773081201,
+      "pass_population_variance": 0.12210823792596148,
+      "numeric_error_population_variance": 55.407766137384144,
+      "correctness_change_variance": 55.407766137384144,
+      "max_absolute_error": 100.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 16.29,
+      "rank": 1,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 16.29,
+        "performance": null
+      },
+      "score_reasons": [
+        "128 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_4.py",
+      "source_sha256": "fc48f7e6b2f1f2b70d0412676caaeee4d1766531b3ab5f9e2de0bb613bc73de9",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 898,
+      "passed_cases": 713,
+      "failed_cases": 185,
+      "pass_rate_percent": 79.39866369710468,
+      "pass_population_variance": 0.16357185728245396,
+      "numeric_error_population_variance": 0.16357185728245396,
+      "correctness_change_variance": 0.16357185728245396,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 15.09,
+      "rank": 2,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 15.09,
+        "performance": null
+      },
+      "score_reasons": [
+        "185 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_5.py",
+      "source_sha256": "9bf24ac9afc5116ae5e841aaffc09b0fab3aa5c50497d387af31619387ff893b",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 900,
+      "passed_cases": 337,
+      "failed_cases": 563,
+      "pass_rate_percent": 37.44444444444445,
+      "pass_population_variance": 0.2342358024691358,
+      "numeric_error_population_variance": 0.0,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 0.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 7.11,
+      "rank": 4,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 7.11,
+        "performance": null
+      },
+      "score_reasons": [
+        "563 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_6.py",
+      "source_sha256": "b64006813015cd9caf37cb8643141945e2e2986b1d69d6caf8ddae81550f527c",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 898,
+      "passed_cases": 0,
+      "failed_cases": 898,
+      "pass_rate_percent": 0,
+      "pass_population_variance": 0,
+      "numeric_error_population_variance": 0.0,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 0.0,
+      "rank": 5,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 0.0,
+        "performance": null
+      },
+      "score_reasons": [
+        "898 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    }
+  ],
+  "stage_ranking": [
+    {
+      "stage": "stage_3.py",
+      "source_sha256": "a9cbba640d57596988bc7b2dde0098ab8f5f8f79ed7c2eca431d86a4922c7be7",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 899,
+      "passed_cases": 771,
+      "failed_cases": 128,
+      "pass_rate_percent": 85.76195773081201,
+      "pass_population_variance": 0.12210823792596148,
+      "numeric_error_population_variance": 55.407766137384144,
+      "correctness_change_variance": 55.407766137384144,
+      "max_absolute_error": 100.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 16.29,
+      "rank": 1,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 16.29,
+        "performance": null
+      },
+      "score_reasons": [
+        "128 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_4.py",
+      "source_sha256": "fc48f7e6b2f1f2b70d0412676caaeee4d1766531b3ab5f9e2de0bb613bc73de9",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 898,
+      "passed_cases": 713,
+      "failed_cases": 185,
+      "pass_rate_percent": 79.39866369710468,
+      "pass_population_variance": 0.16357185728245396,
+      "numeric_error_population_variance": 0.16357185728245396,
+      "correctness_change_variance": 0.16357185728245396,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 15.09,
+      "rank": 2,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 15.09,
+        "performance": null
+      },
+      "score_reasons": [
+        "185 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_2.py",
+      "source_sha256": "2364ee172b913ce506a871d1f7abe815f56180c9ed6563665b649d597d5f73b8",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 900,
+      "passed_cases": 683,
+      "failed_cases": 217,
+      "pass_rate_percent": 75.88888888888889,
+      "pass_population_variance": 0.18297654320987655,
+      "numeric_error_population_variance": 133.15577654320987,
+      "correctness_change_variance": 133.15577654320987,
+      "max_absolute_error": 199.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 14.42,
+      "rank": 3,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 14.42,
+        "performance": null
+      },
+      "score_reasons": [
+        "217 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_5.py",
+      "source_sha256": "9bf24ac9afc5116ae5e841aaffc09b0fab3aa5c50497d387af31619387ff893b",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 900,
+      "passed_cases": 337,
+      "failed_cases": 563,
+      "pass_rate_percent": 37.44444444444445,
+      "pass_population_variance": 0.2342358024691358,
+      "numeric_error_population_variance": 0.0,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 0.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 7.11,
+      "rank": 4,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 7.11,
+        "performance": null
+      },
+      "score_reasons": [
+        "563 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    },
+    {
+      "stage": "stage_6.py",
+      "source_sha256": "b64006813015cd9caf37cb8643141945e2e2986b1d69d6caf8ddae81550f527c",
+      "identical_to": null,
+      "correctness_status": "fail",
+      "speed_status": "not_run",
+      "agent_status": "disabled",
+      "total_cases": 898,
+      "passed_cases": 0,
+      "failed_cases": 898,
+      "pass_rate_percent": 0,
+      "pass_population_variance": 0,
+      "numeric_error_population_variance": 0.0,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
+      "speed_increase_percent": null,
+      "execution_time_reduction_percent": null,
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 0.0,
+      "rank": 5,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 0.0,
+        "performance": null
+      },
+      "score_reasons": [
+        "898 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
+    }
+  ],
+  "key_stages": [],
+  "run_id": "0b9211cd-0ff8-4faf-84fe-ea315fbb8c51",
+  "generated_at": "2026-11-08T03:28:50.385724+00:00",
   "has_speed_results": false,
   "seed": 20261107,
-  "baseline_sha256": "46c61dd2173936d21a3e9e1924ac04452b936b9ad557d713393145d850b5050b",
+  "baseline_sha256": "60c08a1bbf6e78dae6a5eea5465486d2f0486f9714244eaeed02389db7bedbed",
   "environment": null,
   "definitions": {
     "speed_increase_percent": "100 * (baseline_time / candidate_time - 1); negative means slower",
     "execution_time_reduction_percent": "100 * (1 - candidate_time / baseline_time); negative means longer execution",
-    "aggregate_speed": "Equal-workload geometric mean of median speedup ratios; not total elapsed time",
+    "aggregate_speed": "Median of per-workload median speedup ratios; not total elapsed time",
+    "correctness_change_variance": "Population variance of candidate minus original numeric outputs; excluded non-numeric/exception cases remain covered by pass/fail checks",
+    "speed_change_variance_pp_squared": "Population variance of percentage speed increases across workloads, in percentage-points squared; workload sensitivity, not timing noise or a confidence interval",
+    "worst_observed_speed": "Lowest percentage speed increase across workloads; may still be positive when every workload improves",
+    "slowest_observed_workload": "Largest candidate median execution time across workloads, distinct from worst relative speed change",
     "pass_population_variance": "Population variance of case outcomes (pass=1, fail=0), p*(1-p); not a correctness guarantee",
     "numeric_error": "Candidate minus baseline scalar return value; exceptions and non-finite/non-numeric outputs excluded",
     "timing_variance": "Population variance of per-call batch timing samples; UI units are microseconds squared",
@@ -22,7 +447,7 @@
   "summary": [
     {
       "stage": "stage_1.py",
-      "source_sha256": "ccca6198106fcc9042a5c81a83a3442e07ca8e3d1757a97b94ab1292f539671b",
+      "source_sha256": "de542170324bed6d82d7a288e561c5558c9ae1fbd61ce21f1332bba626e57857",
       "identical_to": null,
       "correctness_status": "pass",
       "speed_status": "not_run",
@@ -31,21 +456,32 @@
       "passed_cases": 898,
       "failed_cases": 0,
       "pass_rate_percent": 100,
-      "pass_mean": 1,
       "pass_population_variance": 0,
-      "numeric_error_mean": 0.0,
       "numeric_error_population_variance": 0.0,
-      "mean_absolute_error": 0.0,
-      "mean_squared_error": 0.0,
-      "root_mean_squared_error": 0.0,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 0.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": null,
+      "rank": null,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {},
+      "score_reasons": [
+        "No verified benchmark evidence; unscored."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     },
     {
       "stage": "stage_2.py",
-      "source_sha256": "fe1b6f3c3ded912a693fe4c949f6c80b25d596d4b3d2aa443619172c4eeb6099",
+      "source_sha256": "2364ee172b913ce506a871d1f7abe815f56180c9ed6563665b649d597d5f73b8",
       "identical_to": null,
       "correctness_status": "fail",
       "speed_status": "not_run",
@@ -54,21 +490,35 @@
       "passed_cases": 683,
       "failed_cases": 217,
       "pass_rate_percent": 75.88888888888889,
-      "pass_mean": 0.7588888888888888,
       "pass_population_variance": 0.18297654320987655,
-      "numeric_error_mean": -2.401111111111111,
       "numeric_error_population_variance": 133.15577654320987,
-      "mean_absolute_error": 2.401111111111111,
-      "mean_squared_error": 138.92111111111112,
-      "root_mean_squared_error": 11.786480013605042,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 133.15577654320987,
+      "max_absolute_error": 199.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 14.42,
+      "rank": 3,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 14.42,
+        "performance": null
+      },
+      "score_reasons": [
+        "217 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     },
     {
       "stage": "stage_3.py",
-      "source_sha256": "cc8b25c6ddba6dd6b9c94f299d51a9b2dbf3140bc2a6546a8b070fffc4cc683b",
+      "source_sha256": "a9cbba640d57596988bc7b2dde0098ab8f5f8f79ed7c2eca431d86a4922c7be7",
       "identical_to": null,
       "correctness_status": "fail",
       "speed_status": "not_run",
@@ -77,21 +527,35 @@
       "passed_cases": 771,
       "failed_cases": 128,
       "pass_rate_percent": 85.76195773081201,
-      "pass_mean": 0.8576195773081201,
       "pass_population_variance": 0.12210823792596148,
-      "numeric_error_mean": -1.174638487208009,
       "numeric_error_population_variance": 55.407766137384144,
-      "mean_absolute_error": 1.174638487208009,
-      "mean_squared_error": 56.78754171301446,
-      "root_mean_squared_error": 7.535750905716992,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 55.407766137384144,
+      "max_absolute_error": 100.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 16.29,
+      "rank": 1,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 16.29,
+        "performance": null
+      },
+      "score_reasons": [
+        "128 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     },
     {
       "stage": "stage_4.py",
-      "source_sha256": "d1b4c8c619b55284708607d25ac076a578e15befc25f3e501e4c06678c6454cf",
+      "source_sha256": "fc48f7e6b2f1f2b70d0412676caaeee4d1766531b3ab5f9e2de0bb613bc73de9",
       "identical_to": null,
       "correctness_status": "fail",
       "speed_status": "not_run",
@@ -100,21 +564,35 @@
       "passed_cases": 713,
       "failed_cases": 185,
       "pass_rate_percent": 79.39866369710468,
-      "pass_mean": 0.7939866369710468,
       "pass_population_variance": 0.16357185728245396,
-      "numeric_error_mean": -0.20601336302895323,
       "numeric_error_population_variance": 0.16357185728245396,
-      "mean_absolute_error": 0.20601336302895323,
-      "mean_squared_error": 0.20601336302895323,
-      "root_mean_squared_error": 0.4538869496129551,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 0.16357185728245396,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 15.09,
+      "rank": 2,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 15.09,
+        "performance": null
+      },
+      "score_reasons": [
+        "185 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     },
     {
       "stage": "stage_5.py",
-      "source_sha256": "1fb31d71778f0b46be720ca65966905de222d56044a66f8b0f8ef3adf6a6c82c",
+      "source_sha256": "9bf24ac9afc5116ae5e841aaffc09b0fab3aa5c50497d387af31619387ff893b",
       "identical_to": null,
       "correctness_status": "fail",
       "speed_status": "not_run",
@@ -123,21 +601,35 @@
       "passed_cases": 337,
       "failed_cases": 563,
       "pass_rate_percent": 37.44444444444445,
-      "pass_mean": 0.37444444444444447,
       "pass_population_variance": 0.2342358024691358,
-      "numeric_error_mean": 0.0,
       "numeric_error_population_variance": 0.0,
-      "mean_absolute_error": 0.0,
-      "mean_squared_error": 0.0,
-      "root_mean_squared_error": 0.0,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 0.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 7.11,
+      "rank": 4,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 7.11,
+        "performance": null
+      },
+      "score_reasons": [
+        "563 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     },
     {
       "stage": "stage_6.py",
-      "source_sha256": "239aeea554c999e457f7d471ae876910a54588fc84ba8cf9b031f475f7493bc8",
+      "source_sha256": "b64006813015cd9caf37cb8643141945e2e2986b1d69d6caf8ddae81550f527c",
       "identical_to": null,
       "correctness_status": "fail",
       "speed_status": "not_run",
@@ -146,17 +638,31 @@
       "passed_cases": 0,
       "failed_cases": 898,
       "pass_rate_percent": 0,
-      "pass_mean": 0,
       "pass_population_variance": 0,
-      "numeric_error_mean": 1.0,
       "numeric_error_population_variance": 0.0,
-      "mean_absolute_error": 1.0,
-      "mean_squared_error": 1.0,
-      "root_mean_squared_error": 1.0,
-      "geometric_mean_speedup": null,
+      "correctness_change_variance": 0.0,
+      "max_absolute_error": 1.0,
+      "speed_change_variance_pp_squared": null,
+      "worst_observed_speed_increase_percent": null,
+      "median_speedup": null,
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
-      "mean_workload_median_us": null
+      "worst_observed_speed": null,
+      "slowest_observed_workload": null,
+      "mean_speed_increase_percent": null,
+      "stage_score": 0.0,
+      "rank": 5,
+      "is_key_stage": false,
+      "selection_eligible": false,
+      "score_breakdown": {
+        "correctness": 0.0,
+        "performance": null
+      },
+      "score_reasons": [
+        "898 correctness failures; blocked from selection. Performance is not assumed."
+      ],
+      "meets_score_threshold": false,
+      "selection_reason": "Blocked: correctness failed or evidence is incomplete."
     }
   ],
   "charts": {
@@ -164,31 +670,43 @@
       {
         "stage": "stage_1.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       },
       {
         "stage": "stage_2.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       },
       {
         "stage": "stage_3.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       },
       {
         "stage": "stage_4.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       },
       {
         "stage": "stage_5.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       },
       {
         "stage": "stage_6.py",
         "speed_increase_percent": null,
+        "speed_change_variance_pp_squared": null,
+        "worst_observed_speed_increase_percent": null,
         "execution_time_reduction_percent": null
       }
     ],
@@ -197,37 +715,43 @@
         "stage": "stage_1.py",
         "pass_rate_percent": 100,
         "pass_population_variance": 0,
-        "mean_absolute_error": 0.0
+        "correctness_change_variance": 0.0,
+        "max_absolute_error": 0.0
       },
       {
         "stage": "stage_2.py",
         "pass_rate_percent": 75.88888888888889,
         "pass_population_variance": 0.18297654320987655,
-        "mean_absolute_error": 2.401111111111111
+        "correctness_change_variance": 133.15577654320987,
+        "max_absolute_error": 199.0
       },
       {
         "stage": "stage_3.py",
         "pass_rate_percent": 85.76195773081201,
         "pass_population_variance": 0.12210823792596148,
-        "mean_absolute_error": 1.174638487208009
+        "correctness_change_variance": 55.407766137384144,
+        "max_absolute_error": 100.0
       },
       {
         "stage": "stage_4.py",
         "pass_rate_percent": 79.39866369710468,
         "pass_population_variance": 0.16357185728245396,
-        "mean_absolute_error": 0.20601336302895323
+        "correctness_change_variance": 0.16357185728245396,
+        "max_absolute_error": 1.0
       },
       {
         "stage": "stage_5.py",
         "pass_rate_percent": 37.44444444444445,
         "pass_population_variance": 0.2342358024691358,
-        "mean_absolute_error": 0.0
+        "correctness_change_variance": 0.0,
+        "max_absolute_error": 0.0
       },
       {
         "stage": "stage_6.py",
         "pass_rate_percent": 0,
         "pass_population_variance": 0,
-        "mean_absolute_error": 1.0
+        "correctness_change_variance": 0.0,
+        "max_absolute_error": 1.0
       }
     ],
     "correctness_by_category": [
@@ -240,7 +764,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -260,7 +783,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -280,7 +802,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -300,7 +821,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -320,7 +840,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -340,7 +859,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -360,7 +878,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -380,7 +897,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 484,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -400,7 +916,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -420,7 +935,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -440,7 +954,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -460,7 +973,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -480,7 +992,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -500,7 +1011,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -520,7 +1030,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -540,7 +1049,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 300,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -560,7 +1068,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -580,7 +1087,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -600,7 +1106,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -620,7 +1125,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -640,7 +1144,6 @@
         "pass_rate_percent": 71.42857142857143,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.7142857142857143,
           "median": 1,
           "population_variance": 0.20408163265306123,
           "standard_deviation": 0.45175395145262565,
@@ -660,7 +1163,6 @@
         "pass_rate_percent": 42.857142857142854,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.42857142857142855,
           "median": 0,
           "population_variance": 0.24489795918367346,
           "standard_deviation": 0.4948716593053935,
@@ -680,7 +1182,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -700,7 +1201,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -720,7 +1220,6 @@
         "pass_rate_percent": 71.42857142857143,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.7142857142857143,
           "median": 1,
           "population_variance": 0.20408163265306123,
           "standard_deviation": 0.45175395145262565,
@@ -740,7 +1239,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -760,7 +1258,6 @@
         "pass_rate_percent": 74.58677685950413,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.7458677685950413,
           "median": 1.0,
           "population_variance": 0.1895490403660952,
           "standard_deviation": 0.4353723008714441,
@@ -780,7 +1277,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -800,7 +1296,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -820,7 +1315,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -840,7 +1334,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -860,7 +1353,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -880,7 +1372,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -900,7 +1391,6 @@
         "pass_rate_percent": 28.57142857142857,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.2857142857142857,
           "median": 0,
           "population_variance": 0.20408163265306123,
           "standard_deviation": 0.45175395145262565,
@@ -920,7 +1410,6 @@
         "pass_rate_percent": 74.0,
         "outcome_statistics": {
           "count": 300,
-          "mean": 0.74,
           "median": 1.0,
           "population_variance": 0.1924,
           "standard_deviation": 0.4386342439892262,
@@ -940,7 +1429,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -960,7 +1448,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -980,7 +1467,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1000,7 +1486,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1020,7 +1505,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1040,7 +1524,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1060,7 +1543,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1080,7 +1562,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1100,7 +1581,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1120,7 +1600,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1140,7 +1619,6 @@
         "pass_rate_percent": 81.40495867768594,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.8140495867768595,
           "median": 1.0,
           "population_variance": 0.1513728570452838,
           "standard_deviation": 0.3890666485902946,
@@ -1160,7 +1638,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1180,7 +1657,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -1200,7 +1676,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1220,7 +1695,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1240,7 +1714,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1260,7 +1733,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1280,7 +1752,6 @@
         "pass_rate_percent": 83.33333333333334,
         "outcome_statistics": {
           "count": 6,
-          "mean": 0.8333333333333334,
           "median": 1.0,
           "population_variance": 0.1388888888888889,
           "standard_deviation": 0.37267799624996495,
@@ -1300,7 +1771,6 @@
         "pass_rate_percent": 89.66666666666666,
         "outcome_statistics": {
           "count": 300,
-          "mean": 0.8966666666666666,
           "median": 1.0,
           "population_variance": 0.09265555555555556,
           "standard_deviation": 0.3043937508483963,
@@ -1320,7 +1790,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1340,7 +1809,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1360,7 +1828,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1380,7 +1847,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1400,7 +1866,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -1420,7 +1885,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -1440,7 +1904,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1460,7 +1923,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1480,7 +1942,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -1500,7 +1961,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1520,7 +1980,6 @@
         "pass_rate_percent": 75.20661157024794,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.7520661157024794,
           "median": 1.0,
           "population_variance": 0.1864626733146643,
           "standard_deviation": 0.4318132389293597,
@@ -1540,7 +1999,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1560,7 +2018,6 @@
         "pass_rate_percent": 85.71428571428571,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.8571428571428571,
           "median": 1,
           "population_variance": 0.12244897959183673,
           "standard_deviation": 0.3499271061118826,
@@ -1580,7 +2037,6 @@
         "pass_rate_percent": 88.88888888888889,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0.8888888888888888,
           "median": 1,
           "population_variance": 0.09876543209876543,
           "standard_deviation": 0.31426968052735443,
@@ -1600,7 +2056,6 @@
         "pass_rate_percent": 87.5,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0.875,
           "median": 1.0,
           "population_variance": 0.109375,
           "standard_deviation": 0.33071891388307384,
@@ -1620,7 +2075,6 @@
         "pass_rate_percent": 87.5,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0.875,
           "median": 1.0,
           "population_variance": 0.109375,
           "standard_deviation": 0.33071891388307384,
@@ -1640,7 +2094,6 @@
         "pass_rate_percent": 87.5,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0.875,
           "median": 1.0,
           "population_variance": 0.109375,
           "standard_deviation": 0.33071891388307384,
@@ -1660,7 +2113,6 @@
         "pass_rate_percent": 60.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.6,
           "median": 1,
           "population_variance": 0.24,
           "standard_deviation": 0.4898979485566356,
@@ -1680,7 +2132,6 @@
         "pass_rate_percent": 84.0,
         "outcome_statistics": {
           "count": 300,
-          "mean": 0.84,
           "median": 1.0,
           "population_variance": 0.1344,
           "standard_deviation": 0.3666060555964672,
@@ -1700,7 +2151,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1720,7 +2170,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1740,7 +2189,6 @@
         "pass_rate_percent": 80.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.8,
           "median": 1,
           "population_variance": 0.16,
           "standard_deviation": 0.4,
@@ -1760,7 +2208,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1780,7 +2227,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1800,7 +2246,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1820,7 +2265,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 9,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1840,7 +2284,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1860,7 +2303,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 7,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1880,7 +2322,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1900,7 +2341,6 @@
         "pass_rate_percent": 28.92561983471074,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.2892561983471074,
           "median": 0.0,
           "population_variance": 0.20558705006488628,
           "standard_deviation": 0.4534170817965356,
@@ -1920,7 +2360,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1940,7 +2379,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1960,7 +2398,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -1980,7 +2417,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2000,7 +2436,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2020,7 +2455,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 8,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2040,7 +2474,6 @@
         "pass_rate_percent": 42.857142857142854,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.42857142857142855,
           "median": 0,
           "population_variance": 0.24489795918367346,
           "standard_deviation": 0.4948716593053935,
@@ -2060,7 +2493,6 @@
         "pass_rate_percent": 44.0,
         "outcome_statistics": {
           "count": 300,
-          "mean": 0.44,
           "median": 0.0,
           "population_variance": 0.2464,
           "standard_deviation": 0.4963869458396343,
@@ -2080,7 +2512,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2100,7 +2531,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2120,7 +2550,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2140,7 +2569,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2160,7 +2588,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2180,7 +2607,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2200,7 +2626,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2220,7 +2645,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2240,7 +2664,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2260,7 +2683,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2280,7 +2702,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2300,7 +2721,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2320,7 +2740,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2340,7 +2759,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 9,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2360,7 +2778,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2380,7 +2797,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2400,7 +2816,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 8,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2420,7 +2835,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2440,7 +2854,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 300,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2460,7 +2873,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2480,7 +2892,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2500,7 +2911,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2522,7 +2932,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 484,
-          "mean": 1,
           "median": 1.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2542,7 +2951,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 5,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2562,7 +2970,6 @@
         "pass_rate_percent": 100,
         "outcome_statistics": {
           "count": 409,
-          "mean": 1,
           "median": 1,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2582,7 +2989,6 @@
         "pass_rate_percent": 74.58677685950413,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.7458677685950413,
           "median": 1.0,
           "population_variance": 0.1895490403660952,
           "standard_deviation": 0.4353723008714441,
@@ -2602,7 +3008,6 @@
         "pass_rate_percent": 28.57142857142857,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.2857142857142857,
           "median": 0,
           "population_variance": 0.20408163265306123,
           "standard_deviation": 0.45175395145262565,
@@ -2622,7 +3027,6 @@
         "pass_rate_percent": 78.239608801956,
         "outcome_statistics": {
           "count": 409,
-          "mean": 0.78239608801956,
           "median": 1,
           "population_variance": 0.17025244947124898,
           "standard_deviation": 0.4126165889433543,
@@ -2642,7 +3046,6 @@
         "pass_rate_percent": 81.40495867768594,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.8140495867768595,
           "median": 1.0,
           "population_variance": 0.1513728570452838,
           "standard_deviation": 0.3890666485902946,
@@ -2662,7 +3065,6 @@
         "pass_rate_percent": 83.33333333333334,
         "outcome_statistics": {
           "count": 6,
-          "mean": 0.8333333333333334,
           "median": 1.0,
           "population_variance": 0.1388888888888889,
           "standard_deviation": 0.37267799624996495,
@@ -2682,7 +3084,6 @@
         "pass_rate_percent": 90.95354523227384,
         "outcome_statistics": {
           "count": 409,
-          "mean": 0.9095354523227384,
           "median": 1,
           "population_variance": 0.08228071329081008,
           "standard_deviation": 0.286846149165036,
@@ -2702,7 +3103,6 @@
         "pass_rate_percent": 75.20661157024794,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.7520661157024794,
           "median": 1.0,
           "population_variance": 0.1864626733146643,
           "standard_deviation": 0.4318132389293597,
@@ -2722,7 +3122,6 @@
         "pass_rate_percent": 60.0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0.6,
           "median": 1,
           "population_variance": 0.24,
           "standard_deviation": 0.4898979485566356,
@@ -2742,7 +3141,6 @@
         "pass_rate_percent": 84.59657701711491,
         "outcome_statistics": {
           "count": 409,
-          "mean": 0.8459657701711492,
           "median": 1,
           "population_variance": 0.13030768586988362,
           "standard_deviation": 0.36098155890555356,
@@ -2762,7 +3160,6 @@
         "pass_rate_percent": 28.92561983471074,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0.2892561983471074,
           "median": 0.0,
           "population_variance": 0.20558705006488628,
           "standard_deviation": 0.4534170817965356,
@@ -2782,7 +3179,6 @@
         "pass_rate_percent": 42.857142857142854,
         "outcome_statistics": {
           "count": 7,
-          "mean": 0.42857142857142855,
           "median": 0,
           "population_variance": 0.24489795918367346,
           "standard_deviation": 0.4948716593053935,
@@ -2802,7 +3198,6 @@
         "pass_rate_percent": 47.43276283618582,
         "outcome_statistics": {
           "count": 409,
-          "mean": 0.4743276283618582,
           "median": 0,
           "population_variance": 0.24934092933447313,
           "standard_deviation": 0.4993404943868193,
@@ -2822,7 +3217,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 484,
-          "mean": 0,
           "median": 0.0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2842,7 +3236,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 5,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,
@@ -2862,7 +3255,6 @@
         "pass_rate_percent": 0,
         "outcome_statistics": {
           "count": 409,
-          "mean": 0,
           "median": 0,
           "population_variance": 0,
           "standard_deviation": 0.0,

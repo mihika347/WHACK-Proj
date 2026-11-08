@@ -339,6 +339,7 @@ main {
 .report-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; padding: 16px; }
 .report-controls > label:not(.report-upload) { display: grid; gap: 7px; flex: 1 1 170px; font-size: .78rem; color: var(--muted); }
 .report-controls select { width: 100%; border: 1px solid #4d4569; border-radius: 7px; background: #1a1b30; color: #f3f2ff; font: inherit; padding: 10px; min-height: 40px; }
+.report-controls input:not([type="file"]) { width: 100%; border: 1px solid #4d4569; border-radius: 7px; background: #1a1b30; color: #f3f2ff; font: inherit; padding: 10px; min-height: 40px; }
 .report-upload { position: relative; overflow: hidden; }
 .report-upload input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
 .report-upload:focus-within { outline: 2px solid var(--violet); outline-offset: 3px; }

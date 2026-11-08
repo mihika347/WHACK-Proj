@@ -54,20 +54,30 @@
           <section class="code-pane panel" id="code-pane" aria-labelledby="source-file">
             <header class="code-header">
               <h2 id="source-file"></h2>
-              <span class="label">Python</span>
+              <div class="code-header-actions">
+                <span class="label">Python</span>
+                <button class="button secondary code-close" id="test-case-code-close" type="button" aria-label="Collapse code pane" aria-controls="code-pane" hidden>&lt;</button>
+              </div>
             </header>
             <div class="diff-toolbar" id="diff-toolbar"></div>
             <div class="code-scroll" id="source-diff" tabindex="0" role="region" aria-label="Source code"></div>
             <p class="code-footer" id="code-footer"></p>
           </section>
-          <div id="split-divider" class="split-divider" role="separator" tabindex="0"
-            aria-label="Source pane width" aria-controls="code-pane" aria-orientation="vertical"
-            aria-valuemin="30" aria-valuemax="65" aria-valuenow="48"></div>
-          <section class="details panel" aria-label="Run details">
+          <div class="split-rail" id="split-rail">
+            <div id="split-divider" class="split-divider" role="separator" tabindex="0"
+              aria-label="Source pane width" aria-controls="code-pane" aria-orientation="vertical"
+              aria-valuemin="30" aria-valuemax="65" aria-valuenow="48"></div>
+            <div class="split-pane-buttons" role="group" aria-label="Pane controls">
+              <button class="button secondary" id="split-left" type="button" aria-label="Collapse code pane" aria-controls="code-pane">&lt;</button>
+              <button class="button secondary" id="split-right" type="button" aria-label="Collapse details pane" aria-controls="details-pane">&gt;</button>
+            </div>
+          </div>
+          <section class="details panel" id="details-pane" aria-label="Run details">
             <p id="build-status" class="visually-hidden" role="status"></p>
             <div id="details-content"></div>
           </section>
         </div>
+        <section class="panel final-improvement" id="final-improvement" aria-labelledby="final-improvement-title" hidden></section>
       </section>
     </main>
   </div>

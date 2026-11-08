@@ -2,20 +2,11 @@
   "stages": [
     {
       "stage": 1,
-      "name": "Use built\u2011in list.count",
-      "explanation": "The built\u2011in count method is implemented in C and avoids the Python loop overhead.",
-      "code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))",
+      "name": "Use built-in list.count()",
+      "explanation": "The built\u2011in count method is implemented in C and performs the comparison loop internally, which is faster than a Python while loop.",
+      "code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nif __name__ == \"__main__\":\n    examples = [\n        ([], 0, 0),\n        ([2, 2, 2, 3], 2, 3),\n        ([0, 1, 0, 0], 0, 3),\n        ([-3, 1, -3], -3, 2),\n        ([1, 2, 9], 9, 1),\n        ([1, 2, 3], 8, 0),\n    ]\n\n    for numbers, target, expected in examples:\n        actual = count_matches(numbers, target)\n        print(\n            f\"{numbers}, target={target}: \"\n            f\"result={actual}, expected={expected}\"\n        )",
       "overlaps_with": []
-    },
-    {
-      "stage": 2,
-      "name": "Use generator expression with sum",
-      "explanation": "A generator expression avoids creating an intermediate list and the sum function is a fast C implementation.",
-      "code": "def count_matches(numbers, target):\n    return sum(1 for number in numbers if number == target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))",
-      "overlaps_with": [
-        1
-      ]
     }
   ],
-  "final_code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nprint(count_matches([1, 2, 3, 2, 2, 4], 2))"
+  "final_code": "def count_matches(numbers, target):\n    return numbers.count(target)\n\nif __name__ == \"__main__\":\n    examples = [\n        ([], 0, 0),\n        ([2, 2, 2, 3], 2, 3),\n        ([0, 1, 0, 0], 0, 3),\n        ([-3, 1, -3], -3, 2),\n        ([1, 2, 9], 9, 1),\n        ([1, 2, 3], 8, 0),\n    ]\n\n    for numbers, target, expected in examples:\n        actual = count_matches(numbers, target)\n        print(\n            f\"{numbers}, target={target}: \"\n            f\"result={actual}, expected={expected}\"\n        )"
 }

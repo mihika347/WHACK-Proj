@@ -7,6 +7,7 @@ import difflib
 import importlib.util
 import io
 import json
+import hashlib
 from pathlib import Path
 import random
 import statistics
@@ -24,10 +25,34 @@ def save_json(path, value):
     path.write_text(json.dumps(value, indent=2, allow_nan=False), encoding="utf-8")
 
 
-def candidates():
-    stages = list((ROOT / "output").glob("stage_*.py"))
+def source_hash(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def candidates(project_dir=None):
+    root = Path(project_dir) if project_dir is not None else ROOT
+    manifest = root / "output/report.json"
+    if manifest.exists():
+        report = json.loads(manifest.read_text(encoding="utf-8"))
+        selected = []
+        seen = set()
+        for stage in report["stages"]:
+            number = stage["stage"]
+            if type(number) is not int or number < 1 or number in seen:
+                raise ValueError("report.json must contain distinct positive integer stage IDs")
+            seen.add(number)
+            path = root / "output" / f"stage_{number}.py"
+            if path.read_text(encoding="utf-8") != stage["code"]:
+                raise ValueError(f"{path.name} does not match the latest report; regenerate the stages")
+            selected.append(path)
+        final = root / "output/final_optimised.py"
+        if final.read_text(encoding="utf-8") != report["final_code"]:
+            raise ValueError("Final code does not match the latest report; regenerate the stages")
+        return selected + [final]
+    # Standalone candidate files are supported when no generator manifest exists.
+    stages = list((root / "output").glob("stage_*.py"))
     stages.sort(key=lambda p: (int(p.stem.split("_")[-1]) if p.stem.split("_")[-1].isdigit() else sys.maxsize, p.name))
-    final = ROOT / "output/final_optimised.py"
+    final = root / "output/final_optimised.py"
     return stages + ([final] if final.exists() else [])
 
 
@@ -35,17 +60,21 @@ def case(name, numbers, target):
     return {"name": name, "numbers": numbers, "target": target}
 
 
-def correctness_cases():
-    rng = random.Random(SEED)
+def correctness_cases(seed=SEED):
+    rng = random.Random(seed)
     lists = [[], [0], [1], [-1], [1, 2, 3, 4], [-4, -3, -2, -1],
              [-8, 4, 0, -2, 9], [0] * 40, [7] * 40,
              [1, 2, 2, 3, 3, 3], list(range(-30, 31)), list(range(30, -31, -1)),
              [1, 2, 5, 4, 3, 6], [-1, 1, -2, 2] * 12,
              [-10**6, 10**6] * 20, [10**100, -10**100, 0, 10**100]]
     result = []
+    categories = ["empty", "singleton_zero", "singleton_positive", "singleton_negative", "positive",
+                  "negative", "mixed_signs", "all_zeros", "identical", "duplicates", "ascending",
+                  "descending", "nearly_sorted", "alternating_signs", "alternating_extremes", "large_integers"]
     for i, numbers in enumerate(lists):
         targets = list(dict.fromkeys([0, -1, 1, 7, 999999, *numbers[:2], *numbers[-2:]]))
-        result.extend(case(f"boundary_{i}_target_{j}", numbers, target) for j, target in enumerate(targets))
+        result.extend({**case(f"boundary_{i}_target_{j}", numbers, target), "category": categories[i]}
+                      for j, target in enumerate(targets))
     for i in range(300):
         size = rng.choice([0, 1, 2, 3, 10, 31, 100, 200])
         bound = rng.choice([1, 3, 100, 10**6, 10**30])
@@ -53,7 +82,7 @@ def correctness_cases():
         if i % 4 == 0:
             numbers.sort(reverse=bool(i % 8))
         target = rng.choice(numbers) if numbers and i % 2 else rng.randint(-bound, bound)
-        result.append(case(f"random_{i}", numbers, target))
+        result.append({**case(f"random_{i}", numbers, target), "category": "seeded_random"})
     return result
 
 
@@ -146,6 +175,7 @@ def isolated(path, suite_path, mode, timeout=60):
 
 
 def worker(path, suite_path, mode):
+    from result_stats import describe
     function = load_function(path)
     tests = json.loads(Path(suite_path).read_text(encoding="utf-8"))
     if mode == "correctness":
@@ -165,6 +195,7 @@ def worker(path, suite_path, mode):
             samples.append((time.perf_counter_ns() - start) / repetitions / 1e9)
         timings.append({"name": test["name"], "size": len(test["numbers"]),
                         "median_seconds": statistics.median(samples), "samples_seconds": samples,
+                        "timing_statistics_seconds": describe(samples),
                         "calls_per_sample": repetitions})
     return {"timings": timings}
 

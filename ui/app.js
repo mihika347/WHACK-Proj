@@ -56,6 +56,7 @@ function readDecisions() {
 
 function saveDecision(candidate, decision) {
   decisions.set(candidate.id, decision);
+  finalBuild = undefined;
   try {
     sessionStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(decisions)));
   } catch {
@@ -107,6 +108,10 @@ function renderNavigation({ stage, view, candidate }) {
 }
 
 function stageSummary(stage) {
+  const file = activeProjectFile();
+  if (file && !file.demo) {
+    return stage === 'original' ? file.name : stage === 'tests' ? 'Upload tests for this file' : 'Awaiting optimisation';
+  }
   const entered = stageCandidates(stage).length;
   const removed = candidates.filter((candidate) => candidate.filteredAt === stage).length;
   switch (stage) {
@@ -191,13 +196,23 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 function renderCode({ stage, candidate }) {
   const isFinal = stage === 'final';
   const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
+  if (isFinal && !hasFinalDiff) {
+    displayedCode = undefined;
+    byId('source-file').textContent = demoRun.filename;
+    byId('diff-toolbar').textContent = finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
+    byId('source-diff').replaceChildren();
+    byId('source-diff').setAttribute('aria-label', 'Final code');
+    byId('code-footer').textContent = finalBuild?.status === 'failed'
+      ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
+    return;
+  }
   const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
   const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
 
   const applied = hasFinalDiff ? finalBuild.applied : isBaseline ? [] : [candidate];
-  const title = hasFinalDiff ? 'Combined diff' : isBaseline ? 'Original source' : 'Candidate diff';
+  const title = hasFinalDiff ? 'Final code · all approved changes' : isBaseline ? 'Original source' : 'Candidate diff';
   const baseline = demoRun.baseline;
   const rows = [];
   let before = 0;
@@ -211,7 +226,7 @@ function renderCode({ stage, candidate }) {
       after += 1;
     }
     for (let i = 0; i < patch.remove; i += 1) {
-      rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
+      if (!hasFinalDiff) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
       before += 1;
     }
     for (const line of patch.lines) {
@@ -395,9 +410,11 @@ function generateBuild() {
   const selected = approvedCandidates();
   if (!selected.length || finalBuild?.status === 'pending') return;
   finalBuild = { status: 'pending', selected };
+  const pendingBuild = finalBuild;
   location.hash = route('final');
 
   window.setTimeout(() => {
+    if (finalBuild !== pendingBuild) return;
     // Insertions at a replacement boundary can be applied before the replacement.
     const applied = [...selected].sort((a, b) =>
       a.patch.start - b.patch.start || a.patch.remove - b.patch.remove,
@@ -454,7 +471,13 @@ function renderBuildUpdate() {
 }
 
 function render(focusHeading = false) {
+  renderFileList();
+  if (renderProjectFile(focusHeading)) return;
+  byId('file-editor').hidden = true;
+  byId('source-diff').hidden = false;
+  document.querySelector('.code-header .label').textContent = 'Python';
   const state = readRoute();
+  if (state.stage === 'final' && !finalBuild && approvedCandidates().length) generateBuild();
   const atHome = state.view === 'pipeline';
   const atTestCases = state.view === 'tests';
   byId('pipeline-home').hidden = !atHome;

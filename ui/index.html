@@ -9,15 +9,34 @@
   <script defer src="demo.js"></script>
   <script defer src="test-case-data.js"></script>
   <script defer src="test-cases.js"></script>
+  <script defer src="files.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <header class="topbar">
+    <div class="header-file-controls">
+      <button id="toggle-files" class="file-toggle" aria-label="Toggle files" aria-expanded="true" aria-controls="file-panel-content" title="Toggle files">☰</button>
+      <label for="header-file-select" class="visually-hidden">Active code file</label>
+      <select id="header-file-select" class="header-file-select" aria-label="Active code file"></select>
+    </div>
     <a class="brand" href="#pipeline" aria-label="FastForward pipeline home">FastForward</a>
     <span class="badge demo-badge"><span class="dot"></span> Demo run</span>
   </header>
 
   <div class="shell">
+    <aside class="file-panel" aria-label="Project files">
+      <div id="file-panel-content">
+        <ul id="project-files" class="project-files"></ul>
+        <form id="new-file-form" class="new-file-form">
+          <label for="new-file-name">New file name</label>
+          <input id="new-file-name" required placeholder="helpers.py" maxlength="100">
+          <button type="submit">+ New file</button>
+        </form>
+        <button type="button" class="import-files" id="import-files-button">+ Import files</button>
+        <input id="import-files" type="file" accept=".py,.txt,.js,.json,.md,.css,.html,.csv" multiple hidden>
+        <p id="file-status" role="status" class="file-status"></p>
+      </div>
+    </aside>
     <nav class="sidebar" aria-label="Run views" id="navigation"></nav>
     <main id="main">
       <section class="home" id="pipeline-home" aria-labelledby="home-title">
@@ -58,6 +77,7 @@
             </header>
             <div class="diff-toolbar" id="diff-toolbar"></div>
             <div class="code-scroll" id="source-diff" tabindex="0" role="region" aria-label="Source code"></div>
+            <textarea id="file-editor" class="file-editor" aria-label="File contents" spellcheck="false" hidden></textarea>
             <p class="code-footer" id="code-footer"></p>
           </section>
           <div id="split-divider" class="split-divider" role="separator" tabindex="0"

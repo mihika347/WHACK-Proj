@@ -60,6 +60,37 @@ class GeneratorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             materialise(SOURCE, {'stages': [stage(replacement='def total(numbers, extra):\n    return sum(numbers)\n')]})
 
+    def test_invalid_proposals_do_not_discard_valid_stages(self):
+        unchanged = stage(2, 'count_matches', 'def count_matches(numbers, target):\n    return sum(1 for n in numbers if n == target)\n')
+        result = materialise(SOURCE, {'stages': [
+            unchanged, stage(3, replacement='def total(numbers, extra):\n    return 0\n'),
+            stage(4, imports=['print("bad")']), stage(), None,
+        ]})
+        self.assertEqual([item['stage'] for item in result['stages']], [1])
+        self.assertEqual(len(result['skipped_proposals']), 4)
+        self.assertIn('must change', result['skipped_proposals'][0]['reason'])
+        self.assertNotIn('print("bad")', result['final_code'])
+
+    def test_no_usable_stages_retries_without_overwriting(self):
+        unchanged = stage(1, 'count_matches', 'def count_matches(numbers, target):\n    return sum(1 for n in numbers if n == target)\n')
+        for proposals in [[], [unchanged]]:
+            with self.subTest(proposals=proposals), self.assertRaisesRegex(ValueError, 'No usable'):
+                materialise(SOURCE, {'stages': proposals})
+
+    def test_mixed_response_is_saved_without_retry(self):
+        calls = []
+        def reply(**kwargs):
+            calls.append(kwargs)
+            return SimpleNamespace(choices=[SimpleNamespace(finish_reason='stop', message=SimpleNamespace(
+                content=json.dumps({'stages': [stage(2, replacement='invalid python'), stage()]})))])
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=reply)))
+        with tempfile.TemporaryDirectory(dir=ROOT) as folder:
+            result = generate(client, 'mock-model', SOURCE, folder)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(len(result['stages']), 1)
+            report = json.loads((Path(folder) / 'report.json').read_text())
+            self.assertEqual(len(report['skipped_proposals']), 1)
+
     def test_truncated_response_retries_and_records_finish_reason(self):
         replies = iter([SimpleNamespace(finish_reason='length', message=SimpleNamespace(content='{"stages":[')),
                         SimpleNamespace(finish_reason='stop', message=SimpleNamespace(content=json.dumps({'stages': [stage()]})))])

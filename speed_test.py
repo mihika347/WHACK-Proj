@@ -31,6 +31,7 @@ def benchmark(correctness, project_dir=ROOT, score_threshold=70):
               "correctness_seed": correctness["seed"], "seed": SEED, "python": sys.version, "platform": platform.platform(),
               "baseline_sha256": correctness["baseline_sha256"],
               "clock": "perf_counter_ns", "warmup_calls": 3, "samples": 7,
+              "batch_policy": "Per-workload calibration targets 5 ms per sample, with 1–200 calls. Copying excluded; runtimes normalised per call.",
               "summary": "Median percentage speed increase, population variance of percentage changes across workloads, and worst observed speed.",
               "baseline": reference, "candidates": []}
     for path in candidates(root):

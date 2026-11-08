@@ -174,6 +174,11 @@ def isolated(path, suite_path, mode, timeout=60, *, project_dir=ROOT):
         return {"error": str(exc)}
 
 
+def benchmark_repetitions(elapsed_seconds):
+    """Aim for 5 ms batches; expensive functions need only one call per sample."""
+    return max(1, min(200, int(0.005 / max(elapsed_seconds, 1e-9))))
+
+
 def worker(path, suite_path, mode):
     from result_stats import describe
     function = load_function(path)
@@ -187,10 +192,14 @@ def worker(path, suite_path, mode):
     timings = []
     for test in tests:
         # Input copying is outside the timed interval; every call receives a fresh list.
+        calibration = []
         for _ in range(3):
-            function(list(test["numbers"]), test["target"])
+            numbers = list(test["numbers"])
+            start = time.perf_counter_ns()
+            function(numbers, test["target"])
+            calibration.append((time.perf_counter_ns() - start) / 1e9)
         samples = []
-        repetitions = max(5, min(200, 100000 // max(1, len(test["numbers"]))))
+        repetitions = benchmark_repetitions(statistics.median(calibration))
         for _ in range(7):
             inputs = [list(test["numbers"]) for _ in range(repetitions)]
             start = time.perf_counter_ns()

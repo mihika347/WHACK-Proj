@@ -6,7 +6,7 @@ try {
   if (saved && Array.isArray(saved.files) && saved.files.every(f =>
     typeof f.id === 'string' && typeof f.name === 'string' && typeof f.content === 'string')) {
     project = saved;
-    if (!project.files.some(f => f.id === project.active)) project.active = project.files[0]?.id;
+    if (!activeProjectFile()) project.active = project.files[0]?.id ?? savedRunFiles[0]?.id;
   }
 } catch { /* Keep files in memory when storage is unavailable. */ }
 
@@ -30,15 +30,16 @@ function validFileName(name, exceptId) {
 }
 
 function renderFileList() {
+  const files = [...project.files, ...savedRunFiles];
   const dropdown = document.getElementById('header-file-select');
   dropdown.replaceChildren();
-  dropdown.disabled = !project.files.length;
-  if (!project.files.length) {
+  dropdown.disabled = !files.length;
+  if (!files.length) {
     const option = document.createElement('option');
     option.textContent = 'No files';
     dropdown.append(option);
   }
-  for (const file of project.files) {
+  for (const file of files) {
     const option = document.createElement('option');
     option.value = file.id;
     option.textContent = file.name;
@@ -50,16 +51,16 @@ function renderFileList() {
   document.querySelector('.shell').classList.toggle('files-collapsed', !!project.collapsed);
   document.getElementById('file-panel-content').hidden = !!project.collapsed;
   document.getElementById('toggle-files').setAttribute('aria-expanded', String(!project.collapsed));
-  for (const file of project.files) {
+  for (const file of files) {
     const item = document.createElement('li');
     const select = document.createElement('button');
     select.className = 'file-select';
     select.textContent = file.name;
     select.title = file.name;
     if (file.id === project.active) select.setAttribute('aria-current', 'true');
-    select.onclick = () => { project.active = file.id; saveProject(); render(); };
+    select.onclick = () => selectProjectFile(file.id);
     item.append(select);
-    for (const action of ['Rename', 'Delete']) {
+    for (const action of file.savedRun ? [] : ['Rename', 'Delete']) {
       const button = document.createElement('button');
       button.className = 'file-action';
       button.textContent = action === 'Rename' ? '✎' : '×';
@@ -74,7 +75,7 @@ function renderFileList() {
         } else {
           if (!window.confirm(`Delete ${file.name} from this workspace?`)) return;
           project.files = project.files.filter(f => f.id !== file.id);
-          if (project.active === file.id) project.active = project.files[0]?.id;
+          if (project.active === file.id) project.active = project.files[0]?.id ?? savedRunFiles[0]?.id;
         }
         saveProject(); render();
       };
@@ -93,7 +94,7 @@ function addProjectFile(name, content) {
 }
 
 function renderProjectFile(focusHeading) {
-  const file = project.files.find(f => f.id === project.active);
+  const file = activeProjectFile();
   if (file?.demo) {
     document.querySelector('.demo-badge').hidden = false;
     document.getElementById('home-title').textContent = 'Optimisation pipeline';
@@ -102,12 +103,17 @@ function renderProjectFile(focusHeading) {
     return false;
   }
   document.querySelector('.demo-badge').hidden = true;
+  if (file?.savedRun) {
+    document.getElementById('home-title').textContent = 'Optimisation pipeline';
+    loadSavedRun(file);
+    return false;
+  }
+  document.getElementById('final-improvement').hidden = true;
+  displayedCode = undefined;
   if (!file) {
     document.getElementById('pipeline-home').hidden = true;
     document.getElementById('workspace').hidden = false;
-    document.getElementById('code-pane').hidden = true;
-    divider.hidden = true;
-    split.classList.add('single-panel');
+    setSplitLayout('details-only');
     document.getElementById('workspace-stages').replaceChildren();
     document.getElementById('details-content').innerHTML = '<h2 id="view-title" tabindex="-1">No files</h2><p>Add or import a file using the Files panel.</p>';
     return true;
@@ -117,9 +123,7 @@ function renderProjectFile(focusHeading) {
   const atTests = state.view === 'tests';
   document.getElementById('pipeline-home').hidden = !atHome;
   document.getElementById('workspace').hidden = atHome;
-  document.getElementById('code-pane').hidden = atTests;
-  divider.hidden = atTests;
-  split.classList.toggle('single-panel', atTests);
+  setSplitLayout(atTests ? 'details-only' : 'split');
   renderNavigation(state);
   renderPipeline(state);
   const name = escapeHtml(file.name);
@@ -151,7 +155,17 @@ function renderProjectFile(focusHeading) {
   return true;
 }
 
-function activeProjectFile() { return project.files.find(f => f.id === project.active); }
+function activeProjectFile() {
+  return project.files.find(file => file.id === project.active) ?? savedRunFiles.find(file => file.id === project.active);
+}
+
+function selectProjectFile(id) {
+  if (id === project.active) return;
+  project.active = id;
+  displayedCode = undefined;
+  saveProject();
+  render(true);
+}
 
 function projectTestCasesView(file) {
   return `<div class="test-page-header"><label class="button primary" for="project-tests">Upload test cases</label><input id="project-tests" type="file" accept=".json,application/json"></div><p>Upload a JSON array, or an object containing a cases array. These cases are saved for this file and have not been evaluated.</p><p id="project-test-status" role="status"></p><div class="test-categories"><section class="inset"><h3>Correctness</h3><p>${(file.testSuites ?? []).reduce((n,s) => n+s.cases.length,0)} uploaded cases · not run</p></section><section class="inset"><h3>Speed</h3><p>No measurements yet</p></section></div>${(file.testSuites ?? []).map(suite => `<section class="test-suite"><h3 class="test-suite-header">${escapeHtml(suite.name)}</h3><pre class="project-test-json">${escapeHtml(JSON.stringify(suite.cases,null,2))}</pre></section>`).join('')}`;
@@ -176,10 +190,7 @@ document.getElementById('details-content').addEventListener('change', async even
 });
 
 document.getElementById('header-file-select').onchange = event => {
-  if (!project.files.some(file => file.id === event.target.value)) return;
-  project.active = event.target.value;
-  saveProject();
-  render();
+  selectProjectFile(event.target.value);
 };
 
 document.getElementById('toggle-files').onclick = () => {

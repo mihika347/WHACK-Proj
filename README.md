@@ -273,6 +273,18 @@ A successful demo exits with code 0 when the control passes and every intentiona
 
 # FastForward
 
+## Browse saved backend runs
+
+From the repository root, start the local read-only server and open `http://127.0.0.1:8000`.
+
+```powershell
+python ui/serve.py
+```
+
+Choose **Saved optimisation run** or **Saved failure demo** in the file picker. Open **Original Code** for the saved baseline or **Deep Dive** for candidate diffs, test cases, correctness results, and measured performance. The failure demo shows real correctness failures from deliberately faulty candidates and has no benchmarks. The UI shows the saved run ID and checks that the reports match the source before displaying the results.
+
+Each run shows the independently evaluated changes. Uploaded cases are kept in the browser and shown as **Not run**. The bundled demo is available in the same file picker.
+
 ## UI demo
 
 Open [`ui/index.html`](ui/index.html) in a browser. The page uses plain HTML, CSS, and JavaScript and runs without a build or backend.

@@ -64,12 +64,15 @@ function saveDecision(candidate, decision) {
   }
 }
 
-function route(stage, candidate = recommended[0], view = stages[stage].view) {
+function route(stage, candidate, view = stages[stage].view) {
   const section = deepDiveStages.includes(stage) ? 'deep-dive/' : '';
-  return `#${section}${stage}/${view}/${candidate.id}`;
+  const fallback = activeProjectFile()?.savedRun ? activeSavedRun()?.candidates[0] : recommended[0];
+  const id = (candidate ?? fallback)?.id;
+  return `#${section}${stage}/${view}${id ? `/${id}` : ''}`;
 }
 
 function stageCandidates(stage) {
+  if (activeProjectFile()?.savedRun) return activeSavedRun()?.candidates ?? [];
   return candidates.filter((candidate) =>
     !candidate.filteredAt || stageOrder.indexOf(candidate.filteredAt) >= stageOrder.indexOf(stage),
   );
@@ -83,13 +86,15 @@ function readRoute() {
   if (isDeepDive && !deepDiveStages.includes(stage)) stage = 'tests';
   // Step 1 approval links used the Performance stage.
   if (stage === 'performance' && view === 'approve') stage = 'human';
-  if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: recommended[0] };
+  const saved = activeProjectFile()?.savedRun;
+  const fallback = saved ? activeSavedRun()?.candidates[0] : recommended[0];
+  if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: fallback };
   const inCandidateStage = candidateStages.includes(stage);
-  const eligible = inCandidateStage ? stageCandidates(stage) : recommended;
+  const eligible = saved || inCandidateStage ? stageCandidates(stage) : recommended;
   return {
     stage,
     view: inCandidateStage && ['results', 'review'].includes(view) ? view : stages[stage].view,
-    candidate: eligible.find((candidate) => candidate.id === id) ?? recommended[0],
+    candidate: eligible.find((candidate) => candidate.id === id) ?? fallback,
   };
 }
 
@@ -109,6 +114,7 @@ function renderNavigation({ stage, view, candidate }) {
 
 function stageSummary(stage) {
   const file = activeProjectFile();
+  if (file?.savedRun) return savedStageSummary(stage, activeSavedRun());
   if (file && !file.demo) {
     return stage === 'original' ? file.name : stage === 'tests' ? 'Upload tests for this file' : 'Awaiting optimisation';
   }
@@ -158,6 +164,11 @@ function renderPipeline({ stage: activeStage, candidate }) {
     strip.scrollLeft += offset - (strip.clientWidth - activeLink.offsetWidth) / 2;
   }
 
+  const file = activeProjectFile();
+  if (file?.savedRun) {
+    byId('run-summary').innerHTML = savedRunSummary(file, activeSavedRun());
+    return;
+  }
   byId('run-summary').innerHTML = `
     <p class="eyebrow">Run ${demoRun.id}</p>
     <h2>Ready for review</h2>
@@ -194,32 +205,33 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 }
 
 function renderCode({ stage, candidate }) {
+  const run = activeSavedRun();
   const isFinal = stage === 'final';
-  const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
+  const hasFinalDiff = !run && isFinal && finalBuild?.status === 'verified';
   if (isFinal && !hasFinalDiff) {
     displayedCode = undefined;
-    byId('source-file').textContent = demoRun.filename;
-    byId('diff-toolbar').textContent = finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
+    byId('source-file').textContent = (run ?? demoRun).filename;
+    byId('diff-toolbar').textContent = !run && finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
     byId('source-diff').replaceChildren();
     byId('source-diff').setAttribute('aria-label', 'Final code');
-    byId('code-footer').textContent = finalBuild?.status === 'failed'
+    byId('code-footer').textContent = run ? '' : finalBuild?.status === 'failed'
       ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
     return;
   }
-  const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
-  const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
+  const isBaseline = stage === 'original' || !candidate || (run && !['generated', 'correctness', 'performance'].includes(stage));
+  const baseline = (run ?? demoRun).baseline;
+  const codeId = hasFinalDiff ? finalBuild : isBaseline ? baseline : candidate;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
 
-  const applied = hasFinalDiff ? finalBuild.applied : isBaseline ? [] : [candidate];
+  const patches = hasFinalDiff ? finalBuild.applied.map(({ patch }) => patch) : isBaseline ? [] : candidate.patches ?? [candidate.patch];
   const title = hasFinalDiff ? 'Final code · all approved changes' : isBaseline ? 'Original source' : 'Candidate diff';
-  const baseline = demoRun.baseline;
   const rows = [];
   let before = 0;
   let after = 0;
   let added = 0;
   let removed = 0;
-  for (const { patch } of applied) {
+  for (const patch of patches) {
     while (before < patch.start - 1) {
       rows.push(codeRow(baseline[before], before + 1, after + 1));
       before += 1;
@@ -241,7 +253,7 @@ function renderCode({ stage, candidate }) {
     before += 1;
     after += 1;
   }
-  byId('source-file').textContent = demoRun.filename;
+  byId('source-file').textContent = (run ?? demoRun).filename;
   byId('diff-toolbar').innerHTML = `<strong>${title}</strong>${isBaseline ? '' :
     `<span><span class="added-text">+${added}</span> <span class="removed-text">−${removed}</span></span>`}`;
   const diff = byId('source-diff');
@@ -250,8 +262,8 @@ function renderCode({ stage, candidate }) {
   diff.scrollTop = 0;
   diff.scrollLeft = 0;
   byId('code-footer').textContent = hasFinalDiff
-    ? `${applied.length} approved ${applied.length === 1 ? 'change' : 'changes'} used in this build`
-    : isBaseline ? demoRun.inputDomain : candidate.title;
+    ? `${patches.length} approved ${patches.length === 1 ? 'change' : 'changes'} used in this build`
+    : isBaseline ? (run ? 'Saved baseline' : demoRun.inputDomain) : candidate.title;
 }
 
 function formatMs(ms) {
@@ -479,6 +491,7 @@ function finalView() {
 }
 
 function renderBuildUpdate() {
+  if (!activeProjectFile()?.demo) return;
   const state = readRoute();
   if (state.view === 'final' || state.view === 'approve') {
     const restoreHeading = document.activeElement === byId('view-title');
@@ -527,21 +540,25 @@ function render(focusHeading = false) {
   byId('source-diff').hidden = false;
   document.querySelector('.code-header .label').textContent = 'Python';
   const state = readRoute();
-  if (state.stage === 'final' && !finalBuild && approvedCandidates().length) generateBuild();
+  const file = activeProjectFile();
+  const saved = file.savedRun;
+  const run = activeSavedRun();
+  if (!saved && state.stage === 'final' && !finalBuild && approvedCandidates().length) generateBuild();
   const atHome = state.view === 'pipeline';
   const atTestCases = state.view === 'tests';
   byId('pipeline-home').hidden = !atHome;
   byId('workspace').hidden = atHome;
   if (focusHeading || !split.dataset.layout) {
-    setSplitLayout(atTestCases ? 'details-only' : 'split');
+    setSplitLayout(atTestCases || (saved && !run) ? 'details-only' : 'split');
   }
   renderNavigation(state);
   renderPipeline(state);
 
   if (!atHome) {
-    if (!atTestCases) renderCode(state);
+    if (!atTestCases && (!saved || run)) renderCode(state);
     const content = byId('details-content');
-    switch (state.view) {
+    if (saved) content.innerHTML = savedRunView(file, run, state);
+    else switch (state.view) {
       case 'overview': content.innerHTML = baselineView(); break;
       case 'tests': content.innerHTML = testCasesView(); break;
       case 'results': content.innerHTML = resultsView(state.stage, state.candidate); break;
@@ -550,10 +567,10 @@ function render(focusHeading = false) {
       default: content.innerHTML = reviewView(state.stage, state.candidate);
     }
     const liveStatus = byId('build-status');
-    const status = state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
+    const status = !saved && state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
     if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
-  const showImprovement = state.view === 'final' && finalBuild?.status === 'verified';
+  const showImprovement = !saved && state.view === 'final' && finalBuild?.status === 'verified';
   const improvement = byId('final-improvement');
   improvement.hidden = !showImprovement;
   improvement.innerHTML = showImprovement ? finalImprovementSummary(finalBuild.timing) : '';

@@ -324,6 +324,8 @@ main {
 .timing-table th, .timing-table td { padding: 5px 0; border-top: 1px solid #36354f; text-align: right; }
 .timing-table th:first-child { text-align: left; color: var(--muted); }
 .timing-table thead { color: var(--muted); }
+.saved-evidence-table, .saved-run-id { overflow-wrap: anywhere; }
+.saved-performance-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 8px 0; }
 .selection { border-color: #514575; background: #211c39; }
 .actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
 .candidate-list { display: grid; gap: 8px; }

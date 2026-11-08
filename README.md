@@ -101,7 +101,7 @@ The repository includes `test_utils.py`, `speed_test.py`, `correctness_test.py`,
 ```powershell
 python correctness_test.py
 python speed_test.py
-python -m unittest test_harness test_targeted_agent test_result_stats -v
+python -m unittest test_harness test_targeted_agent test_result_stats test_failure_reduction -v
 ```
 
 The speed runner first regenerates correctness checks, then verifies the benchmark inputs too. Failed candidates are skipped. Both runners exit with a nonzero status if a candidate fails, errors, or is skipped. Paths resolve relative to the scripts rather than the terminal's working directory.
@@ -138,7 +138,7 @@ The default endpoint is the same local LM Studio server used by the optimiser, w
 
 The current agent contract is specifically `count_matches(numbers, target)`. Adapt its prompt as well as the execution adapter when changing the function contract.
 
-Timing uses three warmup calls and seven samples per workload, with repeated calls per sample and fresh input copies prepared outside the measured interval. Reports include sample timings, medians, per-workload speedups, and their geometric mean. A speedup below 1 means a slowdown. Small timing differences can be noise; results depend on the machine and current load.
+Timing uses three warmup calls and seven samples per workload, with repeated calls per sample and fresh input copies prepared outside the measured interval. Reports include sample timings, medians, per-workload speedups, and the median speedup across workloads. A speedup below 1 means a slowdown. Small timing differences can be noise; results depend on the machine and current load.
 
 ### Shared speed-test batch
 
@@ -197,11 +197,11 @@ reports/speed_workloads.csv      # Timing statistics and percentages for each wo
 reports/correctness_cases.csv    # Individual outcomes, numeric errors, and mismatch fields
 ```
 
-Correctness statistics include pass/fail counts, pass percentage, mean, median, population variance, standard deviation, and category/source breakdowns. Outcomes are encoded as pass=1 and fail=0. The mean is the pass fraction, and population variance is `p * (1 - p)`. Both all-passing and all-failing suites have zero variance: always interpret variance alongside the pass rate. These are descriptive statistics over the executed cases, not a proof of correctness or an estimate that a future input will pass. Counts can include repeated inputs across coverage sources.
+Correctness statistics include pass/fail counts, pass percentage, median, population variance, standard deviation, and category/source/input-size breakdowns. Outcomes are encoded as pass=1 and fail=0; population variance is `p * (1 - p)`, where p is the pass fraction. Both all-passing and all-failing suites have zero variance: always interpret variance alongside the pass rate. These are descriptive statistics over the executed cases, not a proof of correctness or an estimate that a future input will pass. Counts can include repeated inputs across coverage sources.
 
-For finite numeric return values, the numeric error is `candidate - original`. Reports include its mean, variance, mean absolute error (MAE), mean squared error (MSE), and root mean squared error (RMSE). Signed errors can cancel, so inspect MAE/MSE too. Non-numeric values, exceptions, and errors too large for finite statistics are excluded from numeric-error statistics and counted separately. Full behaviour comparison still covers those cases. Correct numeric output with unexpected input mutation or printed output still fails correctness.
+For finite numeric return values, the numeric error is `candidate - original`. Reports include its median, variance, standard deviation, and maximum absolute error. Non-numeric values, exceptions, and errors too large for finite statistics are excluded from numeric-error statistics and counted separately. Full behaviour comparison still covers those cases. Correct numeric output with unexpected input mutation or printed output still fails correctness.
 
-Speed reports include per-workload sample mean, median, population variance, standard deviation, min/max, interquartile range, and empirical 5th/95th percentiles. These describe seven per-call batch-average timing samples, not the distribution of individual calls; percentiles are not confidence intervals. Raw report times use seconds, and variances use seconds squared. UI chart times use microseconds (`us`) and variances use microseconds squared. Variance uses denominator N throughout.
+Speed reports include per-workload median, population variance, standard deviation, min/max, interquartile range, and empirical 5th/95th percentiles. These describe seven per-call batch-average timing samples, not the distribution of individual calls; percentiles are not confidence intervals. Raw report times use seconds, and variances use seconds squared. UI chart times use microseconds (`us`) and variances use microseconds squared. Variance uses denominator N throughout.
 
 Two separate percentage metrics avoid ambiguity:
 
@@ -210,7 +210,11 @@ Two separate percentage metrics avoid ambiguity:
 | Speed increase | `100 * (baseline_time / candidate_time - 1)` | 100% faster |
 | Execution time reduction | `100 * (1 - candidate_time / baseline_time)` | 50% less time |
 
-Negative values mean a slowdown or longer execution, respectively. Aggregate percentages are derived from the equal-workload geometric mean of median speedup ratios. They are not total runtime reductions for an application. The mean of workload medians is also available but mixes input sizes and should not replace workload-specific comparisons. Near-zero differences can be timing noise, especially with sequential benchmarking. Identical code files are marked with `identical_to` in the UI summary.
+Negative values mean a slowdown or longer execution, respectively. Aggregate percentages are derived from the median of workload speedup ratios. They are not total runtime reductions for an application. All reported mean metrics, including arithmetic/geometric means and MAE/MSE/RMSE, have been removed. Use `median_speedup` instead of the previous `geometric_mean_speedup` field. The report schema is now version 3, and the UI schema is version 2. Near-zero differences can be timing noise, especially with sequential benchmarking. Identical code files are marked with `identical_to` in the UI summary.
+
+Each speed candidate now has `speed_by_input_size` for 100, 1,000, and 10,000 elements and `worst_observed_slowdown`, including the workload, list size, original/candidate median timings, and the full reproducible input. Slowdown is `100 * (candidate_time / baseline_time - 1)`, clamped to zero when every workload is at least as fast. `is_slowdown` distinguishes an actual measured slowdown from the least-improved workload. Incorrect candidates are skipped and have null slowdown results, not fabricated timings.
+
+Correctness failures include `smallest_failing_input`: the shortest observed failing list and a bounded, deletion-reduced reproducer with actual observations from both programs. Reduction keeps the target, order of retained values, and original mismatch fields. It uses at most 200 evaluations, a 10-second soft reduction budget, and a 15-second worker timeout. `single_deletion_minimal` means no remaining single element can be deleted while preserving those mismatches; it does not guarantee a globally shortest input. Budget exhaustion or worker failure is recorded, and the original shortest observed failure remains available. Benchmark-input correctness failures also receive this reduction; speed reports carry forward ordinary correctness counterexamples for skipped candidates.
 
 `ui_results.json` includes these chart-ready arrays:
 
@@ -218,10 +222,13 @@ Negative values mean a slowdown or longer execution, respectively. Aggregate per
 | --- | --- |
 | `summary` | Candidate cards or summary table |
 | `charts.speed_comparison` | Percentage speed increase / time reduction bars |
-| `charts.correctness_comparison` | Pass-rate bars, outcome variance, MAE |
+| `charts.correctness_comparison` | Pass-rate bars, outcome variance, maximum absolute error |
 | `charts.correctness_by_source` | Shared, rule-targeted, exhaustive, and agent coverage |
 | `charts.correctness_by_category` | Pass/fail breakdown by input category |
 | `charts.speed_by_input_size` | Percentage speed improvement by list size |
+| `charts.correctness_by_input_size` | Pass/fail results for each observed list size |
+| `charts.smallest_failing_inputs` | Small observed and reduced failure reproducers |
+| `charts.worst_observed_slowdowns` | Slowest relative workloads and their inputs |
 | `charts.speed_by_workload` | Baseline vs candidate timings, raw samples, and variability |
 | `correctness_case_results` | Per-case outcomes and numeric-error scatter plot |
 

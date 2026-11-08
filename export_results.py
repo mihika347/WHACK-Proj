@@ -22,6 +22,7 @@ def export(correctness, speed=None, output_dir=None):
     destination.mkdir(parents=True, exist_ok=True)
     speed_entries = {entry["file"]: entry for entry in speed["candidates"]} if speed else {}
     summary, workloads, case_rows, category_rows, source_rows, size_rows = [], [], [], [], [], []
+    failures, slowdowns, correctness_sizes = [], [], []
     seen_hashes = {}
     for candidate in correctness["candidates"]:
         name = candidate["file"]
@@ -38,18 +39,17 @@ def export(correctness, speed=None, output_dir=None):
                "agent_status": candidate.get("agent_status"),
                "total_cases": candidate.get("total"), "passed_cases": stats.get("passed"), "failed_cases": stats.get("failed"),
                "pass_rate_percent": stats.get("pass_rate_percent"),
-               "pass_mean": stats.get("outcome_statistics", {}).get("mean"),
                "pass_population_variance": stats.get("outcome_statistics", {}).get("population_variance"),
-               "numeric_error_mean": error_stats.get("mean"),
                "numeric_error_population_variance": error_stats.get("population_variance"),
-               "mean_absolute_error": error_stats.get("mean_absolute_error"),
-               "mean_squared_error": error_stats.get("mean_squared_error"),
-               "root_mean_squared_error": error_stats.get("root_mean_squared_error"),
-               "geometric_mean_speedup": timing_stats.get("geometric_mean_speedup"),
+               "max_absolute_error": error_stats.get("max_absolute_error"),
+               "median_speedup": timing_stats.get("median_speedup"),
                "speed_increase_percent": timing_stats.get("speed_increase_percent"),
                "execution_time_reduction_percent": timing_stats.get("execution_time_reduction_percent"),
-               "mean_workload_median_us": timing_stats.get("workload_median_seconds", {}).get("mean", 0) * 1e6 if timing_stats else None}
+               "worst_observed_slowdown_percent": timing_stats.get("worst_observed_slowdown", {}).get("slowdown_percent")}
         summary.append(row)
+        failures.append({"stage": name, "smallest_failing_input": timing.get("smallest_failing_input") or candidate.get("smallest_failing_input")})
+        slowdowns.append({"stage": name, "worst_observed_slowdown": timing.get("worst_observed_slowdown")})
+        correctness_sizes.extend({"stage": name, **group} for group in stats.get("by_input_size", []))
         case_rows.extend({"stage": name, **case} for case in candidate.get("case_results", []))
         category_rows.extend({"stage": name, **group} for group in stats.get("by_category", []))
         source_rows.extend({"stage": name, **group} for group in stats.get("by_source", []))
@@ -60,7 +60,6 @@ def export(correctness, speed=None, output_dir=None):
                 workloads.append({"stage": name, "workload": test["name"], "input_size": test["size"],
                                   "baseline_median_us": baseline[test["name"]]["median_seconds"] * 1e6,
                                   "median_us": test["median_seconds"] * 1e6,
-                                  "mean_us": distribution["mean"] * 1e6,
                                   "population_variance_us_squared": distribution["population_variance"] * 1e12,
                                   "standard_deviation_us": distribution["standard_deviation"] * 1e6,
                                   "min_us": distribution["min"] * 1e6, "max_us": distribution["max"] * 1e6,
@@ -72,14 +71,16 @@ def export(correctness, speed=None, output_dir=None):
             for size in sorted({test["size"] for test in timing["timings"]}):
                 size_rows.append({"stage": name, "input_size": size,
                                   **speed_statistics([test for test in timing["timings"] if test["size"] == size])})
-    data = {"schema_version": 1, "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
+    data = {"schema_version": 2, "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
             "has_speed_results": speed is not None, "seed": correctness["seed"],
             "baseline_sha256": correctness["baseline_sha256"],
             "environment": {"python": speed.get("python"), "platform": speed.get("platform")} if speed else None,
             "definitions": {
                 "speed_increase_percent": "100 * (baseline_time / candidate_time - 1); negative means slower",
                 "execution_time_reduction_percent": "100 * (1 - candidate_time / baseline_time); negative means longer execution",
-                "aggregate_speed": "Equal-workload geometric mean of median speedup ratios; not total elapsed time",
+                "aggregate_speed": "Median of workload speedup ratios; not total elapsed time",
+                "worst_observed_slowdown": "Largest candidate/baseline median runtime increase; zero when no workload slowed. Only measured for correct candidates.",
+                "smallest_failing_input": "Shortest observed failing list, reduced by deletion with bounded attempts; no global minimum guarantee",
                 "pass_population_variance": "Population variance of case outcomes (pass=1, fail=0), p*(1-p); not a correctness guarantee",
                 "numeric_error": "Candidate minus baseline scalar return value; exceptions and non-finite/non-numeric outputs excluded",
                 "timing_variance": "Population variance of per-call batch timing samples; UI units are microseconds squared",
@@ -93,15 +94,17 @@ def export(correctness, speed=None, output_dir=None):
                                       "execution_time_reduction_percent": r["execution_time_reduction_percent"]} for r in summary],
                 "correctness_comparison": [{"stage": r["stage"], "pass_rate_percent": r["pass_rate_percent"],
                                             "pass_population_variance": r["pass_population_variance"],
-                                            "mean_absolute_error": r["mean_absolute_error"]} for r in summary],
+                                            "max_absolute_error": r["max_absolute_error"]} for r in summary],
                 "correctness_by_category": category_rows, "correctness_by_source": source_rows,
+                "correctness_by_input_size": correctness_sizes,
+                "smallest_failing_inputs": failures, "worst_observed_slowdowns": slowdowns,
                 "speed_by_input_size": size_rows, "speed_by_workload": workloads},
             "correctness_case_results": case_rows}
     save_json(destination / "ui_results.json", data)
     summary_fields = list(summary[0]) if summary else ["stage"]
     write_csv(destination / "summary.csv", summary, summary_fields)
     write_csv(destination / "speed_workloads.csv", workloads, ["stage", "workload", "input_size", "baseline_median_us",
-              "median_us", "mean_us", "population_variance_us_squared", "standard_deviation_us", "p05_us", "p95_us",
+              "median_us", "population_variance_us_squared", "standard_deviation_us", "p05_us", "p95_us",
               "sample_count", "speedup", "speed_increase_percent", "execution_time_reduction_percent"])
     write_csv(destination / "correctness_cases.csv", case_rows,
               ["stage", "case_index", "name", "source", "category", "input_size", "passed", "numeric_error", "mismatch_fields"])

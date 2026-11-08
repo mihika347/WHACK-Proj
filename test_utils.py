@@ -178,6 +178,10 @@ def worker(path, suite_path, mode):
     from result_stats import describe
     function = load_function(path)
     tests = json.loads(Path(suite_path).read_text(encoding="utf-8"))
+    if mode == "shrink":
+        from shrink_failure import reduce_failure
+        baseline = load_function(tests["baseline"])
+        return reduce_failure(tests["failure"], lambda test: (observe(baseline, test), observe(function, test)))
     if mode == "correctness":
         return {"observations": [observe(function, test) for test in tests]}
     timings = []

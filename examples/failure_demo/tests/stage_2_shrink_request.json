@@ -1,0 +1,37 @@
+{
+  "baseline": "C:\\Users\\arnav\\OneDrive\\Documents\\WHACK\\WHACK-Proj\\examples\\failure_demo\\original.py",
+  "failure": {
+    "case": {
+      "name": "random_127",
+      "numbers": [
+        0,
+        0
+      ],
+      "target": 0,
+      "category": "seeded_random",
+      "source": "shared"
+    },
+    "expected": {
+      "value": 2,
+      "value_type": "int",
+      "exception": null,
+      "numbers_after": [
+        0,
+        0
+      ],
+      "stdout": "",
+      "stderr": ""
+    },
+    "actual": {
+      "value": 1,
+      "value_type": "int",
+      "exception": null,
+      "numbers_after": [
+        0,
+        0
+      ],
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+}

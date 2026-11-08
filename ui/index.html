@@ -7,12 +7,13 @@
   <title>FastForward · Optimisation workspace</title>
   <link rel="stylesheet" href="styles.css">
   <script defer src="demo.js"></script>
+  <script defer src="agent-test-cases.js"></script>
+  <script defer src="test-cases.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#pipeline" aria-label="FastForward pipeline home">FastForward</a>
-    <span class="topbar-label">Optimisation workspace</span>
     <span class="badge demo-badge"><span class="dot"></span> Demo run</span>
   </header>
 
@@ -26,17 +27,26 @@
           <p>Follow proposed changes from baseline through final verification.</p>
         </header>
         <div class="home-grid">
-          <section class="graph" aria-label="Pipeline stages">
-            <ol id="pipeline-stages"></ol>
-          </section>
+          <div class="home-flow">
+            <section class="graph" aria-label="Pipeline stages">
+              <ol id="pipeline-stages"></ol>
+            </section>
+            <section class="deep-dive" aria-labelledby="deep-dive-title">
+              <h2 id="deep-dive-title">Deep Dive</h2>
+              <ul class="deep-dive-cards" id="deep-dive-cards"></ul>
+            </section>
+          </div>
           <aside class="run-card panel" id="run-summary" aria-label="Demo run summary"></aside>
         </div>
       </section>
 
       <section class="workspace" id="workspace" aria-label="Optimisation workspace" hidden>
         <div class="workspace-header">
-          <a class="back-link" href="#pipeline">← Back to pipeline</a>
-          <nav aria-label="Pipeline stages">
+          <div class="workspace-heading">
+            <a class="back-link" href="#pipeline">← Back to pipeline</a>
+            <span class="eyebrow" id="deep-dive-label" hidden>Deep Dive</span>
+          </div>
+          <nav id="workspace-stage-menu" aria-label="Pipeline stages">
             <ol class="stage-strip" id="workspace-stages"></ol>
           </nav>
         </div>
@@ -54,7 +64,6 @@
             aria-label="Source pane width" aria-controls="code-pane" aria-orientation="vertical"
             aria-valuemin="30" aria-valuemax="65" aria-valuenow="48"></div>
           <section class="details panel" aria-label="Run details">
-            <nav class="view-tabs" id="workspace-views" aria-label="Workspace views"></nav>
             <p id="build-status" class="visually-hidden" role="status"></p>
             <div id="details-content"></div>
           </section>

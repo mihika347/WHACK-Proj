@@ -96,13 +96,13 @@ function addProjectFile(name, content) {
   saveProject(); location.hash = '#pipeline'; render();
 }
 
-function addProjectRun(job, source) {
+function addProjectRun(job, source, destination = '#pipeline') {
   const id = `live:${job.id}`;
   project.runs.push({ id, name: `Run · ${job.filename} · ${job.id.slice(0, 8)}`, savedRun: id });
   const stayWithRun = activeProjectFile() === source;
   if (stayWithRun) {
     project.active = id;
-    location.hash = '#pipeline';
+    location.hash = destination;
   }
   saveProject();
   render(stayWithRun);
@@ -185,24 +185,33 @@ function selectProjectFile(id) {
 }
 
 function projectTestCasesView(file) {
-  return `<div class="test-page-header"><label class="button primary" for="project-tests">Upload test cases</label><input id="project-tests" type="file" accept=".json,application/json"></div><p>Upload a JSON array, or an object containing a cases array. These cases are saved for this file and have not been evaluated.</p><p id="project-test-status" role="status"></p><div class="test-categories"><section class="inset"><h3>Correctness</h3><p>${(file.testSuites ?? []).reduce((n,s) => n+s.cases.length,0)} uploaded cases · not run</p></section><section class="inset"><h3>Speed</h3><p>No measurements yet</p></section></div>${(file.testSuites ?? []).map(suite => `<section class="test-suite"><h3 class="test-suite-header">${escapeHtml(suite.name)}</h3><pre class="project-test-json">${escapeHtml(JSON.stringify(suite.cases,null,2))}</pre></section>`).join('')}`;
+  const suites = file.testSuites ?? [];
+  const count = suites.reduce((total, suite) => total + suite.cases.length, 0);
+  return `<section class="inset test-upload-box"><h2>Upload your own test cases</h2>
+    <label class="button primary" for="project-tests">${icon('upload')} Upload test cases</label>
+    <input id="project-tests" type="file" accept=".json,application/json" class="visually-hidden">
+    <p id="project-test-status" role="status"></p>
+    </section><p>${count} uploaded cases. They will run with the next optimisation of this file.</p>
+    ${suites.map((suite) => `<section class="test-suite"><h3 class="test-suite-header">${escapeHtml(suite.name)}</h3>
+      <pre class="project-test-json">${escapeHtml(suite.text ?? JSON.stringify(suite.cases, null, 2))}</pre></section>`).join('')}`;
 }
 
 document.getElementById('details-content').addEventListener('change', async event => {
   if (event.target.id !== 'project-tests' || !event.target.files[0]) return;
   const target = activeProjectFile();
   const upload = event.target.files[0];
+  event.target.value = '';
   try {
     if (upload.size > 1024 * 1024) throw Error('Maximum upload size is 1 MB.');
-    const data = JSON.parse(await upload.text());
-    const cases = Array.isArray(data) ? data : data?.cases;
-    if (!Array.isArray(cases) || !cases.length) throw Error('Provide a non-empty JSON cases array.');
+    const text = await upload.text();
+    const cases = parseTestCases(text);
     if (!project.files.includes(target)) return;
-    (target.testSuites ??= []).push({name: upload.name, cases});
+    (target.testSuites ??= []).push({name: upload.name, cases, text});
     saveProject();
     if (activeProjectFile() === target) render();
   } catch (error) {
-    if (activeProjectFile() === target) document.getElementById('project-test-status').textContent = error.message;
+    const status = activeProjectFile() === target && document.getElementById('project-test-status');
+    if (status) status.textContent = error.message;
   }
 });
 

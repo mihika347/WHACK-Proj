@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def case_key(case):
-    return case["name"], tuple(case["numbers"]), case["target"]
+    return case["name"], tuple(case["numbers"]), case["target"], case.get("expected")
 
 
 def display_case(case, failed_in=None):
@@ -24,6 +24,8 @@ def display_case(case, failed_in=None):
         "input": f"count_matches({shown}, {case['target']})",
         "reason": reason,
     }
+    if "expected" in case:
+        entry["expected"] = str(case["expected"])
     if failed_in:
         entry["failedIn"] = failed_in
     return entry

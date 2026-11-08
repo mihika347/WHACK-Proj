@@ -282,11 +282,15 @@ python ui/serve.py
 
 Choose **Saved optimisation run** or **Saved failure demo** in the file picker. Open **Original Code** for the saved baseline or **Deep Dive** for candidate diffs, test cases, correctness results, and measured performance. The failure demo shows real correctness failures from deliberately faulty candidates and has no benchmarks. The UI shows the saved run ID and checks that the reports match the source before displaying the results.
 
-Each run shows the independently evaluated changes. Uploaded cases are kept in the browser and shown as **Not run**. The bundled demo is available in the same file picker.
+Each run shows the independently evaluated changes. The bundled demo is available in the same file picker.
 
 **Value Assessment** recommends changes that pass correctness checks and reduce measured execution time by at least 5%, based on the median workload speedup. **Approve** shows each recommendation and its current decision. Decisions are saved for the browser tab's session and scoped to the run and candidate source.
 
 To start a live run, load a model and start the local API in LM Studio. Import or create a trusted Python file with a top-level `count_matches(numbers, target)` function. Select the file and click **Run optimisation** from the pipeline or Original Code. The UI opens a separate run entry and shows progress through generation, correctness, and benchmarking. Each run saves its source snapshot and reports under `.fastforward-runs/`.
+
+Upload a JSON case list or an object with a `cases` array under **Test Cases**. Uploads on a source file run with its next optimisation. Uploads on a completed run create a new evaluation using its saved candidates and test cases. If a supplied `expected` count differs from the original's output, the UI flags it and uses the original as the correctness reference.
+
+From **Approve**, select **Generate optimised code** to apply the approved edits to the saved original. Final Code reports overlapping edits or verification failures. A verified build shows its diff, measured improvement summary, and a downloadable Python file. Reevaluation and final verification reuse saved test inputs and run locally without generating new model proposals.
 
 ## UI demo
 

@@ -1,4 +1,5 @@
 const uploadedTestSuites = new Map();
+const pendingTestUploads = new WeakSet();
 const testCategories = {
   speed: { title: 'Speed', icon: 'bars', description: 'Each benchmark measurement is compared with the baseline for its workload' },
   correctness: { title: 'Correctness', icon: 'check', description: 'Shared, targeted, AI-generated, and uploaded cases' },
@@ -45,9 +46,12 @@ function renderTestSuites(suites, category) {
           <strong>${escapeHtml(test.name)}</strong>
           ${test.failedIn ? badge(isSpeed ? 'Slower' : 'Failed', 'rejected') : ''}
           ${suite.uploaded ? badge('Not run') : ''}
+          ${test.uploaded ? badge('Uploaded') : ''}
+          ${test.uploaded && !test.failedIn ? badge('Passed', 'success') : ''}
           <code class="test-case-input">${escapeHtml(test.input)}</code>
           ${test.failedIn ? `<p>${isSpeed ? 'Slower than baseline in' : 'Failed in'} ${escapeHtml(test.failedIn.join(', '))}</p>` : ''}
           ${test.expected === undefined ? '' : `<p>Expected count <code>${escapeHtml(test.expected)}</code></p>`}
+          ${test.baselineValue === undefined ? '' : `<p class="removed-text">Expected count differs from the original, which returned <code>${escapeHtml(test.baselineValue)}</code>.</p>`}
           ${test.reason ? `<p>${escapeHtml(test.reason)}</p>` : ''}
         </li>`).join('')}
       </ul>
@@ -241,10 +245,22 @@ async function uploadTestCases(event) {
   const file = input.files[0];
   const key = testCaseStorageKey();
   const projectFile = activeProjectFile();
+  const run = activeSavedRun();
   input.value = '';
+  if (pendingTestUploads.has(projectFile)) return;
   let message;
   let error = false;
   try {
+    if (file.size > 1024 * 1024) throw new Error('Maximum upload size is 1 MB.');
+    if (run) {
+      pendingTestUploads.add(projectFile);
+      byId('test-case-upload-status').textContent = 'Starting a new evaluation with this upload…';
+      const job = await requestRun('/api/runs/recheck', {
+        parent: projectFile.savedRun, run_id: run.id, uploads: [await file.text()],
+      });
+      addProjectRun(job, projectFile, route('tests'));
+      return;
+    }
     const cases = parseTestCases(await file.text());
     const suites = readUploadedTestSuites(key);
     suites.push({ sources: [file.name], cases });
@@ -262,6 +278,8 @@ async function uploadTestCases(event) {
   } catch (failure) {
     message = failure.message;
     error = true;
+  } finally {
+    pendingTestUploads.delete(projectFile);
   }
   const status = projectFile === activeProjectFile() && byId('test-case-upload-status');
   if (status) {

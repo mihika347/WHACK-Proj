@@ -212,25 +212,30 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 function renderCode({ stage, candidate }) {
   const run = activeSavedRun();
   const isFinal = stage === 'final';
-  const hasFinalDiff = !run && isFinal && finalBuild?.status === 'verified';
+  const savedBuild = run && isFinal ? savedBuildState(run) : undefined;
+  const savedFinal = savedBuild?.result?.verified ? savedBuild.result : undefined;
+  const hasFinalDiff = isFinal && (run ? Boolean(savedFinal) : finalBuild?.status === 'verified');
   if (isFinal && !hasFinalDiff) {
     displayedCode = undefined;
     byId('source-file').textContent = (run ?? demoRun).filename;
-    byId('diff-toolbar').textContent = !run && finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
+    const pending = run ? buildProgress[savedBuild?.status] : finalBuild?.status === 'pending';
+    byId('diff-toolbar').textContent = pending ? 'Building final code…' : 'No final code available';
     byId('source-diff').replaceChildren();
     byId('source-diff').setAttribute('aria-label', 'Final code');
     byId('code-footer').textContent = run ? '' : finalBuild?.status === 'failed'
       ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
     return;
   }
-  const isBaseline = stage === 'original' || !candidate || (run && !candidateStages.includes(stage));
+  const isBaseline = !hasFinalDiff && (stage === 'original' || !candidate || (run && !candidateStages.includes(stage)));
   const baseline = (run ?? demoRun).baseline;
-  const codeId = hasFinalDiff ? finalBuild : isBaseline ? baseline : candidate;
+  const codeId = hasFinalDiff ? savedFinal ?? finalBuild : isBaseline ? baseline : candidate;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
 
-  const patches = hasFinalDiff ? finalBuild.applied.map(({ patch }) => patch) : isBaseline ? [] : candidate.patches ?? [candidate.patch];
-  const title = hasFinalDiff ? 'Final code · all approved changes' : isBaseline ? 'Original source' : 'Candidate diff';
+  const patches = hasFinalDiff ? savedFinal?.patches ?? finalBuild.applied.map(({ patch }) => patch)
+    : isBaseline ? [] : candidate.patches ?? [candidate.patch];
+  const title = savedFinal ? 'Verified final code diff' : hasFinalDiff ? 'Final code · all approved changes'
+    : isBaseline ? 'Original source' : 'Candidate diff';
   const rows = [];
   let before = 0;
   let after = 0;
@@ -243,7 +248,7 @@ function renderCode({ stage, candidate }) {
       after += 1;
     }
     for (let i = 0; i < patch.remove; i += 1) {
-      if (!hasFinalDiff) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
+      if (!hasFinalDiff || savedFinal) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
       before += 1;
     }
     for (const line of patch.lines) {
@@ -266,8 +271,9 @@ function renderCode({ stage, candidate }) {
   diff.innerHTML = rows.join('');
   diff.scrollTop = 0;
   diff.scrollLeft = 0;
+  const approvedCount = savedFinal ? savedApproved(run).length : patches.length;
   byId('code-footer').textContent = hasFinalDiff
-    ? `${patches.length} approved ${patches.length === 1 ? 'change' : 'changes'} used in this build`
+    ? `${approvedCount} approved ${approvedCount === 1 ? 'change' : 'changes'} used in this build`
     : isBaseline ? (run ? 'Saved baseline' : demoRun.inputDomain) : candidate.title;
 }
 
@@ -576,13 +582,16 @@ function render(focusHeading = false) {
       default: content.innerHTML = reviewView(state.stage, state.candidate);
     }
     const liveStatus = byId('build-status');
-    const status = !saved && state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
+    const status = state.view === 'final'
+      ? (saved ? savedBuildLabel(savedBuildState(run)) : buildLabels[finalBuild?.status]) ?? '' : '';
     if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
-  const showImprovement = !saved && state.view === 'final' && finalBuild?.status === 'verified';
+  const savedFinal = state.view === 'final' ? savedBuildState(run)?.result : undefined;
+  const demoVerified = !saved && state.view === 'final' && finalBuild?.status === 'verified';
+  const summary = savedFinal?.verified ? savedImprovementSummary(savedFinal) : demoVerified ? finalImprovementSummary(finalBuild.timing) : '';
   const improvement = byId('final-improvement');
-  improvement.hidden = !showImprovement;
-  improvement.innerHTML = showImprovement ? finalImprovementSummary(finalBuild.timing) : '';
+  improvement.hidden = !summary;
+  improvement.innerHTML = summary;
 
   if (focusHeading) {
     window.scrollTo(0, 0);
@@ -592,8 +601,14 @@ function render(focusHeading = false) {
 
 byId('details-content').addEventListener('click', (event) => {
   if (handleTestCaseClick(event)) return;
+  const run = activeSavedRun();
   if (event.target.closest('#generate-build')) {
-    generateBuild();
+    if (run) startSavedBuild(run);
+    else generateBuild();
+    return;
+  }
+  if (event.target.closest('#download-final-code')) {
+    if (run) downloadSavedBuild(run);
     return;
   }
   const button = event.target.closest('button[data-decision]');
@@ -601,7 +616,6 @@ byId('details-content').addEventListener('click', (event) => {
   const { stage, view, candidate } = readRoute();
   const decision = button.dataset.decision;
   if (view !== 'review' || !candidate || !['approved', 'rejected'].includes(decision)) return;
-  const run = activeSavedRun();
   if (run) {
     if (stage !== 'value' || !savedValue(candidate).recommended) return;
     const review = savedReview(run);

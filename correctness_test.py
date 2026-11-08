@@ -18,7 +18,7 @@ def smallest_counterexample(baseline, path, failures, request_path, *, project_d
             "reduction_error": reduced.get("error")}
 
 
-def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
+def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None, *, uploads=(), saved_suites=None):
     root = Path(project_dir) if project_dir is not None else ROOT
     baseline = root / "original.py"
     common = correctness_cases(seed)
@@ -33,6 +33,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         raise RuntimeError("No generated candidate files found in output/")
     suites = {"seed": seed, "shared_cases": common, "targeted": {}}
     for path in files:
+        saved = saved_suites.get(path.name) if saved_suites else None
         try:
             targeted = targeted_cases(baseline, path)
         except (SyntaxError, UnicodeError, OSError) as exc:
@@ -41,7 +42,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
             continue
         suites["targeted"][path.name] = targeted
         agent, agent_error = None, None
-        if use_agent:
+        if use_agent and saved is None:
             try:
                 print(f"{path.name}: requesting independent targeted cases (or matching cache)...", flush=True)
                 agent = generate(baseline, path, refresh=refresh_agent, cache_dir=root / "tests/agent_cases")
@@ -56,6 +57,8 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
                    "category": "exhaustive_short_lists" if test["name"].startswith("exhaustive_") else "rule_targeted"}
                   for test in targeted["cases"]]
         cases += [{**test, "source": "agent", "category": "agent_targeted"} for test in agent_cases]
+        cases = [*(saved["cases"] if saved is not None else cases), *uploads]
+        agent_status = saved["agent_status"] if saved is not None else "error" if agent_error else "used" if agent else "disabled"
         suite_path = root / "tests" / f"{path.stem}_correctness_cases.json"
         save_json(suite_path, cases)
         expected = isolated(baseline, suite_path, "correctness", project_dir=root)
@@ -63,7 +66,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         entry = {"file": path.name, "source_sha256": source_hash(path),
                  "smallest_failing_input": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
-                 "agent_cases": len(agent_cases), "agent_status": "error" if agent_error else "used" if agent else "disabled",
+                 "agent_cases": sum(test["source"] == "agent" for test in cases), "agent_status": agent_status,
                  "agent_error": agent_error,
                  "targeting_rules": targeted["rules"], "total": len(cases), "failures": []}
         if "error" in expected or "error" in actual:
@@ -73,10 +76,13 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
                 raise RuntimeError("Worker returned an incomplete set of correctness observations")
             rows = []
             for index, (test, old, new) in enumerate(zip(cases, expected["observations"], actual["observations"])):
-                rows.append({"case_index": index, "name": test["name"], "source": test["source"],
-                             "category": test["category"], "input_size": len(test["numbers"]),
-                             "passed": old == new, "numeric_error": numeric_error(old, new),
-                             "mismatch_fields": [field for field in old if old[field] != new[field]]})
+                row = {"case_index": index, "name": test["name"], "source": test["source"],
+                       "category": test["category"], "input_size": len(test["numbers"]),
+                       "passed": old == new, "numeric_error": numeric_error(old, new),
+                       "mismatch_fields": [field for field in old if old[field] != new[field]]}
+                if "expected" in test and (old["value_type"] != "int" or old["value"] != test["expected"]):
+                    row["baseline_value"] = str(old["exception"] or old["value"])
+                rows.append(row)
                 if old != new:
                     entry["failures"].append({"case": test, "expected": old, "actual": new})
             entry.update(status="fail" if entry["failures"] else "pass", passed=len(cases) - len(entry["failures"]))
@@ -85,7 +91,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
                 entry["smallest_failing_input"] = smallest_counterexample(
                     baseline, path, entry["failures"], root / "tests" / f"{path.stem}_shrink_request.json",
                     project_dir=root)
-            if agent_error and entry["status"] == "pass":
+            if agent_status == "error" and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)
         print(f"{path.name}: {entry['status']} ({len(entry['failures'])} differences, {len(cases)} cases)")

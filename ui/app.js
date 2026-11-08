@@ -656,5 +656,18 @@ divider.addEventListener('keydown', (event) => {
   resizeSourcePane(widths[event.key]);
 });
 
-window.addEventListener('hashchange', () => render(true));
+const visitedPages = [];
+const undoNavigation = byId('undo-navigation');
+window.addEventListener('hashchange', (event) => {
+  visitedPages.push(new URL(event.oldURL).hash || '#pipeline');
+  undoNavigation.disabled = false;
+  render(true);
+});
+undoNavigation.addEventListener('click', () => {
+  if (!visitedPages.length) return;
+  // Replace the route so undo does not add the page being left back to the stack.
+  history.replaceState(history.state, '', visitedPages.pop());
+  undoNavigation.disabled = visitedPages.length === 0;
+  render(true);
+});
 render();

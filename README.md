@@ -67,7 +67,7 @@ The generator reads the original, requests optimisation proposals, parses the JS
 
 Invalid JSON is saved to `raw_response.txt` before an error is raised. Empty model lists and empty responses also raise errors. For connection failures, check that LM Studio is serving a loaded model at the configured address.
 
-Repeated runs overwrite matching output filenames. Old stage files can remain if a later response contains fewer stages; compare the directory with the latest report before evaluation.
+Repeated runs overwrite matching output filenames. Old stage files can remain if a later response contains fewer stages. Test runners now select only stages listed in the latest `output/report.json`, verify their contents match the report, and ignore older files. When no manifest exists, they discover standalone `stage_*.py` files instead.
 
 ## Independent stages and report
 
@@ -90,7 +90,7 @@ Each stage is requested to contain the complete original program with exactly on
 }
 ```
 
-The current example stages replace the counting loop with `list.count`, use a generator expression with `sum`, and bind `target` to another local variable. The final version uses `list.count`. These are model proposals, not measured improvements. Explanations and overlap metadata require review: the example stages modify the same function despite reporting empty overlap lists.
+Earlier example runs proposed `list.count`, a generator expression with `sum`, and a local alias for `target`. The latest response proposes only `list.count`, and the final version is identical to that stage. Older stage files remain for reference but are excluded from the current test run. Model explanations and overlap metadata require review; measured performance is stored separately in the test reports.
 
 Syntax checks do not establish correctness, speed, independence, or compatibility. The script does not execute generated code or benchmark it. The model chooses the final version; an interface for combining arbitrary user-selected stages is not implemented.
 
@@ -101,7 +101,7 @@ The repository includes `test_utils.py`, `speed_test.py`, `correctness_test.py`,
 ```powershell
 python correctness_test.py
 python speed_test.py
-python -m unittest test_harness test_targeted_agent -v
+python -m unittest test_harness test_targeted_agent test_result_stats -v
 ```
 
 The speed runner first regenerates correctness checks, then verifies the benchmark inputs too. Failed candidates are skipped. Both runners exit with a nonzero status if a candidate fails, errors, or is skipped. Paths resolve relative to the scripts rather than the terminal's working directory.
@@ -185,6 +185,76 @@ reports/correctness_report.json
 ```
 
 Each candidate also has a combined shared-and-targeted suite in `tests/<candidate>_correctness_cases.json`. Reports contain concrete counterexamples when behaviour differs. `test_harness.py` checks that the evaluator detects wrong counts, input mutation, printed output, exceptions, worker errors, and timeouts.
+
+## Statistics and results for a UI
+
+Run `python speed_test.py` to generate a matching set of correctness, speed, and UI reports. Agent cases are reused when matching caches exist. `python correctness_test.py` also exports correctness-only UI data; speed values are null until the next full speed run, so the UI cannot accidentally display old timings as part of a new run. Each report records a run ID and source hashes.
+
+```text
+reports/ui_results.json          # UI summary, chart series, and per-case correctness data
+reports/summary.csv              # One row per candidate
+reports/speed_workloads.csv      # Timing statistics and percentages for each workload
+reports/correctness_cases.csv    # Individual outcomes, numeric errors, and mismatch fields
+```
+
+Correctness statistics include pass/fail counts, pass percentage, mean, median, population variance, standard deviation, and category/source breakdowns. Outcomes are encoded as pass=1 and fail=0. The mean is the pass fraction, and population variance is `p * (1 - p)`. Both all-passing and all-failing suites have zero variance: always interpret variance alongside the pass rate. These are descriptive statistics over the executed cases, not a proof of correctness or an estimate that a future input will pass. Counts can include repeated inputs across coverage sources.
+
+For finite numeric return values, the numeric error is `candidate - original`. Reports include its mean, variance, mean absolute error (MAE), mean squared error (MSE), and root mean squared error (RMSE). Signed errors can cancel, so inspect MAE/MSE too. Non-numeric values, exceptions, and errors too large for finite statistics are excluded from numeric-error statistics and counted separately. Full behaviour comparison still covers those cases. Correct numeric output with unexpected input mutation or printed output still fails correctness.
+
+Speed reports include per-workload sample mean, median, population variance, standard deviation, min/max, interquartile range, and empirical 5th/95th percentiles. These describe seven per-call batch-average timing samples, not the distribution of individual calls; percentiles are not confidence intervals. Raw report times use seconds, and variances use seconds squared. UI chart times use microseconds (`us`) and variances use microseconds squared. Variance uses denominator N throughout.
+
+Two separate percentage metrics avoid ambiguity:
+
+| Metric | Formula | Example at 2x speedup |
+| --- | --- | --- |
+| Speed increase | `100 * (baseline_time / candidate_time - 1)` | 100% faster |
+| Execution time reduction | `100 * (1 - candidate_time / baseline_time)` | 50% less time |
+
+Negative values mean a slowdown or longer execution, respectively. Aggregate percentages are derived from the equal-workload geometric mean of median speedup ratios. They are not total runtime reductions for an application. The mean of workload medians is also available but mixes input sizes and should not replace workload-specific comparisons. Near-zero differences can be timing noise, especially with sequential benchmarking. Identical code files are marked with `identical_to` in the UI summary.
+
+`ui_results.json` includes these chart-ready arrays:
+
+| JSON field | Suggested presentation |
+| --- | --- |
+| `summary` | Candidate cards or summary table |
+| `charts.speed_comparison` | Percentage speed increase / time reduction bars |
+| `charts.correctness_comparison` | Pass-rate bars, outcome variance, MAE |
+| `charts.correctness_by_source` | Shared, rule-targeted, exhaustive, and agent coverage |
+| `charts.correctness_by_category` | Pass/fail breakdown by input category |
+| `charts.speed_by_input_size` | Percentage speed improvement by list size |
+| `charts.speed_by_workload` | Baseline vs candidate timings, raw samples, and variability |
+| `correctness_case_results` | Per-case outcomes and numeric-error scatter plot |
+
+Fields that were not measured are `null`, not zero. Candidate-specific correctness suites can differ; compare the `shared` source group when comparing stages on identical correctness inputs. Summary status and agent status must be shown alongside statistics so missing agent coverage is not mistaken for a complete pass.
+
+Copy `reports/ui_results.json` into your UI's public assets as `results.json`, or expose it through your backend. For example:
+
+```javascript
+const results = await fetch('/results.json').then(response => {
+  if (!response.ok) throw new Error('Could not load test results');
+  return response.json();
+});
+const speedBars = results.charts.speed_comparison.map(row => ({
+  label: row.stage,
+  value: row.speed_increase_percent
+}));
+```
+
+To regenerate exports from existing matching reports without running tests, use `python export_results.py`. This rejects mismatched run IDs. `python export_results.py --correctness-only` intentionally exports no speed data. To vary the reproducible random correctness inputs, run `python speed_test.py --seed 42`; the speed workloads remain fixed for fair comparisons. Reports are overwritten on each run, so save copies when collecting runs for later comparison.
+
+## Deliberately faulty correctness demo
+
+Run a reproducible failure scenario with:
+
+```powershell
+python failure_demo.py
+```
+
+This runs the production correctness evaluator against a separate baseline and six fixture candidates in `examples/failure_demo/`. Stage 1 is a correct control. Stages 2–6 intentionally lose duplicate matches, exclude matching zeros, skip the last item, mutate the input by sorting it, and add one to every result. Real `original.py`, optimisation outputs, and normal reports are unaffected. The demo uses deterministic shared, rule-targeted, and exhaustive cases, with agent generation disabled.
+
+Read `examples/failure_demo/reports/demo_summary.json` for pass rates, variance, numeric-error statistics, first counterexamples, and the worst observed absolute numeric error with its input. The standard correctness report, chart-ready `ui_results.json`, and CSV tables are written in that same demo reports folder. The UI JSON is explicitly marked as a deliberately faulty demo. No speed results are generated for these broken candidates.
+
+A successful demo exits with code 0 when the control passes and every intentional bug is detected; this does not mean the broken candidates passed. The worst observed error is limited to the executed cases. Input mutation can fail correctness even with zero numeric error. An always-wrong candidate illustrates that zero pass/fail variance alone does not mean correctness.
 
 ## Remaining work
 

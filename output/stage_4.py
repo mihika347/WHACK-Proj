@@ -43,9 +43,11 @@ def _positive_total(sample):
 
 
 def _distinct_count(sample):
+    seen = set()
     distinct = []
     for number in sample:
-        if number not in distinct:
+        if number not in seen:
+            seen.add(number)
             distinct.append(number)
     return len(distinct)
 
@@ -53,10 +55,10 @@ def _distinct_count(sample):
 def _frequency_energy(sample):
     frequencies = {}
     for number in sample:
-        frequencies[number] = frequencies.get(number, 0) + 1
+        frequencies[number] = sample.count(number)
     energy = 0
-    for count in frequencies.values():
-        energy += count * count
+    for number in frequencies:
+        energy += frequencies[number] * frequencies[number]
     return energy
 
 

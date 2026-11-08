@@ -1,5 +1,31 @@
 # WHACK: AI Code Optimisation
 
+## NVIDIA GPU profile
+
+The pre-GPU project is preserved at Git commit `b4c507cf1a7205a8338358ef576c6ea26b42ac64` and in `backups/pre-nvidia-gpu-b4c507c.zip`. `backups/lmstudio-before-gpu.json` records the previous loaded-model metadata. Backups and local benchmark timings are excluded from Git.
+
+`api_call1.py` now uses the dedicated LM Studio model identifier `whack-nvidia` through `gpu_runtime.py`. An already loaded profile is reused; otherwise the helper selects the installed CUDA runtime and loads the model using `gpu_runtime.json`. Only an idle instance of the same model is unloaded; other models and active requests are not interrupted. LM Studio must be running. There are no Torch/CUDA dependencies in the Python code: the actual GPU inference runs in LM Studio.
+
+The detected machine has an NVIDIA RTX 4060 Laptop GPU with 8 GB VRAM. Its GPT-OSS 20B MXFP4 model is approximately 12.1 GB on disk, so full GPU offload is not assumed. The configured profile uses 50% GPU offload, 8,192 context tokens, and one prediction at a time. LM Studio estimated 6.85 GiB VRAM for this profile. This preserves the existing model and context while avoiding four concurrent prediction slots that this sequential pipeline does not use. Available memory and achievable speed depend on other applications; lower `gpu_offload` if model loading runs out of memory.
+
+```powershell
+# Inspect CUDA hardware and estimate memory without changing placement:
+python gpu_runtime.py
+
+# Explicitly reapply the GPU loading profile to an idle model:
+python gpu_runtime.py --apply
+
+# Normal project command (reuses/loads that profile automatically):
+python api_call1.py
+
+# Optional small local inference timing check:
+python gpu_benchmark.py --label after
+```
+
+`gpu_benchmark_results.json` records two warm-start end-to-end completion-token timing samples per label. It is a small diagnostic, not a guarantee for real stage-generation workloads. The benchmark uses a generic numeric prompt and does not modify source programs, stages, scores, or test reports. Ordinary Python correctness/speed benchmarks remain CPU tests. To bypass automatic GPU model management, set `enabled` to `false` in `gpu_runtime.json`; this does not unload a model already running in LM Studio. The pre-change code can also be restored from the snapshot. CUDA runtimes and offload are configured using the [LM Studio CLI](https://lmstudio.ai/docs/cli/local-models/load).
+
+The initial local check measured 16.35 completion tokens/second before and 18.24 after (11.6% faster), with two measured samples per profile after warmup. GPU memory use after loading was approximately 6.1 GiB. Treat this as a small observed improvement, not a promised percentage for every prompt. The same model weights and context length were retained, and the API-visible NVIDIA identifier was verified without regenerating project stages.
+
 For a larger end-to-end demonstration, see [the large integer-list demo](examples/large_demo/README.md). It keeps the current input/function/output types, contains 14 distinct optimisation opportunities, and includes an independently checked reference implementation.
 
 A Python prototype that uses a locally hosted LM Studio model to propose speed optimisations while preserving the original program's output and behaviour. Each change is saved as an independent stage for review and comparison against the original.

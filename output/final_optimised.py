@@ -6,6 +6,8 @@ All phases affect the result. No input mutation, printing, floats, or randomness
 Quadratic analyses use the first 64 items to keep the existing benchmarks usable.
 """
 
+from collections import Counter
+
 SAMPLE_LIMIT = 64
 WINDOW_WIDTH = 8
 
@@ -21,89 +23,78 @@ def _count_target(numbers, target):
 
 
 def _total(numbers):
-    result = 0
-    for number in numbers:
-        result = result + number
-    return result
+    return sum(numbers)
 
 
 def _square_total(numbers):
-    squares = []
-    for number in numbers:
-        squares.append(number * number)
+    squares = [number * number for number in numbers]
     return sum(squares)
 
 
 def _positive_total(sample):
-    # Use generator expression to avoid intermediate list creation
-    return sum(number for number in sample if number > 0)
+    positive = [number for number in sample if number > 0]
+    return sum(positive)
 
 
 def _distinct_count(sample):
-    # Build a set once for O(n) distinct count
-    return len(set(sample))
+    distinct = set()
+    for number in sample:
+        distinct.add(number)
+    return len(distinct)
 
 
 def _frequency_energy(sample):
-    from collections import Counter
-
-    freq = Counter(sample)
+    frequencies = Counter(sample)
     energy = 0
-    for count in freq.values():
+    for count in frequencies.values():
         energy += count * count
     return energy
 
 
 def _spread(numbers):
-    if len(numbers) == 0:
+    if not numbers:
         return 0
     ordered = sorted(numbers)
     smallest = ordered[0]
-    largest = ordered[len(ordered) - 1]
+    largest = ordered[-1]
     return largest - smallest
 
 
 def _equal_pair_count(sample):
-    # Use frequencies to compute pair counts in O(n)
-    from collections import Counter
-
-    freq = Counter(sample)
     pairs = 0
-    for count in freq.values():
-        pairs += count * (count - 1) // 2
+    for left in range(len(sample)):
+        for right in range(left + 1, len(sample)):
+            if sample[left] == sample[right]:
+                pairs += 1
     return pairs
 
 
 def _target_pair_count(sample, target):
-    # Two-sum logic with dictionary
-    counts = {}
     pairs = 0
-    for number in sample:
-        complement = target - number
-        pairs += counts.get(complement, 0)
-        counts[number] = counts.get(number, 0) + 1
+    for left in range(len(sample)):
+        for right in range(left + 1, len(sample)):
+            if sample[left] + sample[right] == target:
+                pairs += 1
     return pairs
 
 
 def _prefix_total(sample):
     prefixes = []
-    running_sum = 0
     for end in range(1, len(sample) + 1):
-        running_sum += sample[end - 1]
-        prefixes.append(running_sum)
+        subtotal = sum(sample[:end])
+        prefixes.append(subtotal)
     return sum(prefixes)
 
 
 def _window_total(sample):
-    totals = []
     if len(sample) < WINDOW_WIDTH:
         return 0
-    # Rolling window sum
-    window_sum = sum(sample[:WINDOW_WIDTH])
-    totals.append(window_sum)
+    totals = []
+    first_window_sum = sum(sample[:WINDOW_WIDTH])
+    totals.append(first_window_sum)
     for start in range(1, len(sample) - WINDOW_WIDTH + 1):
-        window_sum += sample[start + WINDOW_WIDTH - 1] - sample[start - 1]
-        totals.append(window_sum)
+        first_window_sum += sample[start + WINDOW_WIDTH - 1] - sample[start - 1]
+        totals.append(first_window_sum)
     return sum(totals)
 
 
@@ -118,17 +109,14 @@ def _opposite_count(sample):
 
 def _longest_run(sample):
     longest = 0
-    current_start = None
-    current_len = 0
-    for i, value in enumerate(sample):
-        if i == 0 or value != sample[i - 1]:
-            # start new run
-            current_start = i
-            current_len = 1
-        else:
-            current_len += 1
-        if current_len > longest:
-            longest = current_len
+    for start in range(len(sample)):
+        length = 0
+        for index in range(start, len(sample)):
+            if sample[index] != sample[start]:
+                break
+            length += 1
+        if length > longest:
+            longest = length
     return longest
 
 

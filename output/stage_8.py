@@ -101,12 +101,13 @@ def _window_total(sample):
     totals = []
     if len(sample) < WINDOW_WIDTH:
         return 0
-    # Rolling sum: start with first window
+    # Precompute first window sum
     current_sum = sum(sample[0:WINDOW_WIDTH])
     totals.append(current_sum)
-    for i in range(1, len(sample) - WINDOW_WIDTH + 1):
-        # Remove element leaving the window and add new one
-        current_sum += sample[i + WINDOW_WIDTH - 1] - sample[i - 1]
+    for start in range(1, len(sample) - WINDOW_WIDTH + 1):
+        # Slide window: subtract leaving element, add new one
+        current_sum -= sample[start - 1]
+        current_sum += sample[start + WINDOW_WIDTH - 1]
         totals.append(current_sum)
     return sum(totals)
 

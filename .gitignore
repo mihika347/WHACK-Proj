@@ -1,4 +1,6 @@
 __pycache__/
+backups/
+gpu_benchmark_results.json
 *.py[cod]
 .venv/
 tests/agent_cases/*.invalid_response.txt

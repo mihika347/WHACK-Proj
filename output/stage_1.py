@@ -21,10 +21,7 @@ def _count_target(numbers, target):
 
 
 def _total(numbers):
-    result = 0
-    for number in numbers:
-        result = result + number
-    return result
+    return sum(numbers)
 
 
 def _square_total(numbers):

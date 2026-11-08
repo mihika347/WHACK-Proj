@@ -28,10 +28,7 @@ def _total(numbers):
 
 
 def _square_total(numbers):
-    squares = []
-    for number in numbers:
-        squares.append(number * number)
-    return sum(squares)
+    return sum(number * number for number in numbers)
 
 
 def _positive_total(sample):

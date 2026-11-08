@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import ast
 import re
+from gpu_runtime import config as gpu_config, ensure_model
 
 # ==========================================
 # CONFIGURATION
@@ -12,8 +13,11 @@ import re
 INPUT_FILE = Path("original.py")
 OUTPUT_DIR = Path("output")
 
+gpu_settings = gpu_config()
+preferred_model = ensure_model(gpu_settings)
+
 client = OpenAI(
-    base_url="http://localhost:1234/v1",
+    base_url=gpu_settings.get('base_url', "http://localhost:1234/v1"),
     api_key="lm-studio",
     timeout=600.0
 )
@@ -32,7 +36,9 @@ models = client.models.list()
 if not models.data:
     raise RuntimeError("No model available in LM Studio.")
 
-model_id = models.data[0].id
+model_id = preferred_model or models.data[0].id
+if preferred_model and preferred_model not in {model.id for model in models.data}:
+    raise RuntimeError('The configured NVIDIA model is not exposed by LM Studio. Run python gpu_runtime.py --apply.')
 
 print(f"Using model: {model_id}")
 

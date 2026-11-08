@@ -9,6 +9,8 @@ Quadratic analyses use the first 64 items to keep the existing benchmarks usable
 SAMPLE_LIMIT = 64
 WINDOW_WIDTH = 8
 
+from collections import Counter
+
 
 def _count_target(numbers, target):
     count = 0
@@ -51,12 +53,10 @@ def _distinct_count(sample):
 
 
 def _frequency_energy(sample):
-    frequencies = {}
-    for number in sample:
-        frequencies[number] = sample.count(number)
+    frequencies = Counter(sample)
     energy = 0
-    for number in frequencies:
-        energy += frequencies[number] * frequencies[number]
+    for count in frequencies.values():
+        energy += count * count
     return energy
 
 
@@ -71,12 +71,10 @@ def _spread(numbers):
 
 def _equal_pair_count(sample):
     pairs = 0
-    frequencies = {}
-    for number in sample:
-        frequencies[number] = frequencies.get(number, 0) + 1
-    for count in frequencies.values():
-        if count > 1:
-            pairs += count * (count - 1) // 2
+    for left in range(len(sample)):
+        for right in range(left + 1, len(sample)):
+            if sample[left] == sample[right]:
+                pairs += 1
     return pairs
 
 

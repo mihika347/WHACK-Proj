@@ -71,9 +71,9 @@ def _spread(numbers):
 
 def _equal_pair_count(sample):
     pairs = 0
-    for left in range(len(sample)):
+    for left, left_val in enumerate(sample):
         for right in range(left + 1, len(sample)):
-            if sample[left] == sample[right]:
+            if left_val == sample[right]:
                 pairs += 1
     return pairs
 
@@ -89,10 +89,11 @@ def _target_pair_count(sample, target):
 
 def _prefix_total(sample):
     prefixes = []
-    running_sum = 0
-    for number in sample:
-        running_sum += number
-        prefixes.append(running_sum)
+    for end in range(1, len(sample) + 1):
+        subtotal = 0
+        for number in sample[:end]:
+            subtotal += number
+        prefixes.append(subtotal)
     return sum(prefixes)
 
 

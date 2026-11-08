@@ -35,17 +35,15 @@ def _square_total(numbers):
 
 
 def _positive_total(sample):
-    positive = []
-    for number in sample:
-        if number > 0:
-            positive = positive + [number]
+    positive = [number for number in sample if number > 0]
     return sum(positive)
 
 
 def _distinct_count(sample):
-    distinct = set()
+    distinct = []
     for number in sample:
-        distinct.add(number)
+        if number not in distinct:
+            distinct.append(number)
     return len(distinct)
 
 

@@ -80,11 +80,10 @@ def _equal_pair_count(sample):
 
 def _target_pair_count(sample, target):
     pairs = 0
-    counts = {}
-    for number in sample:
-        complement = target - number
-        pairs += counts.get(complement, 0)
-        counts[number] = counts.get(number, 0) + 1
+    for left in range(len(sample)):
+        for right in range(left + 1, len(sample)):
+            if sample[left] + sample[right] == target:
+                pairs += 1
     return pairs
 
 
@@ -135,10 +134,10 @@ def _longest_run(sample):
 def _median_distance(sample):
     if not sample:
         return 0
+    ordered = sorted(sample)
+    middle = ordered[len(ordered) // 2]
     distance = 0
     for number in sample:
-        ordered = sorted(sample)
-        middle = ordered[len(ordered) // 2]
         distance += abs(number - middle)
     return distance
 

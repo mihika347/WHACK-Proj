@@ -120,16 +120,14 @@ def _opposite_count(sample):
 
 def _longest_run(sample):
     longest = 0
-    current_len = 0
-    prev_value = None
-    for value in sample:
-        if value == prev_value:
-            current_len += 1
-        else:
-            current_len = 1
-            prev_value = value
-        if current_len > longest:
-            longest = current_len
+    for start in range(len(sample)):
+        length = 0
+        for index in range(start, len(sample)):
+            if sample[index] != sample[start]:
+                break
+            length += 1
+        if length > longest:
+            longest = length
     return longest
 
 

@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "base_url": "http://localhost:1234/v1",
+  "model_key": "openai/gpt-oss-20b",
+  "identifier": "whack-nvidia",
+  "gpu_offload": "0.5",
+  "context_length": 8192,
+  "parallel": 1,
+  "cuda_runtime": "llama.cpp-win-x86_64-nvidia-cuda12-avx2@2.71.0"
+}

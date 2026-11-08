@@ -2,6 +2,7 @@ const icons = {
   pipeline: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v7a2 2 0 0 0 2 2h7"/>',
   file: '<path d="M7 3h7l5 5v13H5V3zm7 0v6h5M8 13h8m-8 4h8"/>',
   tests: '<path d="M9 3h6m-5 0v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3M8 14h8"/>',
+  upload: '<path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/>',
   spark: '<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7z"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
   bars: '<path d="M5 20v-5m7 5V9m7 11V4" stroke-width="3"/>',
@@ -190,7 +191,7 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 function renderCode({ stage, candidate }) {
   const isFinal = stage === 'final';
   const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
-  const isBaseline = stage === 'original' || stage === 'tests' || (isFinal && !hasFinalDiff);
+  const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
   const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
@@ -455,13 +456,17 @@ function renderBuildUpdate() {
 function render(focusHeading = false) {
   const state = readRoute();
   const atHome = state.view === 'pipeline';
+  const atTestCases = state.view === 'tests';
   byId('pipeline-home').hidden = !atHome;
   byId('workspace').hidden = atHome;
+  byId('code-pane').hidden = atTestCases;
+  divider.hidden = atTestCases;
+  split.classList.toggle('single-panel', atTestCases);
   renderNavigation(state);
   renderPipeline(state);
 
   if (!atHome) {
-    renderCode(state);
+    if (!atTestCases) renderCode(state);
     const content = byId('details-content');
     switch (state.view) {
       case 'overview': content.innerHTML = baselineView(); break;
@@ -482,6 +487,7 @@ function render(focusHeading = false) {
 }
 
 byId('details-content').addEventListener('click', (event) => {
+  if (handleTestCaseClick(event)) return;
   if (event.target.closest('#generate-build')) {
     generateBuild();
     return;

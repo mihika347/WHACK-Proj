@@ -277,10 +277,12 @@ Open [`ui/index.html`](ui/index.html) in a browser. The page uses plain HTML, CS
 
 Timing and correctness figures are illustrative. Decisions persist for the browser tab's session. Final build results last until reload.
 
-**Test Cases** shows the saved AI-generated suites and accepts a JSON list or a JSON object with a `cases` array. Each case has `numbers` and `target`. You can also provide a `name`, `reason`, or integer `expected` count.
+**Test Cases** compares the saved correctness pass and fail rates. Open **Speed** to browse benchmark workloads or **Correctness** to see the shared, targeted, AI-generated, and uploaded cases. Category buttons show the share of completed checks that failed when there are failures. Speed counts a candidate run as failed when it is slower than the baseline on that workload. Cases with a failure appear first.
+
+**Upload test cases** accepts a JSON list or a JSON object with a `cases` array. Each case has `numbers` and `target`. You can also provide a `name`, `reason`, or integer `expected` count.
 
 ```json
 [{ "name": "Repeated match", "numbers": [1, 2, 1], "target": 1, "expected": 2 }]
 ```
 
-Uploads are displayed in the browser and persist for the tab's session. To refresh the bundled AI cases after running correctness tests, run `python ui/export_test_cases.py` from the project root.
+Uploads are displayed in the browser and persist for the tab's session. To refresh the bundled cases and pass/fail counts after running the tests, run `python ui/export_test_cases.py` from the project root.

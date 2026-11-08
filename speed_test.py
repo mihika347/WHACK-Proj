@@ -2,7 +2,7 @@
 import argparse
 import platform
 import sys
-from correctness_test import run as check_correctness
+from correctness_test import run as check_correctness, smallest_counterexample
 from test_utils import ROOT, SEED, candidates, isolated, save_json, speed_cases
 from result_stats import speed_percentages, speed_statistics
 from export_results import export
@@ -19,20 +19,28 @@ def run(use_agent=True, refresh_agent=False, seed=SEED):
     reference = isolated(baseline, suite_path, "speed")
     if "error" in expected or "error" in reference:
         raise RuntimeError(f"Baseline failed: {expected.get('error') or reference.get('error')}")
-    report = {"schema_version": 2, "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
+    report = {"schema_version": 3, "run_id": correctness["run_id"], "generated_at": correctness["generated_at"],
               "correctness_seed": seed, "seed": SEED, "python": sys.version, "platform": platform.platform(),
               "baseline_sha256": correctness["baseline_sha256"],
               "clock": "perf_counter_ns", "warmup_calls": 3, "samples": 7,
-              "summary": "Geometric mean of per-workload median speedups; each workload has equal weight.",
+              "summary": "Median of per-workload median speedup ratios; each workload has equal weight.",
               "baseline": reference, "candidates": []}
     for path in candidates():
-        entry = {"file": path.name}
+        correct_entry = next(c for c in correctness["candidates"] if c["file"] == path.name)
+        entry = {"file": path.name, "smallest_failing_input": correct_entry.get("smallest_failing_input"),
+                 "speed_by_input_size": [], "worst_observed_slowdown": None}
         if path.name not in eligible:
             entry.update(status="skipped", reason="Correctness suite did not pass")
         else:
             actual = isolated(path, suite_path, "correctness")
             if "error" in actual or actual.get("observations") != expected["observations"]:
                 entry.update(status="skipped", reason="Benchmark-input correctness check failed", error=actual.get("error"))
+                if "observations" in actual:
+                    failures = [{"case": test, "expected": old, "actual": new}
+                                for test, old, new in zip(suite, expected["observations"], actual["observations"])
+                                if old != new]
+                    entry["smallest_failing_input"] = smallest_counterexample(
+                        baseline, path, failures, ROOT / "tests" / f"{path.stem}_benchmark_shrink_request.json")
             else:
                 measured = isolated(path, suite_path, "speed")
                 if "error" in measured:
@@ -43,13 +51,22 @@ def run(use_agent=True, refresh_agent=False, seed=SEED):
                         new.update(speed_percentages(new["speedup"]))
                     entry.update(status="pass", timings=measured["timings"],
                                  statistics=speed_statistics(measured["timings"]))
-                    entry["geometric_mean_speedup"] = entry["statistics"]["geometric_mean_speedup"]
+                    entry["median_speedup"] = entry["statistics"]["median_speedup"]
+                    worst = entry["statistics"]["worst_observed_slowdown"]
+                    worst["input"] = next(test for test in suite if test["name"] == worst["workload"])
+                    entry["worst_observed_slowdown"] = worst
+                    entry["speed_by_input_size"] = [
+                        {"input_size": size, **speed_statistics([t for t in measured["timings"] if t["size"] == size])}
+                        for size in sorted({t["size"] for t in measured["timings"]})]
         report["candidates"].append(entry)
         if "statistics" in entry:
             stats = entry["statistics"]
-            print(f"{path.name}: {entry['status']} ({entry['geometric_mean_speedup']:.2f}x; "
+            print(f"{path.name}: {entry['status']} ({entry['median_speedup']:.2f}x median; "
                   f"{stats['speed_increase_percent']:+.1f}% speed; "
                   f"{stats['execution_time_reduction_percent']:+.1f}% time saved)")
+            for group in entry["speed_by_input_size"]:
+                print(f"  size {group['input_size']}: {group['speed_increase_percent']:+.1f}% speed")
+            print(f"  worst observed slowdown: {entry['worst_observed_slowdown']['slowdown_percent']:.1f}%")
         else:
             print(f"{path.name}: {entry['status']}")
     save_json(ROOT / "reports/speed_report.json", report)

@@ -14,11 +14,11 @@ def percentile(values, fraction):
 def describe(values):
     """Population variance across supplied observations; empty statistics are null."""
     values = list(values)
-    fields = ("mean", "median", "population_variance", "standard_deviation", "min", "max", "p05", "p95", "iqr")
+    fields = ("median", "population_variance", "standard_deviation", "min", "max", "p05", "p95", "iqr")
     if not values:
         return {"count": 0, **dict.fromkeys(fields)}
     variance = statistics.pvariance(values)
-    return {"count": len(values), "mean": statistics.mean(values), "median": statistics.median(values),
+    return {"count": len(values), "median": statistics.median(values),
             "population_variance": variance, "standard_deviation": math.sqrt(variance),
             "min": min(values), "max": max(values), "p05": percentile(values, .05),
             "p95": percentile(values, .95), "iqr": percentile(values, .75) - percentile(values, .25)}
@@ -27,7 +27,7 @@ def describe(values):
 def pass_statistics(rows):
     outcomes = [int(row["passed"]) for row in rows]
     return {"total": len(outcomes), "passed": sum(outcomes), "failed": len(outcomes) - sum(outcomes),
-            "pass_rate_percent": 100 * statistics.mean(outcomes) if outcomes else None,
+            "pass_rate_percent": 100 * sum(outcomes) / len(outcomes) if outcomes else None,
             "outcome_statistics": describe(outcomes)}
 
 
@@ -53,10 +53,10 @@ def correctness_statistics(rows):
                          for name in sorted({row[field] for row in rows})]
     return {**pass_statistics(rows), "numeric_error_statistics": {
         **describe(errors), "excluded_cases": len(rows) - len(errors),
-        "mean_absolute_error": statistics.mean(abs(e) for e in errors) if errors else None,
-        "mean_squared_error": statistics.mean(e * e for e in errors) if errors else None,
-        "root_mean_squared_error": math.sqrt(statistics.mean(e * e for e in errors)) if errors else None},
-        "by_source": groups["source"], "by_category": groups["category"]}
+        "max_absolute_error": max(map(abs, errors), default=None)},
+        "by_source": groups["source"], "by_category": groups["category"],
+        "by_input_size": [{"input_size": size, **pass_statistics([r for r in rows if r.get("input_size") == size])}
+                          for size in sorted({r["input_size"] for r in rows if "input_size" in r})]}
 
 
 def speed_percentages(speedup):
@@ -66,9 +66,17 @@ def speed_percentages(speedup):
 
 def speed_statistics(timings):
     ratios = [t["speedup"] for t in timings]
-    geometric_mean = math.exp(statistics.mean(math.log(r) for r in ratios))
-    return {"workload_count": len(timings), "geometric_mean_speedup": geometric_mean,
-            **speed_percentages(geometric_mean),
+    median_speedup = statistics.median(ratios)
+    worst = min(timings, key=lambda t: t["speedup"])
+    slowdown = max(0, (1 / worst["speedup"] - 1) * 100)
+    return {"workload_count": len(timings), "median_speedup": median_speedup,
+            **speed_percentages(median_speedup),
+            "worst_observed_slowdown": {
+                "workload": worst.get("name"), "input_size": worst.get("size"),
+                "speedup": worst["speedup"], "slowdown_percent": slowdown,
+                "is_slowdown": worst["speedup"] < 1,
+                "candidate_median_seconds": worst["median_seconds"],
+                "baseline_median_seconds": worst["median_seconds"] * worst["speedup"]},
             "workload_median_seconds": describe(t["median_seconds"] for t in timings),
             "workload_speed_increase_percent": describe(t["speed_increase_percent"] for t in timings),
             "faster_workloads": sum(r > 1 for r in ratios), "slower_workloads": sum(r < 1 for r in ratios),

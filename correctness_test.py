@@ -8,11 +8,21 @@ from targeted_test_agent import generate
 from result_stats import correctness_statistics, numeric_error
 
 
+def smallest_counterexample(baseline, path, failures, request_path):
+    if not failures:
+        return None
+    smallest = min(failures, key=lambda failure: len(failure["case"]["numbers"]))
+    save_json(request_path, {"baseline": str(baseline.resolve()), "failure": smallest})
+    reduced = isolated(path, request_path, "shrink", timeout=15)
+    return {"smallest_observed": smallest, "reduced": reduced if "error" not in reduced else None,
+            "reduction_error": reduced.get("error")}
+
+
 def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
     root = Path(project_dir) if project_dir is not None else ROOT
     baseline = root / "original.py"
     common = correctness_cases(seed)
-    report = {"schema_version": 2, "run_id": str(uuid.uuid4()),
+    report = {"schema_version": 3, "run_id": str(uuid.uuid4()),
               "generated_at": datetime.now(timezone.utc).isoformat(),
               "seed": seed, "function": FUNCTION_NAME, "baseline": baseline.name,
               "baseline_sha256": source_hash(baseline), "candidates": [],
@@ -51,6 +61,7 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
         expected = isolated(baseline, suite_path, "correctness")
         actual = isolated(path, suite_path, "correctness")
         entry = {"file": path.name, "source_sha256": source_hash(path),
+                 "smallest_failing_input": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
                  "agent_cases": len(agent_cases), "agent_status": "error" if agent_error else "used" if agent else "disabled",
                  "agent_error": agent_error,
@@ -70,6 +81,9 @@ def run(use_agent=True, refresh_agent=False, seed=SEED, project_dir=None):
                     entry["failures"].append({"case": test, "expected": old, "actual": new})
             entry.update(status="fail" if entry["failures"] else "pass", passed=len(cases) - len(entry["failures"]))
             entry.update(statistics=correctness_statistics(rows), case_results=rows)
+            if entry["failures"]:
+                entry["smallest_failing_input"] = smallest_counterexample(
+                    baseline, path, entry["failures"], root / "tests" / f"{path.stem}_shrink_request.json")
             if agent_error and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)

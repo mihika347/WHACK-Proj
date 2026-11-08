@@ -18401,6 +18401,61 @@
     "category": "rule_targeted"
   },
   {
+    "name": "targeted_comparison_boundaries_0",
+    "numbers": [
+      -1,
+      0,
+      1
+    ],
+    "target": -2,
+    "source": "rule_targeted",
+    "category": "rule_targeted"
+  },
+  {
+    "name": "targeted_comparison_boundaries_1",
+    "numbers": [
+      -1,
+      0,
+      1
+    ],
+    "target": -1,
+    "source": "rule_targeted",
+    "category": "rule_targeted"
+  },
+  {
+    "name": "targeted_comparison_boundaries_2",
+    "numbers": [
+      -1,
+      0,
+      1
+    ],
+    "target": 0,
+    "source": "rule_targeted",
+    "category": "rule_targeted"
+  },
+  {
+    "name": "targeted_comparison_boundaries_3",
+    "numbers": [
+      -1,
+      0,
+      1
+    ],
+    "target": 1,
+    "source": "rule_targeted",
+    "category": "rule_targeted"
+  },
+  {
+    "name": "targeted_comparison_boundaries_4",
+    "numbers": [
+      -1,
+      0,
+      1
+    ],
+    "target": 2,
+    "source": "rule_targeted",
+    "category": "rule_targeted"
+  },
+  {
     "name": "exhaustive_0_()_-1",
     "numbers": [],
     "target": -1,
@@ -23976,7 +24031,7 @@
     "name": "empty_list",
     "numbers": [],
     "target": 5,
-    "reason": "Verify handling of no elements",
+    "reason": "Verify behavior with no elements",
     "source": "agent",
     "category": "agent_targeted"
   },
@@ -23986,7 +24041,7 @@
       7
     ],
     "target": 7,
-    "reason": "Single element equals target",
+    "reason": "Single element equal to target",
     "source": "agent",
     "category": "agent_targeted"
   },
@@ -23998,74 +24053,96 @@
       3
     ],
     "target": 4,
-    "reason": "No occurrences present",
+    "reason": "No elements match target",
     "source": "agent",
     "category": "agent_targeted"
   },
   {
-    "name": "multiple_matches",
+    "name": "duplicates_match",
     "numbers": [
-      2,
-      2,
-      2,
-      2
+      9,
+      9,
+      9,
+      9
     ],
-    "target": 2,
-    "reason": "All elements match target",
+    "target": 9,
+    "reason": "All elements match target; count should be length",
     "source": "agent",
     "category": "agent_targeted"
   },
   {
-    "name": "mixed_values",
+    "name": "mixed_duplicates",
+    "numbers": [
+      5,
+      6,
+      5,
+      7,
+      5
+    ],
+    "target": 5,
+    "reason": "Mixed matches and non-matches with duplicates",
+    "source": "agent",
+    "category": "agent_targeted"
+  },
+  {
+    "name": "negative_values",
     "numbers": [
       -1,
+      -2,
+      -1,
+      0
+    ],
+    "target": -1,
+    "reason": "Negative numbers as targets and elements",
+    "source": "agent",
+    "category": "agent_targeted"
+  },
+  {
+    "name": "zero_target",
+    "numbers": [
       0,
       1,
-      -1,
       0,
-      1
+      2
     ],
     "target": 0,
-    "reason": "Negative and zero values mixed with positives",
+    "reason": "Zero as target and element",
     "source": "agent",
     "category": "agent_targeted"
   },
   {
     "name": "large_integers",
     "numbers": [
-      12345678901234567890,
-      12345678901234567890,
-      -98765432109876543210
+      1000000000000000000,
+      999999999999999999,
+      1000000000000000000
     ],
-    "target": 12345678901234567890,
-    "reason": "Test very large integer handling",
+    "target": 1000000000000000000,
+    "reason": "Very large integers to test equality handling",
     "source": "agent",
     "category": "agent_targeted"
   },
   {
-    "name": "duplicate_and_order",
+    "name": "order_variation",
     "numbers": [
-      5,
+      3,
       1,
-      5,
       2,
-      5,
-      3
-    ],
-    "target": 5,
-    "reason": "Duplicates with varying order",
-    "source": "agent",
-    "category": "agent_targeted"
-  },
-  {
-    "name": "mutation_after_call",
-    "numbers": [
-      4,
-      4,
+      3,
       4
     ],
-    "target": 4,
-    "reason": "Ensure function does not modify input list",
+    "target": 3,
+    "reason": "Target appears at start and middle",
+    "source": "agent",
+    "category": "agent_targeted"
+  },
+  {
+    "name": "single_non_match_large",
+    "numbers": [
+      999999999999999999
+    ],
+    "target": 1000000000000000000,
+    "reason": "Large non-matching single element",
     "source": "agent",
     "category": "agent_targeted"
   }

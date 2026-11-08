@@ -1,0 +1,28 @@
+{
+  "baseline": "C:\\Users\\arnav\\OneDrive\\Documents\\WHACK\\WHACK-Proj\\examples\\failure_demo\\original.py",
+  "failure": {
+    "case": {
+      "name": "boundary_0_target_0",
+      "numbers": [],
+      "target": 0,
+      "category": "empty",
+      "source": "shared"
+    },
+    "expected": {
+      "value": 0,
+      "value_type": "int",
+      "exception": null,
+      "numbers_after": [],
+      "stdout": "",
+      "stderr": ""
+    },
+    "actual": {
+      "value": 1,
+      "value_type": "int",
+      "exception": null,
+      "numbers_after": [],
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+}

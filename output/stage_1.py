@@ -1,5 +1,9 @@
 def count_matches(numbers, target):
-    return numbers.count(target)
+    count = 0
+    for num in numbers:
+        if num == target:
+            count += 1
+    return count
 
 if __name__ == "__main__":
     examples = [

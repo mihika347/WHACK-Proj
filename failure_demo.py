@@ -38,6 +38,7 @@ def run_demo(project_dir=None):
                    "pass_rate_percent": stats.get("pass_rate_percent"),
                    "outcome_variance": stats.get("outcome_statistics", {}).get("population_variance"),
                    "numeric_error_statistics": stats.get("numeric_error_statistics"),
+                   "smallest_failing_input": entry.get("smallest_failing_input"),
                    "worst_observed_absolute_numeric_error": worst_error,
                    "first_counterexample": failures[0] if failures else None,
                    "worst_numeric_counterexample": worst}

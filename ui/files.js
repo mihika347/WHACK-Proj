@@ -94,6 +94,7 @@ function addProjectFile(name, content) {
 
 function renderProjectFile(focusHeading) {
   const file = project.files.find(f => f.id === project.active);
+  if (file?.liveRunId) return renderLiveDashboard(file, focusHeading);
   if (file?.demo) {
     document.querySelector('.demo-badge').hidden = false;
     document.getElementById('home-title').textContent = 'Optimisation pipeline';
@@ -123,7 +124,7 @@ function renderProjectFile(focusHeading) {
   renderNavigation(state);
   renderPipeline(state);
   const name = escapeHtml(file.name);
-  document.getElementById('run-summary').innerHTML = `<p class="eyebrow">Source file</p><h2>${name}</h2><p>Ready for optimisation</p><dl class="run-counts"><div><dt>Proposed</dt><dd>0</dd></div><div><dt>Recommended</dt><dd>0</dd></div><div><dt>Filtered</dt><dd>0</dd></div></dl><div class="demo-note">${icon('file')}<div><strong>${name}</strong><p>No optimisation run yet. Results will appear after this file is processed.</p></div></div>`;
+  document.getElementById('run-summary').innerHTML = `<p class="eyebrow">Source file</p><h2>${name}</h2><p>Ready for optimisation</p><dl class="run-counts"><div><dt>Proposed</dt><dd>0</dd></div><div><dt>Recommended</dt><dd>0</dd></div><div><dt>Filtered</dt><dd>0</dd></div></dl><div class="demo-note">${icon('file')}<div><strong>${name}</strong><p>No optimisation run yet. Results will appear after this file is processed.</p></div></div>` + liveRunControls(file);
   document.getElementById('home-title').textContent = `Optimisation pipeline · ${file.name}`;
   document.getElementById('source-file').textContent = file.name;
   document.querySelector('.code-header .label').textContent = file.name.endsWith('.py') ? 'Python' : 'Source';
@@ -205,5 +206,5 @@ document.getElementById('import-files').onchange = async event => {
 };
 document.getElementById('file-editor').oninput = event => {
   const file = project.files.find(f => f.id === project.active);
-  if (file && !file.demo) { file.content = event.target.value; saveProject(); }
+  if (file && (!file.demo || file.liveRunId)) { file.content = event.target.value; saveProject(); }
 };

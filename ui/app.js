@@ -109,6 +109,7 @@ function renderNavigation({ stage, view, candidate }) {
 
 function stageSummary(stage) {
   const file = activeProjectFile();
+  if (file?.liveRunId) return liveStageSummary(stage, file);
   if (file && !file.demo) {
     return stage === 'original' ? file.name : stage === 'tests' ? 'Upload tests for this file' : 'Awaiting optimisation';
   }
@@ -170,6 +171,7 @@ function renderPipeline({ stage: activeStage, candidate }) {
     <div class="demo-note">${icon('file')}<div><strong>${demoRun.filename}</strong>
       <p>${demoRun.inputDomain}. Timing and correctness figures are illustrative.</p></div></div>
   `;
+  byId('run-summary').insertAdjacentHTML('beforeend', liveRunControls(activeProjectFile()));
 }
 
 function escapeHtml(text) {

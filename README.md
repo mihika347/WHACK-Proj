@@ -275,7 +275,7 @@ A successful demo exits with code 0 when the control passes and every intentiona
 
 ## UI demo
 
-Open [`ui/index.html`](ui/index.html) in a browser. The page uses plain HTML, CSS, and JavaScript and runs without a build or backend.
+Open [`ui/index.html`](ui/index.html) in a browser for the standalone demo. For live trusted-Python runs, start `python local_api.py` and open `http://127.0.0.1:8000`. See [the live API contract](LIVE_API.md) for setup, recommendation rules, approval scoping, and integration with the saved reports.
 
 1. Open any pipeline stage, or choose a card under **Deep Dive** to explore Test Cases, AI Generated Changes, or Evaluation. Evaluation opens Correctness Check, with Performance Evaluation in the next tab.
 2. Drag the divider to resize the source and detail panes, or use the keyboard arrows while the divider is focused. Use **<** or **>** beside the divider to collapse a pane, then use the remaining arrow to restore the split. On small screens the panes stack.

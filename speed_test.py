@@ -8,8 +8,9 @@ from result_stats import speed_percentages, speed_statistics
 from export_results import export
 
 
-def run(use_agent=True, refresh_agent=False, seed=SEED):
-    correctness = check_correctness(use_agent=use_agent, refresh_agent=refresh_agent, seed=seed)
+def run(use_agent=True, refresh_agent=False, seed=SEED, correctness_report=None):
+    correctness = correctness_report if correctness_report is not None else check_correctness(
+        use_agent=use_agent, refresh_agent=refresh_agent, seed=seed)
     eligible = {c["file"] for c in correctness["candidates"] if c["status"] == "pass"}
     suite = speed_cases()
     suite_path = ROOT / "tests/speed_cases.json"

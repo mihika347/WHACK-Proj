@@ -79,6 +79,14 @@ h1:focus { outline: none; }
 .file-status { margin-top: 12px; overflow-wrap: anywhere; }
 .file-editor { width: 100%; min-height: 55vh; flex: 1; resize: vertical; padding: 16px; border: 0; background: #121322; color: #dddff9; font: .85rem/1.6 Consolas, monospace; tab-size: 4; }
 .project-test-json { padding: 12px; overflow: auto; max-height: 24rem; font: .8rem/1.5 Consolas, monospace; }
+.live-controls { display: grid; gap: 12px; margin-top: 18px; }
+.live-controls label { font-size: .85rem; line-height: 1.5; }
+.live-controls input { accent-color: var(--violet); }
+.live-run-id { font: .75rem/1.5 Consolas, monospace; overflow-wrap: anywhere; }
+.live-progress { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.live-progress li { border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; color: var(--muted); font-size: .75rem; }
+.live-progress [aria-current] { color: var(--green); border-color: var(--green); }
+.live-candidate { display: grid; gap: 10px; overflow-wrap: anywhere; }
 .sidebar { padding: 23px 12px; background: #131422; border-right: 1px solid #25263c; }
 .nav-label { padding: 0 11px 10px; font-size: .67rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .sidebar a {

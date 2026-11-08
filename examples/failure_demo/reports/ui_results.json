@@ -23,7 +23,7 @@
       "total_cases": 898,
       "passed_cases": 898,
       "failed_cases": 0,
-      "pass_rate_percent": 100,
+      "pass_rate_percent": 100.0,
       "pass_population_variance": 0,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -34,6 +34,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": null,
@@ -68,6 +69,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 14.42,
@@ -105,6 +107,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 16.29,
@@ -142,6 +145,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 15.09,
@@ -168,7 +172,7 @@
       "total_cases": 900,
       "passed_cases": 337,
       "failed_cases": 563,
-      "pass_rate_percent": 37.44444444444445,
+      "pass_rate_percent": 37.44444444444444,
       "pass_population_variance": 0.2342358024691358,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -179,6 +183,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 7.11,
@@ -205,7 +210,7 @@
       "total_cases": 898,
       "passed_cases": 0,
       "failed_cases": 898,
-      "pass_rate_percent": 0,
+      "pass_rate_percent": 0.0,
       "pass_population_variance": 0,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -216,6 +221,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 0.0,
@@ -255,6 +261,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 16.29,
@@ -292,6 +299,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 15.09,
@@ -329,6 +337,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 14.42,
@@ -355,7 +364,7 @@
       "total_cases": 900,
       "passed_cases": 337,
       "failed_cases": 563,
-      "pass_rate_percent": 37.44444444444445,
+      "pass_rate_percent": 37.44444444444444,
       "pass_population_variance": 0.2342358024691358,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -366,6 +375,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 7.11,
@@ -392,7 +402,7 @@
       "total_cases": 898,
       "passed_cases": 0,
       "failed_cases": 898,
-      "pass_rate_percent": 0,
+      "pass_rate_percent": 0.0,
       "pass_population_variance": 0,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -403,6 +413,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 0.0,
@@ -421,8 +432,10 @@
     }
   ],
   "key_stages": [],
-  "run_id": "0b9211cd-0ff8-4faf-84fe-ea315fbb8c51",
-  "generated_at": "2026-11-08T03:28:50.385724+00:00",
+  "run_id": "f86986bf-3001-47cc-ba6e-f62645148f6b",
+  "generated_at": "2026-11-08T05:59:11.055036+00:00",
+  "complete": true,
+  "pending_candidates": [],
   "has_speed_results": false,
   "seed": 20261107,
   "baseline_sha256": "60c08a1bbf6e78dae6a5eea5465486d2f0486f9714244eaeed02389db7bedbed",
@@ -455,7 +468,7 @@
       "total_cases": 898,
       "passed_cases": 898,
       "failed_cases": 0,
-      "pass_rate_percent": 100,
+      "pass_rate_percent": 100.0,
       "pass_population_variance": 0,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -466,6 +479,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": null,
@@ -500,6 +514,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 14.42,
@@ -537,6 +552,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 16.29,
@@ -574,6 +590,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 15.09,
@@ -600,7 +617,7 @@
       "total_cases": 900,
       "passed_cases": 337,
       "failed_cases": 563,
-      "pass_rate_percent": 37.44444444444445,
+      "pass_rate_percent": 37.44444444444444,
       "pass_population_variance": 0.2342358024691358,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -611,6 +628,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 7.11,
@@ -637,7 +655,7 @@
       "total_cases": 898,
       "passed_cases": 0,
       "failed_cases": 898,
-      "pass_rate_percent": 0,
+      "pass_rate_percent": 0.0,
       "pass_population_variance": 0,
       "numeric_error_population_variance": 0.0,
       "correctness_change_variance": 0.0,
@@ -648,6 +666,7 @@
       "speed_increase_percent": null,
       "execution_time_reduction_percent": null,
       "worst_observed_speed": null,
+      "worst_observed_slowdown_percent": null,
       "slowest_observed_workload": null,
       "mean_speed_increase_percent": null,
       "stage_score": 0.0,
@@ -713,7 +732,7 @@
     "correctness_comparison": [
       {
         "stage": "stage_1.py",
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "pass_population_variance": 0,
         "correctness_change_variance": 0.0,
         "max_absolute_error": 0.0
@@ -741,14 +760,14 @@
       },
       {
         "stage": "stage_5.py",
-        "pass_rate_percent": 37.44444444444445,
+        "pass_rate_percent": 37.44444444444444,
         "pass_population_variance": 0.2342358024691358,
         "correctness_change_variance": 0.0,
         "max_absolute_error": 0.0
       },
       {
         "stage": "stage_6.py",
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "pass_population_variance": 0,
         "correctness_change_variance": 0.0,
         "max_absolute_error": 1.0
@@ -761,7 +780,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -780,7 +799,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -799,7 +818,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -818,7 +837,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -837,7 +856,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -856,7 +875,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -875,7 +894,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -894,7 +913,7 @@
         "total": 484,
         "passed": 484,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -913,7 +932,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -932,7 +951,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -951,7 +970,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -970,7 +989,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -989,7 +1008,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1008,7 +1027,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1027,7 +1046,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1046,7 +1065,7 @@
         "total": 300,
         "passed": 300,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 300,
           "median": 1.0,
@@ -1065,7 +1084,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1084,7 +1103,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1103,7 +1122,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1179,7 +1198,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -1198,7 +1217,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -1236,7 +1255,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1312,7 +1331,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -1331,7 +1350,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1350,7 +1369,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1369,7 +1388,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1388,7 +1407,7 @@
         "total": 7,
         "passed": 2,
         "failed": 5,
-        "pass_rate_percent": 28.57142857142857,
+        "pass_rate_percent": 28.571428571428573,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -1426,7 +1445,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1445,7 +1464,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1464,7 +1483,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1502,7 +1521,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -1521,7 +1540,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -1578,7 +1597,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -1597,7 +1616,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1616,7 +1635,7 @@
         "total": 484,
         "passed": 394,
         "failed": 90,
-        "pass_rate_percent": 81.40495867768594,
+        "pass_rate_percent": 81.40495867768595,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -1635,7 +1654,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1692,7 +1711,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1711,7 +1730,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1730,7 +1749,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -1749,7 +1768,7 @@
         "total": 6,
         "passed": 5,
         "failed": 1,
-        "pass_rate_percent": 83.33333333333334,
+        "pass_rate_percent": 83.33333333333333,
         "outcome_statistics": {
           "count": 6,
           "median": 1.0,
@@ -1768,7 +1787,7 @@
         "total": 300,
         "passed": 269,
         "failed": 31,
-        "pass_rate_percent": 89.66666666666666,
+        "pass_rate_percent": 89.66666666666667,
         "outcome_statistics": {
           "count": 300,
           "median": 1.0,
@@ -1787,7 +1806,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1806,7 +1825,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1958,7 +1977,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -1977,7 +1996,7 @@
         "total": 484,
         "passed": 364,
         "failed": 120,
-        "pass_rate_percent": 75.20661157024794,
+        "pass_rate_percent": 75.20661157024793,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -2205,7 +2224,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2224,7 +2243,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2243,7 +2262,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2262,7 +2281,7 @@
         "total": 9,
         "passed": 9,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 9,
           "median": 1,
@@ -2281,7 +2300,7 @@
         "total": 9,
         "passed": 0,
         "failed": 9,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 9,
           "median": 0,
@@ -2300,7 +2319,7 @@
         "total": 7,
         "passed": 7,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 7,
           "median": 1,
@@ -2319,7 +2338,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2338,7 +2357,7 @@
         "total": 484,
         "passed": 140,
         "failed": 344,
-        "pass_rate_percent": 28.92561983471074,
+        "pass_rate_percent": 28.925619834710744,
         "outcome_statistics": {
           "count": 484,
           "median": 0.0,
@@ -2357,7 +2376,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2376,7 +2395,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2395,7 +2414,7 @@
         "total": 9,
         "passed": 0,
         "failed": 9,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 9,
           "median": 0,
@@ -2414,7 +2433,7 @@
         "total": 8,
         "passed": 0,
         "failed": 8,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 8,
           "median": 0.0,
@@ -2433,7 +2452,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -2452,7 +2471,7 @@
         "total": 8,
         "passed": 8,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 8,
           "median": 1.0,
@@ -2509,7 +2528,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2528,7 +2547,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2547,7 +2566,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2566,7 +2585,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2585,7 +2604,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2604,7 +2623,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2623,7 +2642,7 @@
         "total": 9,
         "passed": 0,
         "failed": 9,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 9,
           "median": 0,
@@ -2642,7 +2661,7 @@
         "total": 9,
         "passed": 0,
         "failed": 9,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 9,
           "median": 0,
@@ -2661,7 +2680,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2680,7 +2699,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2699,7 +2718,7 @@
         "total": 484,
         "passed": 0,
         "failed": 484,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 484,
           "median": 0.0,
@@ -2718,7 +2737,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2737,7 +2756,7 @@
         "total": 7,
         "passed": 0,
         "failed": 7,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -2756,7 +2775,7 @@
         "total": 9,
         "passed": 0,
         "failed": 9,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 9,
           "median": 0,
@@ -2775,7 +2794,7 @@
         "total": 8,
         "passed": 0,
         "failed": 8,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 8,
           "median": 0.0,
@@ -2794,7 +2813,7 @@
         "total": 8,
         "passed": 0,
         "failed": 8,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 8,
           "median": 0.0,
@@ -2813,7 +2832,7 @@
         "total": 8,
         "passed": 0,
         "failed": 8,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 8,
           "median": 0.0,
@@ -2832,7 +2851,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2851,7 +2870,7 @@
         "total": 300,
         "passed": 0,
         "failed": 300,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 300,
           "median": 0.0,
@@ -2870,7 +2889,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2889,7 +2908,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2908,7 +2927,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -2929,7 +2948,7 @@
         "total": 484,
         "passed": 484,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -2948,7 +2967,7 @@
         "total": 5,
         "passed": 5,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 5,
           "median": 1,
@@ -2967,7 +2986,7 @@
         "total": 409,
         "passed": 409,
         "failed": 0,
-        "pass_rate_percent": 100,
+        "pass_rate_percent": 100.0,
         "outcome_statistics": {
           "count": 409,
           "median": 1,
@@ -3005,7 +3024,7 @@
         "total": 7,
         "passed": 2,
         "failed": 5,
-        "pass_rate_percent": 28.57142857142857,
+        "pass_rate_percent": 28.571428571428573,
         "outcome_statistics": {
           "count": 7,
           "median": 0,
@@ -3043,7 +3062,7 @@
         "total": 484,
         "passed": 394,
         "failed": 90,
-        "pass_rate_percent": 81.40495867768594,
+        "pass_rate_percent": 81.40495867768595,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -3062,7 +3081,7 @@
         "total": 6,
         "passed": 5,
         "failed": 1,
-        "pass_rate_percent": 83.33333333333334,
+        "pass_rate_percent": 83.33333333333333,
         "outcome_statistics": {
           "count": 6,
           "median": 1.0,
@@ -3100,7 +3119,7 @@
         "total": 484,
         "passed": 364,
         "failed": 120,
-        "pass_rate_percent": 75.20661157024794,
+        "pass_rate_percent": 75.20661157024793,
         "outcome_statistics": {
           "count": 484,
           "median": 1.0,
@@ -3157,7 +3176,7 @@
         "total": 484,
         "passed": 140,
         "failed": 344,
-        "pass_rate_percent": 28.92561983471074,
+        "pass_rate_percent": 28.925619834710744,
         "outcome_statistics": {
           "count": 484,
           "median": 0.0,
@@ -3195,7 +3214,7 @@
         "total": 409,
         "passed": 194,
         "failed": 215,
-        "pass_rate_percent": 47.43276283618582,
+        "pass_rate_percent": 47.432762836185816,
         "outcome_statistics": {
           "count": 409,
           "median": 0,
@@ -3214,7 +3233,7 @@
         "total": 484,
         "passed": 0,
         "failed": 484,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 484,
           "median": 0.0,
@@ -3233,7 +3252,7 @@
         "total": 5,
         "passed": 0,
         "failed": 5,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 5,
           "median": 0,
@@ -3252,7 +3271,7 @@
         "total": 409,
         "passed": 0,
         "failed": 409,
-        "pass_rate_percent": 0,
+        "pass_rate_percent": 0.0,
         "outcome_statistics": {
           "count": 409,
           "median": 0,
@@ -3264,6 +3283,2025 @@
           "p95": 0.0,
           "iqr": 0.0
         }
+      }
+    ],
+    "correctness_by_input_size": [
+      {
+        "stage": "stage_1.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 52,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 67,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 75,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 3,
+        "total": 144,
+        "passed": 144,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 144,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 4,
+        "total": 347,
+        "passed": 347,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 347,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 5,
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 10,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 15,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 40,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 17,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 100,
+        "total": 31,
+        "passed": 31,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 31,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_1.py",
+        "input_size": 200,
+        "total": 40,
+        "passed": 40,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 52,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 67,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 71,
+        "failed": 4,
+        "pass_rate_percent": 94.66666666666667,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 1,
+          "population_variance": 0.05048888888888889,
+          "standard_deviation": 0.2246973272847029,
+          "min": 0,
+          "max": 1,
+          "p05": 0.7000000000000002,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 3,
+        "total": 144,
+        "passed": 116,
+        "failed": 28,
+        "pass_rate_percent": 80.55555555555556,
+        "outcome_statistics": {
+          "count": 144,
+          "median": 1.0,
+          "population_variance": 0.1566358024691358,
+          "standard_deviation": 0.39577241246597245,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 4,
+        "total": 347,
+        "passed": 247,
+        "failed": 100,
+        "pass_rate_percent": 71.18155619596541,
+        "outcome_statistics": {
+          "count": 347,
+          "median": 1,
+          "population_variance": 0.20513416771171591,
+          "standard_deviation": 0.45291739612396864,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 5,
+        "total": 11,
+        "passed": 9,
+        "failed": 2,
+        "pass_rate_percent": 81.81818181818181,
+        "outcome_statistics": {
+          "count": 11,
+          "median": 1,
+          "population_variance": 0.1487603305785124,
+          "standard_deviation": 0.38569460791993504,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 13,
+        "failed": 2,
+        "pass_rate_percent": 86.66666666666667,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 1,
+          "population_variance": 0.11555555555555555,
+          "standard_deviation": 0.339934634239519,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 22,
+        "failed": 13,
+        "pass_rate_percent": 62.857142857142854,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 1,
+          "population_variance": 0.23346938775510204,
+          "standard_deviation": 0.4831867007225075,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 19,
+        "failed": 21,
+        "pass_rate_percent": 47.5,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0.249375,
+          "standard_deviation": 0.4993746088859545,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 13,
+        "failed": 4,
+        "pass_rate_percent": 76.47058823529412,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 1,
+          "population_variance": 0.17993079584775087,
+          "standard_deviation": 0.42418250299576343,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 3,
+        "failed": 4,
+        "pass_rate_percent": 42.857142857142854,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 0,
+          "population_variance": 0.24489795918367346,
+          "standard_deviation": 0.4948716593053935,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 100,
+        "total": 32,
+        "passed": 19,
+        "failed": 13,
+        "pass_rate_percent": 59.375,
+        "outcome_statistics": {
+          "count": 32,
+          "median": 1.0,
+          "population_variance": 0.2412109375,
+          "standard_deviation": 0.4911323014219285,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_2.py",
+        "input_size": 200,
+        "total": 40,
+        "passed": 14,
+        "failed": 26,
+        "pass_rate_percent": 35.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0.2275,
+          "standard_deviation": 0.47696960070847283,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 52,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 63,
+        "failed": 4,
+        "pass_rate_percent": 94.02985074626865,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 1,
+          "population_variance": 0.05613722432613054,
+          "standard_deviation": 0.23693295322966482,
+          "min": 0,
+          "max": 1,
+          "p05": 0.30000000000000027,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 67,
+        "failed": 8,
+        "pass_rate_percent": 89.33333333333333,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 1,
+          "population_variance": 0.0952888888888889,
+          "standard_deviation": 0.30868898407440604,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 3,
+        "total": 145,
+        "passed": 123,
+        "failed": 22,
+        "pass_rate_percent": 84.82758620689656,
+        "outcome_statistics": {
+          "count": 145,
+          "median": 1,
+          "population_variance": 0.1287039239001189,
+          "standard_deviation": 0.35875329113489524,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 4,
+        "total": 348,
+        "passed": 282,
+        "failed": 66,
+        "pass_rate_percent": 81.03448275862068,
+        "outcome_statistics": {
+          "count": 348,
+          "median": 1.0,
+          "population_variance": 0.15368608799048752,
+          "standard_deviation": 0.39202817244489907,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 5,
+        "total": 9,
+        "passed": 8,
+        "failed": 1,
+        "pass_rate_percent": 88.88888888888889,
+        "outcome_statistics": {
+          "count": 9,
+          "median": 1,
+          "population_variance": 0.09876543209876543,
+          "standard_deviation": 0.31426968052735443,
+          "min": 0,
+          "max": 1,
+          "p05": 0.4,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 15,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 32,
+        "failed": 3,
+        "pass_rate_percent": 91.42857142857143,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 1,
+          "population_variance": 0.0783673469387755,
+          "standard_deviation": 0.27994168488950605,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 35,
+        "failed": 5,
+        "pass_rate_percent": 87.5,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 1.0,
+          "population_variance": 0.109375,
+          "standard_deviation": 0.33071891388307384,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 16,
+        "failed": 1,
+        "pass_rate_percent": 94.11764705882354,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 1,
+          "population_variance": 0.05536332179930796,
+          "standard_deviation": 0.23529411764705882,
+          "min": 0,
+          "max": 1,
+          "p05": 0.8,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 16,
+        "failed": 2,
+        "pass_rate_percent": 88.88888888888889,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 1.0,
+          "population_variance": 0.09876543209876543,
+          "standard_deviation": 0.31426968052735443,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 100,
+        "total": 32,
+        "passed": 26,
+        "failed": 6,
+        "pass_rate_percent": 81.25,
+        "outcome_statistics": {
+          "count": 32,
+          "median": 1.0,
+          "population_variance": 0.15234375,
+          "standard_deviation": 0.3903123748998999,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 150,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 1,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "input_size": 200,
+        "total": 38,
+        "passed": 28,
+        "failed": 10,
+        "pass_rate_percent": 73.6842105263158,
+        "outcome_statistics": {
+          "count": 38,
+          "median": 1.0,
+          "population_variance": 0.19390581717451524,
+          "standard_deviation": 0.44034738238635557,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.75
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 52,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 45,
+        "failed": 22,
+        "pass_rate_percent": 67.16417910447761,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 1,
+          "population_variance": 0.2205390955669414,
+          "standard_deviation": 0.4696159021657395,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 60,
+        "failed": 15,
+        "pass_rate_percent": 80.0,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 1,
+          "population_variance": 0.16,
+          "standard_deviation": 0.4,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 3,
+        "total": 144,
+        "passed": 108,
+        "failed": 36,
+        "pass_rate_percent": 75.0,
+        "outcome_statistics": {
+          "count": 144,
+          "median": 1.0,
+          "population_variance": 0.1875,
+          "standard_deviation": 0.4330127018922193,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.25
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 4,
+        "total": 347,
+        "passed": 263,
+        "failed": 84,
+        "pass_rate_percent": 75.79250720461096,
+        "outcome_statistics": {
+          "count": 347,
+          "median": 1,
+          "population_variance": 0.18347465721000922,
+          "standard_deviation": 0.42833941823046034,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 5,
+        "total": 10,
+        "passed": 8,
+        "failed": 2,
+        "pass_rate_percent": 80.0,
+        "outcome_statistics": {
+          "count": 10,
+          "median": 1.0,
+          "population_variance": 0.16,
+          "standard_deviation": 0.4,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 13,
+        "failed": 2,
+        "pass_rate_percent": 86.66666666666667,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 1,
+          "population_variance": 0.11555555555555555,
+          "standard_deviation": 0.339934634239519,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 31,
+        "failed": 4,
+        "pass_rate_percent": 88.57142857142857,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 1,
+          "population_variance": 0.10122448979591837,
+          "standard_deviation": 0.318157963590287,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 33,
+        "failed": 7,
+        "pass_rate_percent": 82.5,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 1.0,
+          "population_variance": 0.144375,
+          "standard_deviation": 0.3799671038392666,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 14,
+        "failed": 3,
+        "pass_rate_percent": 82.3529411764706,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 1,
+          "population_variance": 0.1453287197231834,
+          "standard_deviation": 0.3812200410828153,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 6,
+        "failed": 1,
+        "pass_rate_percent": 85.71428571428571,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 1,
+          "population_variance": 0.12244897959183673,
+          "standard_deviation": 0.3499271061118826,
+          "min": 0,
+          "max": 1,
+          "p05": 0.30000000000000004,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 16,
+        "failed": 2,
+        "pass_rate_percent": 88.88888888888889,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 1.0,
+          "population_variance": 0.09876543209876543,
+          "standard_deviation": 0.31426968052735443,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 100,
+        "total": 31,
+        "passed": 29,
+        "failed": 2,
+        "pass_rate_percent": 93.54838709677419,
+        "outcome_statistics": {
+          "count": 31,
+          "median": 1,
+          "population_variance": 0.060353798126951096,
+          "standard_deviation": 0.24567010018915833,
+          "min": 0,
+          "max": 1,
+          "p05": 0.5,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "input_size": 200,
+        "total": 40,
+        "passed": 35,
+        "failed": 5,
+        "pass_rate_percent": 87.5,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 1.0,
+          "population_variance": 0.109375,
+          "standard_deviation": 0.33071891388307384,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 52,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 1.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 67,
+        "failed": 0,
+        "pass_rate_percent": 100.0,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 1,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 1,
+          "max": 1,
+          "p05": 1.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 49,
+        "failed": 26,
+        "pass_rate_percent": 65.33333333333333,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 1,
+          "population_variance": 0.22648888888888888,
+          "standard_deviation": 0.4759084879353266,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 3,
+        "total": 144,
+        "passed": 49,
+        "failed": 95,
+        "pass_rate_percent": 34.02777777777778,
+        "outcome_statistics": {
+          "count": 144,
+          "median": 0.0,
+          "population_variance": 0.22448881172839505,
+          "standard_deviation": 0.47380250287265796,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 4,
+        "total": 349,
+        "passed": 76,
+        "failed": 273,
+        "pass_rate_percent": 21.77650429799427,
+        "outcome_statistics": {
+          "count": 349,
+          "median": 0,
+          "population_variance": 0.1703434290358864,
+          "standard_deviation": 0.4127268213187585,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 5,
+        "total": 10,
+        "passed": 0,
+        "failed": 10,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 10,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 7,
+        "failed": 8,
+        "pass_rate_percent": 46.666666666666664,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 0,
+          "population_variance": 0.24888888888888888,
+          "standard_deviation": 0.49888765156985887,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 2,
+        "failed": 33,
+        "pass_rate_percent": 5.714285714285714,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 0,
+          "population_variance": 0.053877551020408164,
+          "standard_deviation": 0.23211538298959886,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 0.29999999999999716,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 6,
+        "failed": 34,
+        "pass_rate_percent": 15.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0.1275,
+          "standard_deviation": 0.3570714214271425,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 10,
+        "failed": 7,
+        "pass_rate_percent": 58.8235294117647,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 1,
+          "population_variance": 0.2422145328719723,
+          "standard_deviation": 0.4921529567847503,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 0,
+        "failed": 7,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 9,
+        "failed": 9,
+        "pass_rate_percent": 50.0,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 0.5,
+          "population_variance": 0.25,
+          "standard_deviation": 0.5,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 1.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 100,
+        "total": 31,
+        "passed": 3,
+        "failed": 28,
+        "pass_rate_percent": 9.67741935483871,
+        "outcome_statistics": {
+          "count": 31,
+          "median": 0,
+          "population_variance": 0.08740894901144641,
+          "standard_deviation": 0.29565004483586066,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "input_size": 200,
+        "total": 40,
+        "passed": 7,
+        "failed": 33,
+        "pass_rate_percent": 17.5,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0.144375,
+          "standard_deviation": 0.3799671038392666,
+          "min": 0,
+          "max": 1,
+          "p05": 0.0,
+          "p95": 1.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 0,
+        "total": 52,
+        "passed": 0,
+        "failed": 52,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 52,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 1,
+        "total": 67,
+        "passed": 0,
+        "failed": 67,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 67,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 2,
+        "total": 75,
+        "passed": 0,
+        "failed": 75,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 75,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 3,
+        "total": 144,
+        "passed": 0,
+        "failed": 144,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 144,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 4,
+        "total": 347,
+        "passed": 0,
+        "failed": 347,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 347,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 5,
+        "total": 10,
+        "passed": 0,
+        "failed": 10,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 10,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 6,
+        "total": 15,
+        "passed": 0,
+        "failed": 15,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 15,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 10,
+        "total": 35,
+        "passed": 0,
+        "failed": 35,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 35,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 31,
+        "total": 40,
+        "passed": 0,
+        "failed": 40,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 40,
+        "total": 17,
+        "passed": 0,
+        "failed": 17,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 17,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 48,
+        "total": 7,
+        "passed": 0,
+        "failed": 7,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 7,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 61,
+        "total": 18,
+        "passed": 0,
+        "failed": 18,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 18,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 100,
+        "total": 31,
+        "passed": 0,
+        "failed": 31,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 31,
+          "median": 0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "input_size": 200,
+        "total": 40,
+        "passed": 0,
+        "failed": 40,
+        "pass_rate_percent": 0.0,
+        "outcome_statistics": {
+          "count": 40,
+          "median": 0.0,
+          "population_variance": 0,
+          "standard_deviation": 0.0,
+          "min": 0,
+          "max": 0,
+          "p05": 0.0,
+          "p95": 0.0,
+          "iqr": 0.0
+        }
+      }
+    ],
+    "smallest_failing_inputs": [
+      {
+        "stage": "stage_1.py",
+        "smallest_failing_input": null
+      },
+      {
+        "stage": "stage_2.py",
+        "smallest_failing_input": {
+          "smallest_observed": {
+            "case": {
+              "name": "random_127",
+              "numbers": [
+                0,
+                0
+              ],
+              "target": 0,
+              "category": "seeded_random",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 2,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            }
+          },
+          "reduced": {
+            "case": {
+              "name": "random_127",
+              "numbers": [
+                0,
+                0
+              ],
+              "target": 0,
+              "category": "seeded_random",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 2,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "original_input_size": 2,
+            "input_size": 2,
+            "evaluations": 2,
+            "budget_exhausted": false,
+            "single_deletion_minimal": true,
+            "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+          },
+          "reduction_error": null
+        }
+      },
+      {
+        "stage": "stage_3.py",
+        "smallest_failing_input": {
+          "smallest_observed": {
+            "case": {
+              "name": "boundary_1_target_0",
+              "numbers": [
+                0
+              ],
+              "target": 0,
+              "category": "singleton_zero",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            }
+          },
+          "reduced": {
+            "case": {
+              "name": "boundary_1_target_0",
+              "numbers": [
+                0
+              ],
+              "target": 0,
+              "category": "singleton_zero",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "original_input_size": 1,
+            "input_size": 1,
+            "evaluations": 1,
+            "budget_exhausted": false,
+            "single_deletion_minimal": true,
+            "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+          },
+          "reduction_error": null
+        }
+      },
+      {
+        "stage": "stage_4.py",
+        "smallest_failing_input": {
+          "smallest_observed": {
+            "case": {
+              "name": "boundary_1_target_0",
+              "numbers": [
+                0
+              ],
+              "target": 0,
+              "category": "singleton_zero",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            }
+          },
+          "reduced": {
+            "case": {
+              "name": "boundary_1_target_0",
+              "numbers": [
+                0
+              ],
+              "target": 0,
+              "category": "singleton_zero",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "original_input_size": 1,
+            "input_size": 1,
+            "evaluations": 1,
+            "budget_exhausted": false,
+            "single_deletion_minimal": true,
+            "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+          },
+          "reduction_error": null
+        }
+      },
+      {
+        "stage": "stage_5.py",
+        "smallest_failing_input": {
+          "smallest_observed": {
+            "case": {
+              "name": "random_67",
+              "numbers": [
+                1,
+                0
+              ],
+              "target": 1,
+              "category": "seeded_random",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                1,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                1
+              ],
+              "stdout": "",
+              "stderr": ""
+            }
+          },
+          "reduced": {
+            "case": {
+              "name": "random_67",
+              "numbers": [
+                1,
+                0
+              ],
+              "target": 1,
+              "category": "seeded_random",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                1,
+                0
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [
+                0,
+                1
+              ],
+              "stdout": "",
+              "stderr": ""
+            },
+            "original_input_size": 2,
+            "input_size": 2,
+            "evaluations": 2,
+            "budget_exhausted": false,
+            "single_deletion_minimal": true,
+            "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+          },
+          "reduction_error": null
+        }
+      },
+      {
+        "stage": "stage_6.py",
+        "smallest_failing_input": {
+          "smallest_observed": {
+            "case": {
+              "name": "boundary_0_target_0",
+              "numbers": [],
+              "target": 0,
+              "category": "empty",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [],
+              "stdout": "",
+              "stderr": ""
+            }
+          },
+          "reduced": {
+            "case": {
+              "name": "boundary_0_target_0",
+              "numbers": [],
+              "target": 0,
+              "category": "empty",
+              "source": "shared"
+            },
+            "expected": {
+              "value": 0,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [],
+              "stdout": "",
+              "stderr": ""
+            },
+            "actual": {
+              "value": 1,
+              "value_type": "int",
+              "exception": null,
+              "numbers_after": [],
+              "stdout": "",
+              "stderr": ""
+            },
+            "original_input_size": 0,
+            "input_size": 0,
+            "evaluations": 0,
+            "budget_exhausted": false,
+            "single_deletion_minimal": true,
+            "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+          },
+          "reduction_error": null
+        }
+      }
+    ],
+    "worst_observed_slowdowns": [
+      {
+        "stage": "stage_1.py",
+        "worst_observed_slowdown": null
+      },
+      {
+        "stage": "stage_2.py",
+        "worst_observed_slowdown": null
+      },
+      {
+        "stage": "stage_3.py",
+        "worst_observed_slowdown": null
+      },
+      {
+        "stage": "stage_4.py",
+        "worst_observed_slowdown": null
+      },
+      {
+        "stage": "stage_5.py",
+        "worst_observed_slowdown": null
+      },
+      {
+        "stage": "stage_6.py",
+        "worst_observed_slowdown": null
       }
     ],
     "speed_by_input_size": [],

@@ -1,6 +1,6 @@
 {
   "is_deliberately_faulty_demo": true,
-  "run_id": "0b9211cd-0ff8-4faf-84fe-ea315fbb8c51",
+  "run_id": "f86986bf-3001-47cc-ba6e-f62645148f6b",
   "all_expected_outcomes_verified": true,
   "scenarios": [
     {
@@ -8,7 +8,7 @@
       "scenario": "Correct control",
       "status": "pass",
       "verified_expected_outcome": true,
-      "pass_rate_percent": 100,
+      "pass_rate_percent": 100.0,
       "outcome_variance": 0,
       "numeric_error_statistics": {
         "count": 898,
@@ -23,6 +23,7 @@
         "excluded_cases": 0,
         "max_absolute_error": 0.0
       },
+      "smallest_failing_input": null,
       "worst_observed_absolute_numeric_error": 0,
       "first_counterexample": null,
       "worst_numeric_counterexample": null
@@ -46,6 +47,83 @@
         "iqr": 0.0,
         "excluded_cases": 0,
         "max_absolute_error": 199.0
+      },
+      "smallest_failing_input": {
+        "smallest_observed": {
+          "case": {
+            "name": "random_127",
+            "numbers": [
+              0,
+              0
+            ],
+            "target": 0,
+            "category": "seeded_random",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 2,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        "reduced": {
+          "case": {
+            "name": "random_127",
+            "numbers": [
+              0,
+              0
+            ],
+            "target": 0,
+            "category": "seeded_random",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 2,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "original_input_size": 2,
+          "input_size": 2,
+          "evaluations": 2,
+          "budget_exhausted": false,
+          "single_deletion_minimal": true,
+          "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+        },
+        "reduction_error": null
       },
       "worst_observed_absolute_numeric_error": 199,
       "first_counterexample": {
@@ -845,6 +923,77 @@
         "excluded_cases": 0,
         "max_absolute_error": 100.0
       },
+      "smallest_failing_input": {
+        "smallest_observed": {
+          "case": {
+            "name": "boundary_1_target_0",
+            "numbers": [
+              0
+            ],
+            "target": 0,
+            "category": "singleton_zero",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        "reduced": {
+          "case": {
+            "name": "boundary_1_target_0",
+            "numbers": [
+              0
+            ],
+            "target": 0,
+            "category": "singleton_zero",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "original_input_size": 1,
+          "input_size": 1,
+          "evaluations": 1,
+          "budget_exhausted": false,
+          "single_deletion_minimal": true,
+          "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+        },
+        "reduction_error": null
+      },
       "worst_observed_absolute_numeric_error": 100,
       "first_counterexample": {
         "case": {
@@ -1226,6 +1375,77 @@
         "excluded_cases": 0,
         "max_absolute_error": 1.0
       },
+      "smallest_failing_input": {
+        "smallest_observed": {
+          "case": {
+            "name": "boundary_1_target_0",
+            "numbers": [
+              0
+            ],
+            "target": 0,
+            "category": "singleton_zero",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        "reduced": {
+          "case": {
+            "name": "boundary_1_target_0",
+            "numbers": [
+              0
+            ],
+            "target": 0,
+            "category": "singleton_zero",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "original_input_size": 1,
+          "input_size": 1,
+          "evaluations": 1,
+          "budget_exhausted": false,
+          "single_deletion_minimal": true,
+          "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+        },
+        "reduction_error": null
+      },
       "worst_observed_absolute_numeric_error": 1,
       "first_counterexample": {
         "case": {
@@ -1295,7 +1515,7 @@
       "scenario": "Input list mutated",
       "status": "fail",
       "verified_expected_outcome": true,
-      "pass_rate_percent": 37.44444444444445,
+      "pass_rate_percent": 37.44444444444444,
       "outcome_variance": 0.2342358024691358,
       "numeric_error_statistics": {
         "count": 900,
@@ -1309,6 +1529,83 @@
         "iqr": 0.0,
         "excluded_cases": 0,
         "max_absolute_error": 0.0
+      },
+      "smallest_failing_input": {
+        "smallest_observed": {
+          "case": {
+            "name": "random_67",
+            "numbers": [
+              1,
+              0
+            ],
+            "target": 1,
+            "category": "seeded_random",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              1,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              1
+            ],
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        "reduced": {
+          "case": {
+            "name": "random_67",
+            "numbers": [
+              1,
+              0
+            ],
+            "target": 1,
+            "category": "seeded_random",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              1,
+              0
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [
+              0,
+              1
+            ],
+            "stdout": "",
+            "stderr": ""
+          },
+          "original_input_size": 2,
+          "input_size": 2,
+          "evaluations": 2,
+          "budget_exhausted": false,
+          "single_deletion_minimal": true,
+          "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+        },
+        "reduction_error": null
       },
       "worst_observed_absolute_numeric_error": 0,
       "first_counterexample": {
@@ -1403,7 +1700,7 @@
       "scenario": "Every result one too large",
       "status": "fail",
       "verified_expected_outcome": true,
-      "pass_rate_percent": 0,
+      "pass_rate_percent": 0.0,
       "outcome_variance": 0,
       "numeric_error_statistics": {
         "count": 898,
@@ -1417,6 +1714,65 @@
         "iqr": 0.0,
         "excluded_cases": 0,
         "max_absolute_error": 1.0
+      },
+      "smallest_failing_input": {
+        "smallest_observed": {
+          "case": {
+            "name": "boundary_0_target_0",
+            "numbers": [],
+            "target": 0,
+            "category": "empty",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [],
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        "reduced": {
+          "case": {
+            "name": "boundary_0_target_0",
+            "numbers": [],
+            "target": 0,
+            "category": "empty",
+            "source": "shared"
+          },
+          "expected": {
+            "value": 0,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [],
+            "stdout": "",
+            "stderr": ""
+          },
+          "actual": {
+            "value": 1,
+            "value_type": "int",
+            "exception": null,
+            "numbers_after": [],
+            "stdout": "",
+            "stderr": ""
+          },
+          "original_input_size": 0,
+          "input_size": 0,
+          "evaluations": 0,
+          "budget_exhausted": false,
+          "single_deletion_minimal": true,
+          "method": "Deletion-only reduction of the shortest observed failure, keeping target and mismatch fields; not a global minimum guarantee."
+        },
+        "reduction_error": null
       },
       "worst_observed_absolute_numeric_error": 1,
       "first_counterexample": {

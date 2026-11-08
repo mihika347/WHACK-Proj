@@ -33,6 +33,7 @@ def export(correctness, speed=None, output_dir=None, score_threshold=70):
     destination.mkdir(parents=True, exist_ok=True)
     speed_entries = {entry["file"]: entry for entry in speed["candidates"]} if speed else {}
     summary, workloads, case_rows, category_rows, source_rows, size_rows = [], [], [], [], [], []
+    failures, slowdowns, correctness_sizes = [], [], []
     seen_hashes = {}
     for candidate in correctness["candidates"]:
         name = candidate["file"]
@@ -59,8 +60,12 @@ def export(correctness, speed=None, output_dir=None, score_threshold=70):
                "speed_increase_percent": timing_stats.get("speed_increase_percent"),
                "execution_time_reduction_percent": timing_stats.get("execution_time_reduction_percent"),
                "worst_observed_speed": timing_stats.get("worst_observed_speed"),
+               "worst_observed_slowdown_percent": timing_stats.get('worst_observed_slowdown', {}).get('slowdown_percent'),
                "slowest_observed_workload": timing_stats.get("slowest_observed_workload")}
         summary.append(row)
+        failures.append({"stage": name, "smallest_failing_input": timing.get("smallest_failing_input") or candidate.get("smallest_failing_input")})
+        slowdowns.append({"stage": name, "worst_observed_slowdown": timing.get("worst_observed_slowdown")})
+        correctness_sizes.extend({"stage": name, **group} for group in stats.get("by_input_size", []))
         case_rows.extend({"stage": name, **case} for case in candidate.get("case_results", []))
         category_rows.extend({"stage": name, **group} for group in stats.get("by_category", []))
         source_rows.extend({"stage": name, **group} for group in stats.get("by_source", []))
@@ -119,6 +124,8 @@ def export(correctness, speed=None, output_dir=None, score_threshold=70):
                                             "correctness_change_variance": r["correctness_change_variance"],
                                             "max_absolute_error": r["max_absolute_error"]} for r in summary],
                 "correctness_by_category": category_rows, "correctness_by_source": source_rows,
+                "correctness_by_input_size": correctness_sizes,
+                "smallest_failing_inputs": failures, "worst_observed_slowdowns": slowdowns,
                 "speed_by_input_size": size_rows, "speed_by_workload": workloads},
             "correctness_case_results": case_rows}
     save_json(destination / "ui_results.json", data)

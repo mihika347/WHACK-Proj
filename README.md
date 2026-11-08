@@ -1,5 +1,7 @@
 # WHACK: AI Code Optimisation
 
+The integrated UI includes both browser-local project/file editing and Deep Dive test-case uploads, plus the measured-results dashboard. Use `#tests` (or `#measured-results`) for saved reports and `#deep-dive/tests/...` for the separate test-case workspace. See [merge notes](MERGE_NOTES.md) for the preserved features, conflict decisions, test results, and archived pre-merge datasets.
+
 ## NVIDIA GPU profile
 
 The pre-GPU project is preserved at Git commit `b4c507cf1a7205a8338358ef576c6ea26b42ac64` and in `backups/pre-nvidia-gpu-b4c507c.zip`. `backups/lmstudio-before-gpu.json` records the previous loaded-model metadata. Backups and local benchmark timings are excluded from Git.
@@ -129,7 +131,7 @@ The repository includes `test_utils.py`, `speed_test.py`, `correctness_test.py`,
 ```powershell
 python correctness_test.py
 python speed_test.py
-python -m unittest test_harness test_targeted_agent test_result_stats -v
+python -m unittest test_harness test_targeted_agent test_result_stats test_failure_reduction -v
 ```
 
 The speed runner first regenerates correctness checks, then verifies the benchmark inputs too. Failed candidates are skipped. Both runners exit with a nonzero status if a candidate fails, errors, or is skipped. Paths resolve relative to the scripts rather than the terminal's working directory.
@@ -259,6 +261,9 @@ Negative values mean a slowdown or longer execution, respectively. Aggregate per
 | `charts.correctness_by_source` | Shared, rule-targeted, exhaustive, and agent coverage |
 | `charts.correctness_by_category` | Pass/fail breakdown by input category |
 | `charts.speed_by_input_size` | Percentage speed improvement by list size |
+| `charts.correctness_by_input_size` | Pass/fail results for each observed list size |
+| `charts.smallest_failing_inputs` | Small observed and reduced failure reproducers |
+| `charts.worst_observed_slowdowns` | Slowest relative workloads and their inputs |
 | `charts.speed_by_workload` | Baseline vs candidate timings, raw samples, and variability |
 | `correctness_case_results` | Per-case outcomes and numeric-error scatter plot |
 
@@ -307,8 +312,8 @@ A successful demo exits with code 0 when the control passes and every intentiona
 
 Open [`ui/index.html`](ui/index.html) in a browser. The page uses plain HTML, CSS, and JavaScript and runs without a build or backend.
 
-1. Open any pipeline stage. Use the stage strip to move between views and **Results** to inspect the candidates evaluated at the current stage.
-2. Drag the divider to resize the source and detail panes. With the divider focused, use the arrow keys to adjust it. On small screens the panes stack.
+1. Open any pipeline stage, or choose a card under **Deep Dive** to explore Test Cases, AI Generated Changes, or Evaluation. Evaluation opens Correctness Check, with Performance Evaluation in the next tab.
+2. Drag the divider to resize the source and detail panes, or use the keyboard arrows while the divider is focused. Use **<** or **>** beside the divider to collapse a pane, then use the remaining arrow to restore the split. On small screens the panes stack.
 3. Approve a recommended change and choose **Generate optimised code** in the approval queue. Final shows the build selection, combined diff, and demo verification.
 4. To try a failed build, approve both **Use the built-in list count** and **Count a list of matches**, then generate again. Final identifies the overlapping patches. Reject either change and rebuild to recover.
 

@@ -1,6 +1,8 @@
 const icons = {
   pipeline: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v7a2 2 0 0 0 2 2h7"/>',
   file: '<path d="M7 3h7l5 5v13H5V3zm7 0v6h5M8 13h8m-8 4h8"/>',
+  tests: '<path d="M9 3h6m-5 0v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3M8 14h8"/>',
+  upload: '<path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/>',
   spark: '<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7z"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
   bars: '<path d="M5 20v-5m7 5V9m7 11V4" stroke-width="3"/>',
@@ -23,14 +25,17 @@ let finalBuild;
 
 const stages = {
   original: { title: 'Original Code', icon: 'file', tone: 'blue', view: 'overview' },
+  tests: { title: 'Test Cases', icon: 'tests', tone: 'violet', view: 'tests' },
   generated: { title: 'AI Generated Changes', icon: 'spark', tone: 'violet', view: 'results' },
-  correctness: { title: 'Correctness Check', icon: 'check', tone: 'green', view: 'results' },
+  correctness: { title: 'Correctness Check', icon: 'check', tone: 'muted', view: 'results' },
   performance: { title: 'Performance Evaluation', icon: 'bars', tone: 'gold', view: 'review' },
   value: { title: 'Value Assessment', icon: 'star', tone: 'blue', view: 'results' },
   human: { title: 'Human Review', icon: 'person', tone: 'violet', view: 'approve' },
   final: { title: 'Final Code', icon: 'flag', tone: 'muted', view: 'final' },
 };
 const stageOrder = Object.keys(stages);
+const pipelineStages = ['original', 'value', 'human', 'final'];
+const deepDiveStages = ['tests', 'generated', 'correctness', 'performance'];
 const candidateStages = ['generated', 'correctness', 'performance', 'value'];
 
 function readDecisions() {
@@ -51,6 +56,7 @@ function readDecisions() {
 
 function saveDecision(candidate, decision) {
   decisions.set(candidate.id, decision);
+  finalBuild = undefined;
   try {
     sessionStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(decisions)));
   } catch {
@@ -59,7 +65,8 @@ function saveDecision(candidate, decision) {
 }
 
 function route(stage, candidate = recommended[0], view = stages[stage].view) {
-  return `#${stage}/${view}/${candidate.id}`;
+  const section = deepDiveStages.includes(stage) ? 'deep-dive/' : '';
+  return `#${section}${stage}/${view}/${candidate.id}`;
 }
 
 function stageCandidates(stage) {
@@ -69,8 +76,12 @@ function stageCandidates(stage) {
 }
 
 function readRoute() {
-  if (location.hash === '#tests') return { view: 'tests', candidate: recommended[0] };
-  let [stage, view, id] = location.hash.slice(1).split('/');
+  if (location.hash === '#tests' || location.hash === '#measured-results') return { view: 'measured', candidate: recommended[0] };
+  const parts = location.hash.slice(1).split('/');
+  const isDeepDive = parts[0] === 'deep-dive';
+  if (isDeepDive) parts.shift();
+  let [stage, view, id] = parts;
+  if (isDeepDive && !deepDiveStages.includes(stage)) stage = 'tests';
   // Step 1 approval links used the Performance stage.
   if (stage === 'performance' && view === 'approve') stage = 'human';
   if (!stageOrder.includes(stage)) return { view: 'pipeline', candidate: recommended[0] };
@@ -87,7 +98,8 @@ function renderNavigation({ stage, view, candidate }) {
   const candidateStage = candidateStages.includes(stage) ? stage : 'performance';
   const items = [
     { id: 'pipeline', label: 'Pipeline', icon: 'pipeline', href: '#pipeline' },
-    { id: 'tests', label: 'Test results', icon: 'bars', href: '#tests' },
+    { id: 'measured', label: 'Test results', icon: 'bars', href: '#tests' },
+    { id: 'tests', label: 'Test cases', icon: 'tests', href: route('tests', candidate) },
     { id: 'results', label: 'Results', icon: 'bars', href: route(candidateStage, candidate, 'results') },
     { id: 'review', label: 'Review', icon: 'review', href: route(candidateStage, candidate, 'review') },
     { id: 'approve', label: 'Approve', icon: 'check', href: route('human', candidate) },
@@ -96,10 +108,13 @@ function renderNavigation({ stage, view, candidate }) {
   const link = (item) => `<a href="${item.href}" ${view === item.id ? 'aria-current="page"' : ''}>
     ${icon(item.icon)}<span>${item.label}</span></a>`;
   byId('navigation').innerHTML = `<p class="nav-label">Workspace</p>${items.map(link).join('')}`;
-  byId('workspace-views').innerHTML = items.filter(item => !['pipeline', 'tests'].includes(item.id)).map(link).join('');
 }
 
 function stageSummary(stage) {
+  const file = activeProjectFile();
+  if (file && !file.demo) {
+    return stage === 'original' ? file.name : stage === 'tests' ? 'Upload tests for this file' : 'Awaiting optimisation';
+  }
   const entered = stageCandidates(stage).length;
   const removed = candidates.filter((candidate) => candidate.filteredAt === stage).length;
   switch (stage) {
@@ -112,18 +127,31 @@ function stageSummary(stage) {
   }
 }
 
-function renderPipeline({ stage: activeStage, candidate }) {
-  byId('pipeline-stages').innerHTML = stageOrder.map((stage) => {
-    const { title, icon: iconName, tone } = stages[stage];
-    return `<li><a class="stage-card tone-${tone}" href="${route(stage)}">
-      <span class="stage-icon">${icon(iconName)}</span>
-      <span class="stage-copy"><strong>${title}</strong><small ${stage === 'final' ? 'id="final-stage-summary"' : ''}>${stageSummary(stage)}</small></span>
-      <span class="stage-end" aria-hidden="true">→</span>
-    </a></li>`;
-  }).join('');
+function stageCard(stage, title, summary) {
+  const { icon: iconName, tone } = stages[stage];
+  return `<li><a class="stage-card tone-${tone}" href="${route(stage)}">
+    <span class="stage-icon">${icon(iconName)}</span>
+    <span class="stage-copy"><strong>${title}</strong><small id="${stage}-stage-summary">${summary}</small></span>
+    <span class="stage-end" aria-hidden="true">→</span>
+  </a></li>`;
+}
 
+function renderPipeline({ stage: activeStage, candidate }) {
+  byId('pipeline-stages').innerHTML = pipelineStages.map((stage) =>
+    stageCard(stage, stages[stage].title, stageSummary(stage)),
+  ).join('');
+  byId('deep-dive-cards').innerHTML = [
+    stageCard('tests', stages.tests.title, 'AI-generated cases and your uploads'),
+    stageCard('generated', stages.generated.title, stageSummary('generated')),
+    stageCard('correctness', 'Evaluation', 'Correctness and performance results'),
+  ].join('');
+
+  const isDeepDive = deepDiveStages.includes(activeStage);
+  const menuStages = isDeepDive ? deepDiveStages : pipelineStages;
+  byId('deep-dive-label').hidden = !isDeepDive;
+  byId('workspace-stage-menu').setAttribute('aria-label', isDeepDive ? 'Deep Dive' : 'Pipeline stages');
   const strip = byId('workspace-stages');
-  strip.innerHTML = stageOrder.map((stage, index) => `
+  strip.innerHTML = menuStages.map((stage, index) => `
     <li><a href="${route(stage, candidate)}" ${stage === activeStage ? 'aria-current="step"' : ''}>
       <span class="stage-step" aria-hidden="true">${index + 1}</span><span>${stages[stage].title}</span>
     </a></li>`).join('');
@@ -172,13 +200,23 @@ function codeRow(line, before, after, kind = 'context', sign = '') {
 function renderCode({ stage, candidate }) {
   const isFinal = stage === 'final';
   const hasFinalDiff = isFinal && finalBuild?.status === 'verified';
+  if (isFinal && !hasFinalDiff) {
+    displayedCode = undefined;
+    byId('source-file').textContent = demoRun.filename;
+    byId('diff-toolbar').textContent = finalBuild?.status === 'pending' ? 'Building final code…' : 'No final code available';
+    byId('source-diff').replaceChildren();
+    byId('source-diff').setAttribute('aria-label', 'Final code');
+    byId('code-footer').textContent = finalBuild?.status === 'failed'
+      ? 'Resolve conflicting approvals to generate final code.' : 'Final code includes all compatible approved changes.';
+    return;
+  }
   const isBaseline = stage === 'original' || (isFinal && !hasFinalDiff);
   const codeId = hasFinalDiff ? finalBuild : isBaseline ? 'baseline' : candidate.id;
   if (displayedCode === codeId) return;
   displayedCode = codeId;
 
   const applied = hasFinalDiff ? finalBuild.applied : isBaseline ? [] : [candidate];
-  const title = hasFinalDiff ? 'Combined diff' : isBaseline ? 'Original source' : 'Candidate diff';
+  const title = hasFinalDiff ? 'Final code · all approved changes' : isBaseline ? 'Original source' : 'Candidate diff';
   const baseline = demoRun.baseline;
   const rows = [];
   let before = 0;
@@ -192,7 +230,7 @@ function renderCode({ stage, candidate }) {
       after += 1;
     }
     for (let i = 0; i < patch.remove; i += 1) {
-      rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
+      if (!hasFinalDiff) rows.push(codeRow(baseline[before], before + 1, '', 'removed', '−'));
       before += 1;
     }
     for (const line of patch.lines) {
@@ -276,7 +314,7 @@ function baselineView() {
       <div><dt>Worst observed</dt><dd>${formatMs(worst)}</dd></div>
     </dl>
     <section class="inset"><h2>Correctness reference</h2><p>Each change is compared with the original function on ${evidence.cases} fixture inputs.</p></section>
-    <div class="actions"><a class="button primary" href="${route('generated')}">See proposed changes</a></div>`;
+    <div class="actions"><a class="button primary" href="${route('value')}">See value assessment</a></div>`;
 }
 
 function assessment(stage, candidate) {
@@ -382,9 +420,11 @@ function generateBuild() {
   const selected = approvedCandidates();
   if (!selected.length || finalBuild?.status === 'pending') return;
   finalBuild = { status: 'pending', selected };
+  const pendingBuild = finalBuild;
   location.hash = route('final');
 
   window.setTimeout(() => {
+    if (finalBuild !== pendingBuild) return;
     // Insertions at a replacement boundary can be applied before the replacement.
     const applied = [...selected].sort((a, b) =>
       a.patch.start - b.patch.start || a.patch.remove - b.patch.remove,
@@ -398,6 +438,25 @@ function generateBuild() {
       : { status: 'verified', selected, applied, timing: demoRun.finalTimings[approvalKey(selected)] };
     renderBuildUpdate();
   }, 900);
+}
+
+function finalImprovementSummary(timing) {
+  const metrics = [
+    ['mean', 'Mean runtime'],
+    ['median', 'Median runtime'],
+    ['worst', 'Worst observed runtime'],
+  ];
+  return `<h2 id="final-improvement-title">Improvement summary</h2>
+    <p>Final code compared with the original using demo timings.</p>
+    <dl class="run-counts improvement-stats">${metrics.map(([metric, label]) => {
+      const saved = evidence.baseline[metric] - timing[metric];
+      const tone = saved > 0 ? 'success' : saved < 0 ? 'warning' : '';
+      const percentage = (100 * Math.abs(saved) / evidence.baseline[metric]).toFixed(1);
+      const change = saved === 0 ? 'Same runtime' :
+        `<span aria-hidden="true">${saved > 0 ? '↑' : '↓'}</span> ${percentage}%<span class="visually-hidden"> ${saved > 0 ? 'faster' : 'slower'}</span>`;
+      const delta = saved === 0 ? 'No time difference' : `${formatMs(Math.abs(saved))} ${saved > 0 ? 'saved' : 'added'}`;
+      return `<div><dt>${label}</dt><dd>${badge(change, tone)}<small>${delta}</small></dd></div>`;
+    }).join('')}</dl>`;
 }
 
 function finalView() {
@@ -440,23 +499,75 @@ function renderBuildUpdate() {
   }
 }
 
+function setSplitLayout(layout) {
+  const detailsOnly = layout === 'details-only';
+  const codeCollapsed = layout === 'code-collapsed';
+  const detailsCollapsed = layout === 'details-collapsed';
+  const codeVisible = !detailsOnly && !codeCollapsed;
+  const atTestCases = readRoute().view === 'tests';
+
+  split.dataset.layout = layout;
+  byId('code-pane').hidden = !codeVisible;
+  byId('details-pane').hidden = detailsCollapsed;
+  byId('split-rail').hidden = detailsOnly;
+  divider.hidden = layout !== 'split';
+  splitLeft.hidden = codeCollapsed;
+  splitRight.hidden = detailsCollapsed;
+  splitLeft.title = detailsCollapsed ? 'Expand details pane' : 'Collapse code pane';
+  splitRight.title = codeCollapsed ? 'Expand code pane' : 'Collapse details pane';
+  splitLeft.setAttribute('aria-label', splitLeft.title);
+  splitRight.setAttribute('aria-label', splitRight.title);
+  splitLeft.setAttribute('aria-controls', detailsCollapsed ? 'details-pane' : 'code-pane');
+  splitRight.setAttribute('aria-controls', codeCollapsed ? 'code-pane' : 'details-pane');
+  splitLeft.setAttribute('aria-expanded', String(!detailsCollapsed));
+  splitRight.setAttribute('aria-expanded', String(!codeCollapsed));
+
+  byId('test-case-code-close').hidden = !atTestCases || !codeVisible;
+  const showCode = atTestCases ? byId('test-case-show-code') : null;
+  if (showCode) {
+    showCode.setAttribute('aria-expanded', String(codeVisible));
+    showCode.textContent = codeVisible ? 'Hide code' : 'Show code';
+  }
+}
+
 function render(focusHeading = false) {
+  renderFileList();
+  const initialState = readRoute();
+  if (initialState.view === 'measured') {
+    byId('pipeline-home').hidden = true;
+    byId('workspace').hidden = true;
+    byId('measured-results').hidden = false;
+    byId('final-improvement').hidden = true;
+    document.querySelector('.demo-badge').hidden = false;
+    document.querySelector('.demo-badge').innerHTML = '<span class="dot"></span> Saved reports';
+    renderNavigation(initialState);
+    window.testResults.show();
+    if (focusHeading) byId('measured-title').focus({preventScroll: true});
+    return;
+  }
+  byId('measured-results').hidden = true;
+  byId('final-improvement').hidden = true;
+  if (renderProjectFile(focusHeading)) return;
+  byId('file-editor').hidden = true;
+  byId('source-diff').hidden = false;
+  document.querySelector('.code-header .label').textContent = 'Python';
   const state = readRoute();
+  if (state.stage === 'final' && !finalBuild && approvedCandidates().length) generateBuild();
   const atHome = state.view === 'pipeline';
-  const atTests = state.view === 'tests';
-  document.querySelector('.demo-badge').innerHTML = `<span class="dot"></span> ${atTests ? 'Saved reports' : 'Demo run'}`;
+  const atTestCases = state.view === 'tests';
+  document.querySelector('.demo-badge').innerHTML = '<span class="dot"></span> Demo run';
   byId('pipeline-home').hidden = !atHome;
-  byId('workspace').hidden = atHome || atTests;
-  byId('measured-results').hidden = !atTests;
-  if (atTests) window.testResults.show();
+  byId('workspace').hidden = atHome;
+  if (focusHeading || !split.dataset.layout) setSplitLayout(atTestCases ? 'details-only' : 'split');
   renderNavigation(state);
   renderPipeline(state);
 
-  if (!atHome && !atTests) {
-    renderCode(state);
+  if (!atHome) {
+    if (!atTestCases) renderCode(state);
     const content = byId('details-content');
     switch (state.view) {
       case 'overview': content.innerHTML = baselineView(); break;
+      case 'tests': content.innerHTML = testCasesView(); break;
       case 'results': content.innerHTML = resultsView(state.stage, state.candidate); break;
       case 'approve': content.innerHTML = queueView(); break;
       case 'final': content.innerHTML = finalView(); break;
@@ -466,13 +577,19 @@ function render(focusHeading = false) {
     const status = state.view === 'final' && finalBuild ? buildLabels[finalBuild.status] : '';
     if (liveStatus.textContent !== status) liveStatus.textContent = status;
   }
+  const showImprovement = state.view === 'final' && finalBuild?.status === 'verified';
+  const improvement = byId('final-improvement');
+  improvement.hidden = !showImprovement;
+  improvement.innerHTML = showImprovement ? finalImprovementSummary(finalBuild.timing) : '';
+
   if (focusHeading) {
     window.scrollTo(0, 0);
-    byId(atTests ? 'measured-title' : atHome ? 'home-title' : 'view-title').focus({ preventScroll: true });
+    byId(atHome ? 'home-title' : 'view-title').focus({ preventScroll: true });
   }
 }
 
 byId('details-content').addEventListener('click', (event) => {
+  if (handleTestCaseClick(event)) return;
   if (event.target.closest('#generate-build')) {
     generateBuild();
     return;
@@ -485,11 +602,32 @@ byId('details-content').addEventListener('click', (event) => {
   location.hash = route('human', candidate);
 });
 
+byId('details-content').addEventListener('change', uploadTestCases);
+
+byId('test-case-code-close').addEventListener('click', () => {
+  setSplitLayout('code-collapsed');
+  splitRight.focus();
+});
+
 const split = byId('workspace-split');
 const divider = byId('split-divider');
+const splitLeft = byId('split-left');
+const splitRight = byId('split-right');
 const minSplit = Number(divider.getAttribute('aria-valuemin'));
 const maxSplit = Number(divider.getAttribute('aria-valuemax'));
 let dragOffset = 0;
+
+function moveSplit(collapsedLayout, nextControl) {
+  const layout = split.dataset.layout === 'split' ? collapsedLayout : 'split';
+  setSplitLayout(layout);
+  const focusTarget = nextControl.getClientRects().length
+    ? nextControl
+    : byId('test-case-show-code') ?? byId('view-title');
+  focusTarget.focus();
+}
+
+splitLeft.addEventListener('click', () => moveSplit('code-collapsed', splitRight));
+splitRight.addEventListener('click', () => moveSplit('details-collapsed', splitLeft));
 
 function resizeSourcePane(percent) {
   const width = Math.max(minSplit, Math.min(maxSplit, Math.round(percent)));

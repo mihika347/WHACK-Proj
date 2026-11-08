@@ -27,7 +27,7 @@ def describe(values):
 def pass_statistics(rows):
     outcomes = [int(row["passed"]) for row in rows]
     return {"total": len(outcomes), "passed": sum(outcomes), "failed": len(outcomes) - sum(outcomes),
-            "pass_rate_percent": 100 * statistics.mean(outcomes) if outcomes else None,
+            "pass_rate_percent": 100 * sum(outcomes) / len(outcomes) if outcomes else None,
             "outcome_statistics": describe(outcomes)}
 
 
@@ -55,7 +55,9 @@ def correctness_statistics(rows):
         **describe(errors), "excluded_cases": len(rows) - len(errors),
         "max_absolute_error": max(map(abs, errors), default=None)},
         "change_variance": statistics.pvariance(errors) if errors else None,
-        "by_source": groups["source"], "by_category": groups["category"]}
+        "by_source": groups["source"], "by_category": groups["category"],
+        "by_input_size": [{"input_size": size, **pass_statistics([r for r in rows if r.get("input_size") == size])}
+                          for size in sorted({r["input_size"] for r in rows if "input_size" in r})]}
 
 
 def speed_percentages(speedup):
@@ -80,6 +82,10 @@ def speed_statistics(timings):
             **speed_percentages(statistics.median(ratios)),
             "speed_change_variance_pp_squared": statistics.pvariance(changes),
             "worst_observed_speed": evidence(worst), "slowest_observed_workload": evidence(slowest),
+            "worst_observed_slowdown": {"workload": worst.get("name"), "input_size": worst.get("size"),
+                "speedup": worst["speedup"], "slowdown_percent": max(0, (1 / worst["speedup"] - 1) * 100),
+                "is_slowdown": worst["speedup"] < 1, "candidate_median_seconds": worst["median_seconds"],
+                "baseline_median_seconds": worst["median_seconds"] * worst["speedup"]},
             "workload_median_seconds": describe(t["median_seconds"] for t in timings),
             "workload_speed_increase_percent": describe(t["speed_increase_percent"] for t in timings),
             "faster_workloads": sum(r > 1 for r in ratios), "slower_workloads": sum(r < 1 for r in ratios),

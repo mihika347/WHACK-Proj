@@ -2,7 +2,7 @@
 import argparse
 import platform
 import sys
-from correctness_test import run as check_correctness
+from correctness_test import run as check_correctness, smallest_counterexample
 from test_utils import ROOT, SEED, candidates, isolated, save_json, speed_cases
 from result_stats import speed_percentages, speed_statistics
 from export_results import export, attach_scores
@@ -28,7 +28,10 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
               "summary": "Median percentage speed increase, population variance of percentage changes across workloads, and worst observed speed.",
               "baseline": reference, "candidates": []}
     for path in candidates():
+        correct_entry = next(c for c in correctness['candidates'] if c['file'] == path.name)
         entry = {"file": path.name, "speed_increase_percent": None,
+                 "smallest_failing_input": correct_entry.get('smallest_failing_input'),
+                 "speed_by_input_size": [], "worst_observed_slowdown": None,
                  "speed_change_variance_pp_squared": None, "worst_observed_speed": None}
         if path.name not in eligible:
             entry.update(status="skipped", reason="Correctness suite did not pass")
@@ -36,6 +39,12 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
             actual = isolated(path, suite_path, "correctness")
             if "error" in actual or actual.get("observations") != expected["observations"]:
                 entry.update(status="skipped", reason="Benchmark-input correctness check failed", error=actual.get("error"))
+                if "observations" in actual:
+                    failures = [{"case": test, "expected": old, "actual": new}
+                                for test, old, new in zip(suite, expected["observations"], actual["observations"])
+                                if old != new]
+                    entry["smallest_failing_input"] = smallest_counterexample(
+                        baseline, path, failures, ROOT / "tests" / f"{path.stem}_benchmark_shrink_request.json")
             else:
                 measured = isolated(path, suite_path, "speed")
                 if "error" in measured:
@@ -47,6 +56,12 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, score_threshold=70):
                     entry.update(status="pass", timings=measured["timings"],
                                  statistics=speed_statistics(measured["timings"]))
                     stats = entry["statistics"]
+                    entry['median_speedup'] = stats['median_speedup']
+                    entry['worst_observed_slowdown'] = {**stats['worst_observed_slowdown'],
+                        'input': next(test for test in suite if test['name'] == stats['worst_observed_slowdown']['workload'])}
+                    entry['speed_by_input_size'] = [
+                        {'input_size': size, **speed_statistics([t for t in measured['timings'] if t['size'] == size])}
+                        for size in sorted({t['size'] for t in measured['timings']})]
                     for field in ("speed_increase_percent", "mean_speed_increase_percent", "speed_change_variance_pp_squared", "worst_observed_speed", "slowest_observed_workload"):
                         entry[field] = stats[field]
                     for field in ("worst_observed_speed", "slowest_observed_workload"):

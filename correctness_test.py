@@ -8,6 +8,16 @@ from targeted_test_agent import generate_isolated as generate, TOTAL_TIMEOUT
 from result_stats import correctness_statistics, numeric_error
 
 
+def smallest_counterexample(baseline, path, failures, request_path):
+    if not failures:
+        return None
+    smallest = min(failures, key=lambda failure: len(failure['case']['numbers']))
+    save_json(request_path, {'baseline': str(baseline.resolve()), 'failure': smallest})
+    reduced = isolated(path, request_path, 'shrink', timeout=15)
+    return {'smallest_observed': smallest, 'reduced': reduced if 'error' not in reduced else None,
+            'reduction_error': reduced.get('error')}
+
+
 def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
     if refresh_agent and not use_agent:
         raise ValueError('Refreshing agent cases requires use_agent=True')
@@ -65,6 +75,7 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
         actual = isolated(path, suite_path, "correctness")
         entry = {"file": path.name, "source_sha256": source_hash(path),
                  "change_variance": None,
+                 "smallest_failing_input": None,
                  "shared_cases": len(common), "targeted_cases": len(targeted["cases"]),
                  "agent_cases": len(agent_cases), "agent_status": "error" if agent_error else "used" if agent else "disabled",
                  "agent_error": agent_error,
@@ -86,6 +97,9 @@ def run(use_agent=False, refresh_agent=False, seed=SEED, project_dir=None):
             entry.update(statistics=correctness_statistics(rows), case_results=rows)
             entry["change_variance"] = entry["statistics"]["change_variance"]
             entry['observed_status'] = entry['status']
+            if entry['failures']:
+                entry['smallest_failing_input'] = smallest_counterexample(
+                    baseline, path, entry['failures'], root / 'tests' / f'{path.stem}_shrink_request.json')
             if agent_error and entry["status"] == "pass":
                 entry["status"] = "error"
         report["candidates"].append(entry)

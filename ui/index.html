@@ -8,16 +8,36 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="demo.js"></script>
   <script defer src="test-results.js"></script>
+  <script defer src="test-case-data.js"></script>
+  <script defer src="test-cases.js"></script>
+  <script defer src="files.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <header class="topbar">
+    <div class="header-file-controls">
+      <button id="toggle-files" class="file-toggle" aria-label="Toggle files" aria-expanded="true" aria-controls="file-panel-content" title="Toggle files">☰</button>
+      <label for="header-file-select" class="visually-hidden">Active code file</label>
+      <select id="header-file-select" class="header-file-select" aria-label="Active code file"></select>
+    </div>
     <a class="brand" href="#pipeline" aria-label="FastForward pipeline home">FastForward</a>
-    <span class="topbar-label">Optimisation workspace</span>
     <span class="badge demo-badge"><span class="dot"></span> Demo run</span>
   </header>
 
   <div class="shell">
+    <aside class="file-panel" aria-label="Project files">
+      <div id="file-panel-content">
+        <ul id="project-files" class="project-files"></ul>
+        <form id="new-file-form" class="new-file-form">
+          <label for="new-file-name">New file name</label>
+          <input id="new-file-name" required placeholder="helpers.py" maxlength="100">
+          <button type="submit">+ New file</button>
+        </form>
+        <button type="button" class="import-files" id="import-files-button">+ Import files</button>
+        <input id="import-files" type="file" accept=".py,.txt,.js,.json,.md,.css,.html,.csv" multiple hidden>
+        <p id="file-status" role="status" class="file-status"></p>
+      </div>
+    </aside>
     <nav class="sidebar" aria-label="Run views" id="navigation"></nav>
     <main id="main">
       <section class="home" id="pipeline-home" aria-labelledby="home-title">
@@ -27,9 +47,15 @@
           <p>Follow proposed changes from baseline through final verification.</p>
         </header>
         <div class="home-grid">
-          <section class="graph" aria-label="Pipeline stages">
-            <ol id="pipeline-stages"></ol>
-          </section>
+          <div class="home-flow">
+            <section class="graph" aria-label="Pipeline stages">
+              <ol id="pipeline-stages"></ol>
+            </section>
+            <section class="deep-dive" aria-labelledby="deep-dive-title">
+              <h2 id="deep-dive-title">Deep Dive</h2>
+              <ul class="deep-dive-cards" id="deep-dive-cards"></ul>
+            </section>
+          </div>
           <aside class="run-card panel" id="run-summary" aria-label="Demo run summary"></aside>
         </div>
       </section>
@@ -55,8 +81,11 @@
 
       <section class="workspace" id="workspace" aria-label="Optimisation workspace" hidden>
         <div class="workspace-header">
-          <a class="back-link" href="#pipeline">← Back to pipeline</a>
-          <nav aria-label="Pipeline stages">
+          <div class="workspace-heading">
+            <a class="back-link" href="#pipeline">← Back to pipeline</a>
+            <span class="eyebrow" id="deep-dive-label" hidden>Deep Dive</span>
+          </div>
+          <nav id="workspace-stage-menu" aria-label="Pipeline stages">
             <ol class="stage-strip" id="workspace-stages"></ol>
           </nav>
         </div>
@@ -64,21 +93,31 @@
           <section class="code-pane panel" id="code-pane" aria-labelledby="source-file">
             <header class="code-header">
               <h2 id="source-file"></h2>
-              <span class="label">Python</span>
+              <div class="code-header-actions">
+                <span class="label">Python</span>
+                <button class="button secondary code-close" id="test-case-code-close" type="button" aria-label="Collapse code pane" aria-controls="code-pane" hidden>&lt;</button>
+              </div>
             </header>
             <div class="diff-toolbar" id="diff-toolbar"></div>
             <div class="code-scroll" id="source-diff" tabindex="0" role="region" aria-label="Source code"></div>
+            <textarea id="file-editor" class="file-editor" aria-label="File contents" spellcheck="false" hidden></textarea>
             <p class="code-footer" id="code-footer"></p>
           </section>
-          <div id="split-divider" class="split-divider" role="separator" tabindex="0"
-            aria-label="Source pane width" aria-controls="code-pane" aria-orientation="vertical"
-            aria-valuemin="30" aria-valuemax="65" aria-valuenow="48"></div>
-          <section class="details panel" aria-label="Run details">
-            <nav class="view-tabs" id="workspace-views" aria-label="Workspace views"></nav>
+          <div class="split-rail" id="split-rail">
+            <div id="split-divider" class="split-divider" role="separator" tabindex="0"
+              aria-label="Source pane width" aria-controls="code-pane" aria-orientation="vertical"
+              aria-valuemin="30" aria-valuemax="65" aria-valuenow="48"></div>
+            <div class="split-pane-buttons" role="group" aria-label="Pane controls">
+              <button class="button secondary" id="split-left" type="button" aria-label="Collapse code pane" aria-controls="code-pane">&lt;</button>
+              <button class="button secondary" id="split-right" type="button" aria-label="Collapse details pane" aria-controls="details-pane">&gt;</button>
+            </div>
+          </div>
+          <section class="details panel" id="details-pane" aria-label="Run details">
             <p id="build-status" class="visually-hidden" role="status"></p>
             <div id="details-content"></div>
           </section>
         </div>
+        <section class="panel final-improvement" id="final-improvement" aria-labelledby="final-improvement-title" hidden></section>
       </section>
     </main>
   </div>
